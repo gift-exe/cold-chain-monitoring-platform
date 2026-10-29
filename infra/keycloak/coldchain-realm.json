@@ -1,0 +1,324 @@
+{
+  "realm": "coldchain",
+  "enabled": true,
+  "sslRequired": "external",
+  "accessTokenLifespan": 900,
+  "roles": {
+    "realm": [
+      {
+        "name": "admin"
+      },
+      {
+        "name": "driver"
+      },
+      {
+        "name": "facility_oic"
+      },
+      {
+        "name": "lga_officer"
+      },
+      {
+        "name": "national_officer"
+      },
+      {
+        "name": "outreach_lead"
+      },
+      {
+        "name": "state_officer"
+      }
+    ]
+  },
+  "clients": [
+    {
+      "clientId": "coldchain-dashboard",
+      "name": "Dashboard",
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": false,
+      "redirectUris": [
+        "http://localhost:5173/*"
+      ],
+      "webOrigins": [
+        "http://localhost:5173"
+      ],
+      "attributes": {
+        "pkce.code.challenge.method": "S256"
+      },
+      "protocolMappers": [
+        {
+          "name": "jurisdiction_id",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "config": {
+            "user.attribute": "jurisdiction_id",
+            "claim.name": "jurisdiction_id",
+            "jsonType.label": "String",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "userinfo.token.claim": "true"
+          }
+        },
+        {
+          "name": "facility_id",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "config": {
+            "user.attribute": "facility_id",
+            "claim.name": "facility_id",
+            "jsonType.label": "String",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "userinfo.token.claim": "true"
+          }
+        },
+        {
+          "name": "roles",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-realm-role-mapper",
+          "config": {
+            "claim.name": "roles",
+            "multivalued": "true",
+            "jsonType.label": "String",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "userinfo.token.claim": "true"
+          }
+        }
+      ]
+    },
+    {
+      "clientId": "coldchain-dev-cli",
+      "name": "Development CLI (dev only)",
+      "publicClient": true,
+      "standardFlowEnabled": false,
+      "directAccessGrantsEnabled": true,
+      "protocolMappers": [
+        {
+          "name": "jurisdiction_id",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "config": {
+            "user.attribute": "jurisdiction_id",
+            "claim.name": "jurisdiction_id",
+            "jsonType.label": "String",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "userinfo.token.claim": "true"
+          }
+        },
+        {
+          "name": "facility_id",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "config": {
+            "user.attribute": "facility_id",
+            "claim.name": "facility_id",
+            "jsonType.label": "String",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "userinfo.token.claim": "true"
+          }
+        },
+        {
+          "name": "roles",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-realm-role-mapper",
+          "config": {
+            "claim.name": "roles",
+            "multivalued": "true",
+            "jsonType.label": "String",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "userinfo.token.claim": "true"
+          }
+        }
+      ]
+    }
+  ],
+  "users": [
+    {
+      "id": "0b1e5a10-0000-4000-8000-000000000001",
+      "username": "test.national",
+      "enabled": true,
+      "emailVerified": true,
+      "email": "test.national@coldchain.test",
+      "firstName": "Test",
+      "lastName": "National Officer",
+      "attributes": {
+        "jurisdiction_id": [
+          "NG"
+        ]
+      },
+      "realmRoles": [
+        "national_officer"
+      ],
+      "credentials": [
+        {
+          "type": "password",
+          "value": "ZU7zse_4A5yJgzOi",
+          "temporary": false
+        }
+      ]
+    },
+    {
+      "id": "0b1e5a10-0000-4000-8000-000000000002",
+      "username": "test.state",
+      "enabled": true,
+      "emailVerified": true,
+      "email": "test.state@coldchain.test",
+      "firstName": "Test",
+      "lastName": "State Officer",
+      "attributes": {
+        "jurisdiction_id": [
+          "NG-KN"
+        ]
+      },
+      "realmRoles": [
+        "state_officer"
+      ],
+      "credentials": [
+        {
+          "type": "password",
+          "value": "ANYYUgtbhbq1hHSP",
+          "temporary": false
+        }
+      ]
+    },
+    {
+      "id": "0b1e5a10-0000-4000-8000-000000000003",
+      "username": "test.lga",
+      "enabled": true,
+      "emailVerified": true,
+      "email": "test.lga@coldchain.test",
+      "firstName": "Test",
+      "lastName": "LGA Officer",
+      "attributes": {
+        "jurisdiction_id": [
+          "NG-KN-GWL"
+        ]
+      },
+      "realmRoles": [
+        "lga_officer"
+      ],
+      "credentials": [
+        {
+          "type": "password",
+          "value": "k6ZEVWjRRhL6gXFL",
+          "temporary": false
+        }
+      ]
+    },
+    {
+      "id": "0b1e5a10-0000-4000-8000-000000000004",
+      "username": "test.facility",
+      "enabled": true,
+      "emailVerified": true,
+      "email": "test.facility@coldchain.test",
+      "firstName": "Test",
+      "lastName": "Facility OIC",
+      "attributes": {
+        "jurisdiction_id": [
+          "NG-KN-GWL"
+        ],
+        "facility_id": [
+          "8a3c1f52-2b7e-4c1d-9d6a-0f4e5b6c7d01"
+        ]
+      },
+      "realmRoles": [
+        "facility_oic"
+      ],
+      "credentials": [
+        {
+          "type": "password",
+          "value": "7ysFpPzgNbbO4eOl",
+          "temporary": false
+        }
+      ]
+    },
+    {
+      "id": "0b1e5a10-0000-4000-8000-000000000005",
+      "username": "test.outreach",
+      "enabled": true,
+      "emailVerified": true,
+      "email": "test.outreach@coldchain.test",
+      "firstName": "Test",
+      "lastName": "Outreach Lead",
+      "attributes": {
+        "jurisdiction_id": [
+          "NG-KN-GWL"
+        ]
+      },
+      "realmRoles": [
+        "outreach_lead"
+      ],
+      "credentials": [
+        {
+          "type": "password",
+          "value": "-XvD-WvymwqAdvYc",
+          "temporary": false
+        }
+      ]
+    },
+    {
+      "id": "0b1e5a10-0000-4000-8000-000000000006",
+      "username": "test.driver",
+      "enabled": true,
+      "emailVerified": true,
+      "email": "test.driver@coldchain.test",
+      "firstName": "Test",
+      "lastName": "Driver",
+      "attributes": {
+        "jurisdiction_id": [
+          "NG-KN"
+        ]
+      },
+      "realmRoles": [
+        "driver"
+      ],
+      "credentials": [
+        {
+          "type": "password",
+          "value": "FAO9F7dtrGMjFnsH",
+          "temporary": false
+        }
+      ]
+    },
+    {
+      "id": "0b1e5a10-0000-4000-8000-000000000007",
+      "username": "test.admin",
+      "enabled": true,
+      "emailVerified": true,
+      "email": "test.admin@coldchain.test",
+      "firstName": "Test",
+      "lastName": "Administrator",
+      "attributes": {
+        "jurisdiction_id": [
+          "NG"
+        ]
+      },
+      "realmRoles": [
+        "admin"
+      ],
+      "credentials": [
+        {
+          "type": "password",
+          "value": "DPDak07K0Yn-b9Fl",
+          "temporary": false
+        }
+      ]
+    }
+  ],
+  "components": {
+    "org.keycloak.userprofile.UserProfileProvider": [
+      {
+        "providerId": "declarative-user-profile",
+        "subComponents": {},
+        "config": {
+          "kc.user.profile.config": [
+            "{\"unmanagedAttributePolicy\": \"ADMIN_VIEW\", \"attributes\": [{\"name\": \"username\", \"displayName\": \"${username}\", \"permissions\": {\"view\": [\"admin\", \"user\"], \"edit\": [\"admin\"]}, \"validations\": {\"length\": {\"min\": 3, \"max\": 255}}}, {\"name\": \"email\", \"displayName\": \"${email}\", \"permissions\": {\"view\": [\"admin\", \"user\"], \"edit\": [\"admin\"]}, \"validations\": {\"email\": {}}}, {\"name\": \"firstName\", \"displayName\": \"${firstName}\", \"required\": {\"roles\": [\"user\"]}, \"permissions\": {\"view\": [\"admin\", \"user\"], \"edit\": [\"admin\"]}}, {\"name\": \"lastName\", \"displayName\": \"${lastName}\", \"required\": {\"roles\": [\"user\"]}, \"permissions\": {\"view\": [\"admin\", \"user\"], \"edit\": [\"admin\"]}}, {\"name\": \"jurisdiction_id\", \"displayName\": \"Jurisdiction\", \"permissions\": {\"view\": [\"admin\", \"user\"], \"edit\": [\"admin\"]}}, {\"name\": \"facility_id\", \"displayName\": \"Facility\", \"permissions\": {\"view\": [\"admin\", \"user\"], \"edit\": [\"admin\"]}}]}"
+          ]
+        }
+      }
+    ]
+  }
+}
