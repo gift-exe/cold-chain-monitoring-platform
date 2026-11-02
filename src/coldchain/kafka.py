@@ -7,9 +7,11 @@ from coldchain.config import get_settings
 READINGS = "readings"                    # accepted readings, keyed by device id
 READINGS_REJECTED = "readings.rejected"  # rejected messages with the reason
 READINGS_STORED = "readings.stored"      # per device: event-time range of readings just stored
-INTEGRITY_EVENTS = "integrity-events"    # integrity events created or updated by detection
+INTEGRITY_EVENTS = "integrity-events"    # integrity events created or updated (detection, custody)
+NOTIFICATIONS = "notifications"          # notifications requested by the incident service (sent in I5)
 
-TOPICS = {READINGS: 6, READINGS_REJECTED: 1, READINGS_STORED: 6, INTEGRITY_EVENTS: 6}  # name: partitions
+TOPICS = {READINGS: 6, READINGS_REJECTED: 1, READINGS_STORED: 6, INTEGRITY_EVENTS: 6,
+          NOTIFICATIONS: 3}  # name: partitions
 
 
 def producer() -> Producer:

@@ -1,11 +1,14 @@
 # Development commands. `make dev` brings everything up from scratch.
 COMPOSE = podman compose
 
-INFRA = postgres keycloak mosquitto kafka
+INFRA = postgres keycloak mosquitto kafka temporal
 
 .PHONY: dev env infra build up down reset migrate seed train test test-unit test-resilience lint logs
 
-dev: env infra migrate seed models/default.joblib up  ## start the stack, apply migrations, load seed data, start services
+dev: env anchors infra migrate seed models/default.joblib up  ## start the stack, apply migrations, load seed data, start services
+
+anchors:  ## audit anchors are kept on the host, outside the database
+	mkdir -p anchors
 
 env:  ## create .env from the example if it does not exist
 	@test -f .env || cp .env.example .env
@@ -22,8 +25,9 @@ up: env build  ## start everything, rebuilding the services image if the code ch
 down:  ## stop the stack, keeping data
 	$(COMPOSE) down
 
-reset:  ## stop the stack and delete all data
+reset:  ## stop the stack and delete all data, including the audit anchors (they describe the old database)
 	$(COMPOSE) down -v
+	rm -rf anchors
 
 migrate:
 	uv run alembic upgrade head

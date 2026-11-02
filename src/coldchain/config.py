@@ -12,7 +12,8 @@ class Settings(BaseSettings):
     coldchain_db_password: str = "dev-coldchain-pw"
     coldchain_app_password: str = "dev-app-pw"
 
-    keycloak_url: str = "http://localhost:8080"
+    keycloak_url: str = "http://localhost:8080"          # where the services reach Keycloak
+    keycloak_public_url: str = "http://localhost:8080"   # the issuer named in tokens (KC_HOSTNAME)
     keycloak_realm: str = "coldchain"
 
     mqtt_host: str = "localhost"
@@ -23,6 +24,11 @@ class Settings(BaseSettings):
 
     detection_sweep_s: float = 15.0          # how often device silence is checked
     model_dir: str = "models"                # trained anomaly models (detection/anomaly.py)
+
+    temporal_address: str = "localhost:7233"
+    temporal_namespace: str = "default"
+    temporal_task_queue: str = "incidents"
+    audit_anchor_dir: str = "anchors"        # outside the database (Section 3.4.6)
 
     def db_url(self, role: str = "app") -> str:
         """SQLAlchemy URL. role="owner" for migrations, "app" for the services."""

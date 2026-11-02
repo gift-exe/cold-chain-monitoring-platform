@@ -17,7 +17,7 @@ from confluent_kafka import Consumer
 from coldchain import kafka
 from coldchain.config import get_settings
 from coldchain.simulator.basic import SimDevice, between, connect, publish_buffered, publish_live
-from tests.conftest import _pg_url
+from tests.conftest import _pg_url, retire_devices
 
 pytestmark = pytest.mark.integration
 TIMEOUT_S = 40
@@ -27,7 +27,7 @@ MIN = timedelta(minutes=1)
 
 @pytest.fixture
 def register():
-    """Register test devices; remove them, their readings and events afterwards."""
+    """Register test devices; close their incidents and retire them afterwards."""
     created = []
 
     def make(fixed=False, power=False, door=False, interval_s=60):
@@ -43,11 +43,7 @@ def register():
 
     time.sleep(0)  # registration happens inside tests; bridge cache reload is handled by wait below
     yield make
-    with psycopg.connect(_pg_url("owner"), autocommit=True) as conn:
-        for d in created:
-            conn.execute("DELETE FROM integrity_event WHERE device_id = %s", (d,))
-            conn.execute("DELETE FROM reading WHERE device_id = %s", (d,))
-            conn.execute("DELETE FROM device WHERE id = %s", (d,))
+    retire_devices([str(d) for d in created])
 
 
 @pytest.fixture(scope="module")

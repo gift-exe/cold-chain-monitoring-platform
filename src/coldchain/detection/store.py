@@ -143,15 +143,29 @@ def reconcile(conn: psycopg.Connection, device_id: str, detected: list[Detected]
     return changed
 
 
+# Fixed devices: silent after three reporting intervals without a reading. Mobile loggers upload when
+# they reach a network, so they are silent only while assigned to a consignment and only after their
+# synchronisation window passes without an upload (Table 3.17); a logger that has never uploaded since
+# its assignment is measured from the assignment.
 SILENCE_START = """
+    WITH contact AS (
+        SELECT d.id, d.type, d.reporting_interval_s, d.sync_window_min,
+               CASE WHEN d.type = 'fixed' THEN s.last_received_at
+                    ELSE greatest(s.last_received_at, da.valid_from) END AS last_contact,
+               CASE WHEN d.type = 'fixed' THEN make_interval(secs => 3 * d.reporting_interval_s)
+                    ELSE make_interval(mins => d.sync_window_min) END AS allowed
+        FROM device d
+        LEFT JOIN device_status s ON s.device_id = d.id
+        LEFT JOIN device_assignment da ON da.device_id = d.id AND da.valid_to IS NULL
+        WHERE d.status = 'active' AND (d.type = 'fixed' OR da.device_id IS NOT NULL))
     INSERT INTO integrity_event (device_id, type, severity, event_start, details)
-    SELECT d.id, 'device_silence', 'warning', s.last_received_at,
-           jsonb_build_object('last_contact', s.last_received_at, 'reporting_interval_s', d.reporting_interval_s)
-    FROM device d JOIN device_status s ON s.device_id = d.id
-    WHERE d.type = 'fixed' AND d.status = 'active'
-      AND s.last_received_at < now() - make_interval(secs => 3 * d.reporting_interval_s)
-      AND NOT EXISTS (SELECT 1 FROM integrity_event e WHERE e.device_id = d.id
-                      AND e.type = 'device_silence' AND e.event_end IS NULL)
+    SELECT c.id, 'device_silence', 'warning', c.last_contact,
+           jsonb_build_object('last_contact', c.last_contact, 'device_type', c.type,
+                              'reporting_interval_s', c.reporting_interval_s, 'sync_window_min', c.sync_window_min)
+    FROM contact c
+    WHERE c.last_contact < now() - c.allowed
+      AND NOT EXISTS (SELECT 1 FROM integrity_event e WHERE e.device_id = c.id
+                      AND e.type = 'device_silence' AND (e.event_end IS NULL OR e.event_start = c.last_contact))
     RETURNING id::text, device_id::text, type, severity, event_start, event_end, peak_value, borderline,
               details, detected_at, updated_at
 """
@@ -172,8 +186,8 @@ SILENCE_END = """
 
 
 def sweep_silence(conn: psycopg.Connection) -> list[dict]:
-    """Start device-silence events for fixed devices not heard from for three reporting intervals, and end
-    those whose device has been heard from again (Table 3.17). Mobile devices: see I4 (custody)."""
+    """Start device-silence events for devices not heard from within their allowed period, and end those
+    whose device has been heard from again (Table 3.17)."""
     cur = conn.cursor(row_factory=dict_row)
     with conn.transaction():
         started = [{**r, "change": "created"} for r in cur.execute(SILENCE_START).fetchall()]

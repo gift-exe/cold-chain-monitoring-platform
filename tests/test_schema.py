@@ -87,9 +87,10 @@ def make_incident(conn) -> str:
     ev = conn.execute("INSERT INTO integrity_event (device_id, type, event_start) "
                       "VALUES (%s, 'heat_excursion', now()) RETURNING id", (FIXED_DEVICE,)).fetchone()[0]
     return conn.execute(
-        "INSERT INTO incident (incident_key, integrity_event_id, severity, mode, owner_id) "
-        "VALUES (%s, %s, 'critical', 'operational', %s) RETURNING id",
-        (f"test:{ev}", ev, LGA_OFFICER)).fetchone()[0]
+        "INSERT INTO incident (incident_key, integrity_event_id, type, severity, mode, owner_id, device_id, "
+        "jurisdiction_id, ownership, detected_at) "
+        "VALUES (%s, %s, 'heat_excursion', 'critical', 'operational', %s, %s, 'NG-KN-GWL', 'test', now()) RETURNING id",
+        (f"test:{ev}", ev, LGA_OFFICER, FIXED_DEVICE)).fetchone()[0]
 
 
 def test_services_can_append_to_audit_trail(app_conn):
@@ -131,8 +132,10 @@ def test_incident_key_prevents_duplicate_incidents(owner_conn):
     ev = owner_conn.execute("INSERT INTO integrity_event (device_id, type, event_start) "
                             "VALUES (%s, 'heat_excursion', now()) RETURNING id", (FIXED_DEVICE,)).fetchone()[0]
     with pytest.raises(errors.UniqueViolation):
-        owner_conn.execute("INSERT INTO incident (incident_key, integrity_event_id, severity, mode, owner_id) "
-                           "VALUES (%s, %s, 'critical', 'operational', %s)", (key, ev, LGA_OFFICER))
+        owner_conn.execute("INSERT INTO incident (incident_key, integrity_event_id, type, severity, mode, owner_id, "
+                           "device_id, jurisdiction_id, ownership, detected_at) VALUES (%s, %s, 'heat_excursion', "
+                           "'critical', 'operational', %s, %s, 'NG-KN-GWL', 'test', now())",
+                           (key, ev, LGA_OFFICER, FIXED_DEVICE))
 
 
 def test_phone_number_unique_among_active_users(owner_conn):

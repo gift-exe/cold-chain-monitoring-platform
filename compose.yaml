@@ -1,5 +1,5 @@
 # Local development stack. Start with `make dev`.
-# Temporal, Prometheus and Grafana are added in the iterations that first need them.
+# Prometheus and Grafana are added in the iteration that first needs them (I8).
 name: coldchain
 
 x-service: &service
@@ -13,6 +13,9 @@ x-service: &service
     MQTT_HOST: mosquitto
     MQTT_PORT: 1883
     KAFKA_BOOTSTRAP: kafka:19092
+    TEMPORAL_ADDRESS: temporal:7233
+    KEYCLOAK_URL: http://keycloak:8080
+    KEYCLOAK_PUBLIC_URL: http://localhost:${KEYCLOAK_PORT}
   depends_on:
     postgres: { condition: service_healthy }
     mosquitto: { condition: service_healthy }
@@ -104,6 +107,24 @@ services:
       retries: 30
       start_period: 20s
 
+  temporal:
+    # Temporal development server: durable workflow timers, persisted to SQLite on a volume
+    image: docker.io/temporalio/temporal:1.8.3
+    command: ["server", "start-dev", "--ip", "0.0.0.0", "--db-filename", "/data/temporal.db",
+              "--ui-port", "8233", "--log-level", "warn"]
+    user: root   # so the server can write to the named volume
+    ports:
+      - "${TEMPORAL_PORT}:7233"
+      - "${TEMPORAL_UI_PORT}:8233"
+    volumes:
+      - temporaldata:/data
+    healthcheck:
+      test: ["CMD", "temporal", "operator", "cluster", "health", "--address", "localhost:7233"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 5s
+
   ingestion-bridge:
     <<: *service
     command: ["python", "-m", "coldchain.ingestion.bridge"]
@@ -126,7 +147,51 @@ services:
     volumes:
       - ./models:/app/models:ro
 
+  incident-service:
+    <<: *service
+    command: ["python", "-m", "coldchain.incidents.service"]
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      COLDCHAIN_APP_PASSWORD: ${COLDCHAIN_APP_PASSWORD}
+      KAFKA_BOOTSTRAP: kafka:19092
+      TEMPORAL_ADDRESS: temporal:7233
+      AUDIT_ANCHOR_DIR: /app/anchors
+    volumes:
+      - ./anchors:/app/anchors   # outside the database, on the host (Section 3.4.6)
+    depends_on:
+      postgres: { condition: service_healthy }
+      kafka: { condition: service_healthy }
+      temporal: { condition: service_healthy }
+
+  api:
+    <<: *service
+    command: ["uvicorn", "coldchain.api.app:app", "--host", "0.0.0.0", "--port", "8000"]
+    ports:
+      - "${API_PORT}:8000"
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      COLDCHAIN_APP_PASSWORD: ${COLDCHAIN_APP_PASSWORD}
+      KAFKA_BOOTSTRAP: kafka:19092
+      TEMPORAL_ADDRESS: temporal:7233
+      KEYCLOAK_URL: http://keycloak:8080
+      KEYCLOAK_PUBLIC_URL: http://localhost:${KEYCLOAK_PORT}
+      AUDIT_ANCHOR_DIR: /app/anchors
+    volumes:
+      - ./anchors:/app/anchors:ro
+    depends_on:
+      postgres: { condition: service_healthy }
+      keycloak: { condition: service_healthy }
+      temporal: { condition: service_healthy }
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
 volumes:
+  temporaldata:
   pgdata:
   kafkadata:
   mqttdata:

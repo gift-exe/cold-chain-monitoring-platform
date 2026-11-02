@@ -7,13 +7,17 @@ requires-python = ">=3.12,<3.13"
 dependencies = [
     "alembic>=1.13",
     "confluent-kafka>=2.5",
+    "fastapi>=0.160",
     "httpx>=0.27",
     "paho-mqtt>=2.1",
     "psycopg[binary]>=3.2",
     "pydantic>=2.8",
     "pydantic-settings>=2.4",
+    "pyjwt[crypto]>=2.10",
     "scikit-learn>=1.5",
     "sqlalchemy>=2.0",
+    "temporalio>=1.35",
+    "uvicorn>=0.35",
 ]
 
 [dependency-groups]
