@@ -2,6 +2,22 @@
 # Temporal, Prometheus and Grafana are added in the iterations that first need them.
 name: coldchain
 
+x-service: &service
+  build: { context: ., dockerfile: Containerfile }
+  image: localhost/coldchain-services:dev
+  restart: unless-stopped
+  environment:
+    POSTGRES_HOST: postgres
+    POSTGRES_PORT: 5432
+    COLDCHAIN_APP_PASSWORD: ${COLDCHAIN_APP_PASSWORD}
+    MQTT_HOST: mosquitto
+    MQTT_PORT: 1883
+    KAFKA_BOOTSTRAP: kafka:19092
+  depends_on:
+    postgres: { condition: service_healthy }
+    mosquitto: { condition: service_healthy }
+    kafka: { condition: service_healthy }
+
 services:
   postgres:
     # PostgreSQL 17 with TimescaleDB and PostGIS
@@ -54,6 +70,7 @@ services:
       - "${MQTT_PORT}:1883"
     volumes:
       - ./infra/mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
+      - mqttdata:/mosquitto/data
     healthcheck:
       test: ["CMD-SHELL", "mosquitto_sub -t '$$SYS/broker/uptime' -C 1 -W 3"]
       interval: 10s
@@ -87,6 +104,15 @@ services:
       retries: 30
       start_period: 20s
 
+  ingestion-bridge:
+    <<: *service
+    command: ["python", "-m", "coldchain.ingestion.bridge"]
+
+  storage-writer:
+    <<: *service
+    command: ["python", "-m", "coldchain.ingestion.writer"]
+
 volumes:
   pgdata:
   kafkadata:
+  mqttdata:

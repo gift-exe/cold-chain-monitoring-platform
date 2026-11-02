@@ -18,6 +18,8 @@ class Settings(BaseSettings):
     mqtt_host: str = "localhost"
     mqtt_port: int = 1883
     kafka_bootstrap: str = "localhost:9092"
+    # Must stay the same across restarts: the broker keeps queued messages for this client's session
+    bridge_client_id: str = "ingestion-bridge-1"
 
     def db_url(self, role: str = "app") -> str:
         """SQLAlchemy URL. role="owner" for migrations, "app" for the services."""

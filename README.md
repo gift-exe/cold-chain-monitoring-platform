@@ -8,8 +8,9 @@ and requirement numbers in the code (e.g. FR1.4, Table 3.18) refer to it.
 
 | Iteration | Scope | Status |
 |---|---|---|
-| I1 Foundations | Repository, local stack, database schema, identity server with roles and jurisdictions | In progress |
-| I2–I8 | Ingestion, detection, incidents and custody, notification, dashboard, simulator, evaluation | Planned |
+| I1 Foundations | Repository, local stack, database schema, identity server with roles and jurisdictions | Done |
+| I2 Ingestion | MQTT bridge, Kafka, storage writer, validation and de-duplication, basic simulator | Done |
+| I3–I8 | Detection, incidents and custody, notification, dashboard, simulator, evaluation | Planned |
 
 ## Requirements
 
@@ -22,6 +23,7 @@ and requirement numbers in the code (e.g. FR1.4, Table 3.18) refer to it.
 ```bash
 make dev      # create .env, start the stack, apply migrations, load seed data
 make test     # run all tests (the stack must be running)
+make test-resilience   # restart services under load and check no reading is lost (slow)
 make down     # stop, keeping data; `make reset` also deletes data
 ```
 
@@ -31,6 +33,9 @@ make down     # stop, keeping data; `make reset` also deletes data
 | Keycloak | http://localhost:8080 | Realm `coldchain`; admin console user `admin`, password in `.env` |
 | Mosquitto (MQTT) | localhost:1883 | Anonymous access in development only |
 | Kafka | localhost:9092 | Single node, KRaft mode, seven-day retention |
+| ingestion-bridge, storage-writer | — | Built from `Containerfile`; `make up` rebuilds after code changes |
+
+After editing a file in `infra/`, restart that service (e.g. `podman compose restart mosquitto`): containers read their configuration only at start.
 
 ## Layout
 
@@ -40,7 +45,7 @@ infra/                    configuration for PostgreSQL, Keycloak and Mosquitto
 migrations/               database schema (Alembic, written in SQL)
 seeds/                    development reference data and test users
 scripts/                  seed loader; generator for the Keycloak realm and test users
-src/coldchain/            the services (one package per service from I2 onwards)
+src/coldchain/            messages.py (device message format), ingestion/ (bridge, writer), simulator/
 tests/                    acceptance and unit tests
 ```
 

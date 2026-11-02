@@ -3,8 +3,11 @@ import socket
 
 import httpx
 import pytest
+from alembic.config import Config
+from alembic.script import ScriptDirectory
 
 from coldchain.config import get_settings
+from tests.conftest import ROOT
 
 pytestmark = pytest.mark.integration
 S = get_settings()
@@ -16,7 +19,8 @@ def test_database_extensions_installed(owner_conn):
 
 
 def test_migrations_at_head(owner_conn):
-    assert owner_conn.execute("SELECT version_num FROM alembic_version").fetchone()[0] == "0001"
+    head = ScriptDirectory.from_config(Config(str(ROOT / "alembic.ini"))).get_current_head()
+    assert owner_conn.execute("SELECT version_num FROM alembic_version").fetchone()[0] == head
 
 
 def test_reading_is_a_hypertable(owner_conn):
