@@ -21,6 +21,9 @@ class Settings(BaseSettings):
     # Must stay the same across restarts: the broker keeps queued messages for this client's session
     bridge_client_id: str = "ingestion-bridge-1"
 
+    detection_sweep_s: float = 15.0          # how often device silence is checked
+    model_dir: str = "models"                # trained anomaly models (detection/anomaly.py)
+
     def db_url(self, role: str = "app") -> str:
         """SQLAlchemy URL. role="owner" for migrations, "app" for the services."""
         user, password = {

@@ -3,9 +3,9 @@ COMPOSE = podman compose
 
 INFRA = postgres keycloak mosquitto kafka
 
-.PHONY: dev env infra up down reset migrate seed test test-unit test-resilience lint logs
+.PHONY: dev env infra build up down reset migrate seed train test test-unit test-resilience lint logs
 
-dev: env infra migrate seed up  ## start the stack, apply migrations, load seed data, start services
+dev: env infra migrate seed models/default.joblib up  ## start the stack, apply migrations, load seed data, start services
 
 env:  ## create .env from the example if it does not exist
 	@test -f .env || cp .env.example .env
@@ -13,8 +13,11 @@ env:  ## create .env from the example if it does not exist
 infra: env  ## start databases, identity server and brokers, and wait until they are healthy
 	$(COMPOSE) up -d --wait $(INFRA)
 
-up: env  ## start everything, rebuilding the services image if the code changed
-	$(COMPOSE) up -d --build --wait
+build:  ## build the services image (podman build: compose --build hangs with Podman)
+	podman build -q -t localhost/coldchain-services:dev -f Containerfile .
+
+up: env build  ## start everything, rebuilding the services image if the code changed
+	$(COMPOSE) up -d --wait
 
 down:  ## stop the stack, keeping data
 	$(COMPOSE) down
@@ -27,6 +30,12 @@ migrate:
 
 seed:
 	uv run python scripts/seed.py
+
+models/default.joblib:
+	uv run python scripts/train_anomaly.py
+
+train:  ## retrain the anomaly model
+	uv run python scripts/train_anomaly.py
 
 test:  ## all tests (stack must be running)
 	uv run pytest

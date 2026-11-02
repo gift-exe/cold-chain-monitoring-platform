@@ -1,0 +1,7 @@
+.venv/
+.git/
+models/
+.pytest_cache/
+.ruff_cache/
+**/__pycache__/
+.env

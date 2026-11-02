@@ -1,4 +1,4 @@
-# Local development stack (iteration I1). Start with `make up`.
+# Local development stack. Start with `make dev`.
 # Temporal, Prometheus and Grafana are added in the iterations that first need them.
 name: coldchain
 
@@ -111,6 +111,20 @@ services:
   storage-writer:
     <<: *service
     command: ["python", "-m", "coldchain.ingestion.writer"]
+
+  detection:
+    <<: *service
+    command: ["python", "-m", "coldchain.detection.service"]
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      COLDCHAIN_APP_PASSWORD: ${COLDCHAIN_APP_PASSWORD}
+      MQTT_HOST: mosquitto
+      KAFKA_BOOTSTRAP: kafka:19092
+      DETECTION_SWEEP_S: 2     # short for development and tests; minutes in production
+      MODEL_DIR: /app/models
+    volumes:
+      - ./models:/app/models:ro
 
 volumes:
   pgdata:

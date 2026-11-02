@@ -3,7 +3,7 @@
 A device publishes to the MQTT topic ``devices/<serial>/readings`` either one reading:
 
     {"device_id": "TEST-FIX-0001", "seq_no": 42, "event_time": "2026-11-01T10:00:00Z", "temp": 5.1,
-     "power_ok": true, "door_open": false, "lat": 11.98, "lon": 8.49, "battery": 87}
+     "power_ok": true, "door_open": false, "alarm": false, "lat": 11.98, "lon": 8.49, "battery": 87}
 
 or a batch of buffered readings uploaded after a period offline (FR1.2):
 
@@ -13,7 +13,7 @@ Each reading in a batch is validated separately, so one bad reading does not cau
 """
 import json
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 
 from pydantic import AwareDatetime, BaseModel, ConfigDict, Field, ValidationError, model_validator
 
@@ -31,6 +31,7 @@ class ReadingIn(BaseModel):
     temp: float = Field(ge=-50, le=70)   # assumed physical range of the sensor; outside it is a fault
     power_ok: bool | None = None
     door_open: bool | None = None
+    alarm: bool | None = None            # the device's local alarm sounded
     lat: float | None = Field(default=None, ge=-90, le=90)
     lon: float | None = Field(default=None, ge=-180, le=180)
     battery: int | None = Field(default=None, ge=0, le=100)
@@ -60,9 +61,9 @@ class Accepted:
         """The form published to the event log and stored in the database."""
         r = self.reading
         return {"device_id": device_uuid, "serial": self.serial, "seq_no": r.seq_no,
-                "event_time": r.event_time.isoformat(), "received_at": self.received_at.isoformat(),
+                "event_time": r.event_time.astimezone(UTC).isoformat(), "received_at": self.received_at.isoformat(),
                 "temperature": r.temp, "power_ok": r.power_ok, "door_open": r.door_open,
-                "lat": r.lat, "lon": r.lon, "battery": r.battery, "late_flag": self.late}
+                "alarm": r.alarm, "lat": r.lat, "lon": r.lon, "battery": r.battery, "late_flag": self.late}
 
 
 @dataclass(frozen=True)
