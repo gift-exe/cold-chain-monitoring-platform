@@ -30,6 +30,17 @@ class Settings(BaseSettings):
     temporal_task_queue: str = "incidents"
     audit_anchor_dir: str = "anchors"        # outside the database (Section 3.4.6)
 
+    # SMS gateway: Africa's Talking's API, or the local emulator that speaks the same protocol
+    # (simulator/sms_gateway.py). For the Africa's Talking sandbox: AT_API_URL=https://api.sandbox.africastalking.com,
+    # AT_USERNAME=sandbox and the sandbox API key.
+    at_api_url: str = "http://localhost:8002"
+    at_username: str = "sandbox"
+    at_api_key: str = "dev-at-key"
+    at_sender_id: str | None = None          # alphanumeric sender id, if one is registered
+    sms_callback_token: str = "dev-callback-token"   # shared secret in the gateway's callback URLs
+    code_secret: str = "dev-code-secret"     # HMAC key for response codes; never stored in the database
+    digest_hour_utc: int = 6                 # retrospective digests at 07:00 WAT
+
     def db_url(self, role: str = "app") -> str:
         """SQLAlchemy URL. role="owner" for migrations, "app" for the services."""
         user, password = {

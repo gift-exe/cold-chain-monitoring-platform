@@ -10,6 +10,7 @@ As in incidents.store, the functions here run inside the caller's transaction. C
 written to the outbox in the same transaction. A handoff's confirmation window is watched by a durable
 timer (incidents.workflows.HandoffWorkflow), which calls expire() when the window ends.
 """
+import uuid
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 
@@ -20,6 +21,7 @@ from psycopg.types.json import Jsonb
 from coldchain import kafka, outbox
 from coldchain.errors import InvalidState, NotFound, NotPermitted
 from coldchain.incidents.store import raise_custody_gap
+from coldchain.notify import codes
 
 CONFIRMATION_MARGIN = timedelta(minutes=30)   # CR4: expected transit time plus 30 minutes
 HOLDER_ROLES = ("facility_oic", "outreach_lead", "driver", "lga_officer", "state_officer")
@@ -130,6 +132,10 @@ def release(conn: psycopg.Connection, actor: str, consignment_id: str, to_user: 
         (consignment_id, actor, to_user, now, window_ends)).fetchone()[0]
     _log(conn, consignment_id, "release", actor, actor, to_user, hid,
          {"window_ends_at": window_ends.isoformat(), "expected_transit_min": transit})
+    # the receiver is texted the consignment number and a confirmation code (Section 3.4.3)
+    outbox.enqueue(conn, kafka.NOTIFICATIONS, consignment_id, {
+        "id": str(uuid.uuid4()), "kind": "handoff", "consignment_id": consignment_id, "handoff_id": hid,
+        "recipients": [to_user], "urgency": "sms", "requested_at": now})
     return Handoff(hid, consignment_id, actor, to_user, now, window_ends)
 
 
@@ -148,6 +154,7 @@ def confirm(conn: psycopg.Connection, actor: str, consignment_id: str, now: date
     conn.execute("UPDATE custody_handoff SET state = 'confirmed', ended_at = %s WHERE id = %s", (now, h["id"]))
     _log(conn, consignment_id, "confirm", actor, h["from_user"], actor, h["id"],
          {"delayed": now > h["window_ends_at"]})
+    codes.void(conn, now, handoff_id=h["id"])
     _end_gap(conn, h["gap_event_id"], now)
     return h["id"]
 
@@ -167,6 +174,7 @@ def reject(conn: psycopg.Connection, actor: str, consignment_id: str, reason: st
     conn.execute("""UPDATE custody_handoff SET state = 'rejected', ended_at = %s, reason = %s, gap_event_id = %s
                     WHERE id = %s""", (now, reason, gap, h["id"]))
     _log(conn, consignment_id, "reject", actor, h["from_user"], actor, h["id"], {"reason": reason})
+    codes.void(conn, now, handoff_id=h["id"])
     return h["id"]
 
 
@@ -181,6 +189,7 @@ def cancel(conn: psycopg.Connection, actor: str, consignment_id: str, reason: st
     conn.execute("UPDATE custody_handoff SET state = 'cancelled', ended_at = coalesce(ended_at, %s) WHERE id = %s",
                  (now, h["id"]))
     _log(conn, consignment_id, "cancel", actor, actor, None, h["id"], {"reason": reason, "was": h["state"]})
+    codes.void(conn, now, handoff_id=h["id"])
     _end_gap(conn, h["gap_event_id"], now)
     return h["id"]
 

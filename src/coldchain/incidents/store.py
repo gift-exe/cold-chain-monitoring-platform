@@ -7,7 +7,7 @@ functions here never commit on their own; callers run them inside conn.transacti
 """
 import uuid
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 
 import psycopg
 from psycopg.rows import dict_row
@@ -16,7 +16,8 @@ from psycopg.types.json import Jsonb
 from coldchain import kafka, outbox
 from coldchain.errors import InvalidState, NotFound, NotPermitted
 from coldchain.incidents import ownership
-from coldchain.incidents.policy import TIERS, Clock, Policy, Step, advance, next_step, rank
+from coldchain.incidents.policy import TIERS, Clock, Policy, Step, above, advance, next_step, rank
+from coldchain.notify import codes
 
 RETROSPECTIVE_AFTER = timedelta(minutes=15)   # Section 3.4.4
 RECURRENCE_WITHIN = timedelta(minutes=60)     # FR5.5
@@ -259,36 +260,43 @@ def _get(conn: psycopg.Connection, incident_id: str, lock: bool = True) -> dict:
     return inc
 
 
-def _notify(conn: psycopg.Connection, inc: dict, kind: str, tier: str, recipients: list[str], step: Step,
-            now: datetime) -> None:
+def _notify(conn: psycopg.Connection, inc: dict, kind: str, tier: str, recipients: list[str], due_at: datetime,
+            now: datetime, reason: str | None = None, how: str | None = None) -> None:
+    """Ask the notification service to tell people about the incident (by the incident's urgency unless
+    `how` says otherwise)."""
     outbox.enqueue(conn, kafka.NOTIFICATIONS, inc["id"], {
         "id": str(uuid.uuid4()), "kind": kind, "incident_id": inc["id"], "incident_no": inc["incident_no"],
         "type": inc["type"], "severity": inc["severity"], "mode": inc["mode"], "tier": tier,
         "recipients": recipients, "cc": inc["cc_ids"] if kind == "alert" else [], "owner_id": inc["owner_id"],
-        "urgency": urgency(inc["severity"], inc["mode"]), "due_at": step.at, "requested_at": now})
+        "urgency": how or urgency(inc["severity"], inc["mode"]), "reason": reason, "due_at": due_at,
+        "requested_at": now})
 
 
 CLOCK_COLUMNS = ("state", "current_tier", "ack_stage", "resolve_stage", "top_tier_at", "overdue",
                  "last_reminder_at")
 
 
-def _apply(conn: psycopg.Connection, inc: dict, step: Step, policy: Policy, now: datetime) -> None:
+def _apply(conn: psycopg.Connection, inc: dict, step: Step, policy: Policy, now: datetime,
+           reason: str | None = None) -> None:
     """Apply one step: update the incident's clock, record the step in the audit trail and queue the
     notification it requires."""
     before = clock(inc)
     after = advance(before, step, now, policy)
     sets = {k: getattr(after, k) for k in CLOCK_COLUMNS if getattr(after, k) != getattr(before, k)}
     details = {"tier": step.tier, "stage": step.stage, "clock": step.clock, "due_at": step.at, "applied_at": now}
+    if reason:
+        details["reason"] = reason
     if step.kind == "notify":
         sets["notified_at"] = inc["notified_at"] or now
         recipients = [inc["owner_id"]]
         record(conn, inc["id"], "notified", {**details, "recipients": recipients, "cc": inc["cc_ids"]})
-        _notify(conn, inc, "alert", "owner", recipients, step, now)
+        _notify(conn, inc, "alert", "owner", recipients, step.at, now)
     elif step.kind in ("escalate", "overdue", "reminder"):
         recipients = ownership.recipients(conn, step.tier, inc["owner_id"], inc["jurisdiction_id"])
         record(conn, inc["id"], "escalated" if step.kind == "escalate" else step.kind,
                {**details, "recipients": recipients})
-        _notify(conn, inc, "escalation" if step.kind == "escalate" else step.kind, step.tier, recipients, step, now)
+        _notify(conn, inc, "escalation" if step.kind == "escalate" else step.kind, step.tier, recipients, step.at,
+                now, reason)
     # "skip": the tier was already reached; only the stage counter advances
     if sets:
         conn.execute("UPDATE incident SET " + ", ".join(f"{k} = %s" for k in sets) + " WHERE id = %s",
@@ -309,6 +317,30 @@ def apply_due(conn: psycopg.Connection, incident_id: str, now: datetime,
         if step is None or step.at > now:
             return (step.at if step else None), False
         _apply(conn, inc, step, policy, now)
+
+
+def flag_undelivered(conn: psycopg.Connection, incident_id: str, recipient_id: str, kind: str) -> None:
+    """Table 3.20: the incident is flagged 'notification failed' on the dashboard."""
+    conn.execute("UPDATE incident SET notification_failed = true WHERE id = %s", (incident_id,))
+    record(conn, incident_id, "notification_failed", {"recipient": recipient_id, "kind": kind})
+
+
+def escalate_undelivered(conn: psycopg.Connection, incident_id: str, failed_tier: str, recipient_id: str,
+                         now: datetime, policy: Policy | None = None) -> Outcome:
+    """An SMS about the incident could not be delivered (Table 3.20): flag the incident and, if it still
+    needs acknowledging, escalate at once to the tier above the one the message was for, unless that tier
+    has already been reached. Later policy stages for tiers already reached are skipped as usual."""
+    inc = _get(conn, incident_id)
+    flag_undelivered(conn, incident_id, recipient_id, "sms")
+    target = above(failed_tier)
+    if (inc["state"] in ("resolved", "closed") or inc["acknowledged_at"] is not None or target is None
+            or rank(target) <= rank(inc["current_tier"])):
+        return Outcome(incident_id, False, f"incident {inc['incident_no']} flagged: notification failed")
+    policy = policy or load_policy(conn)
+    if rank(target) > rank(policy.top_tier(inc["severity"], inc["mode"])):
+        return Outcome(incident_id, False, f"incident {inc['incident_no']} flagged: notification failed")
+    _apply(conn, inc, Step(now, "escalate", target, -1, "delivery"), policy, now, reason="undelivered")
+    return Outcome(incident_id, True, f"incident {inc['incident_no']} escalated to {target}: notification failed")
 
 
 # Actions by people ------------------------------------------------------------------------------------
@@ -383,8 +415,15 @@ def acknowledge(conn: psycopg.Connection, incident_id: str, user_id: str, channe
         UPDATE incident SET acknowledged_at = now(), acknowledged_by = %s, resolve_due_from = now(),
                resolve_stage = 0, state = 'acknowledged'
         WHERE id = %s""", (user_id, incident_id))
-    record(conn, incident_id, "acknowledged", {"tier_at_acknowledgement": inc["current_tier"],
-                                               "late": inc["current_tier"] != "owner"}, user_id, channel)
+    late = inc["current_tier"] != "owner"
+    record(conn, incident_id, "acknowledged", {"tier_at_acknowledgement": inc["current_tier"], "late": late},
+           user_id, channel)
+    if late:   # Table 3.17: the escalation stands, and the officers it reached are informed
+        informed = [u for t in TIERS[1:rank(inc["current_tier"]) + 1]
+                    for u in ownership.officers(conn, inc["jurisdiction_id"], t) if u != user_id]
+        if informed:
+            _notify(conn, inc, "acknowledged", inc["current_tier"], informed, datetime.now(UTC), datetime.now(UTC),
+                    how="dashboard")
     return Outcome(incident_id, True, f"incident {inc['incident_no']} acknowledged")
 
 
@@ -409,6 +448,7 @@ def resolve(conn: psycopg.Connection, incident_id: str, user_id: str, note: str,
                  (user_id, incident_id))
     record(conn, incident_id, "resolved", {"note": note, "condition_cleared": inc["condition_cleared"]},
            user_id, channel)
+    codes.void(conn, incident_id=incident_id)
     return Outcome(incident_id, True, f"incident {inc['incident_no']} resolved")
 
 
@@ -429,6 +469,7 @@ def close(conn: psycopg.Connection, incident_id: str, user_id: str, note: str = 
     conn.execute("UPDATE incident SET state = 'closed', closed_at = now(), closed_by = %s WHERE id = %s",
                  (user_id, incident_id))
     record(conn, incident_id, "closed", {"note": note}, user_id, "dashboard")
+    codes.void(conn, incident_id=incident_id)
     return Outcome(incident_id, True, f"incident {inc['incident_no']} closed")
 
 
@@ -443,4 +484,6 @@ def reopen(conn: psycopg.Connection, incident_id: str, user_id: str, reason: str
                reopened_at = now(), reopen_count = reopen_count + 1, resolve_due_from = now(), resolve_stage = 0
         WHERE id = %s""", (incident_id,))
     record(conn, incident_id, "reopened", {"reason": "review", "note": reason}, user_id, "dashboard")
+    now = datetime.now(UTC)   # the owner needs a new response code to resolve by SMS
+    _notify(conn, inc, "reopened", "owner", [inc["owner_id"]], now, now)
     return Outcome(incident_id, True, f"incident {inc['incident_no']} reopened")

@@ -120,7 +120,8 @@ def test_live_excursion_to_closure(cleanup, token):
         assert api.post(f"/incidents/{no}/close", headers=token("test.lga"), json={"note": "verified"}).status_code == 200
         detail = api.get(f"/incidents/{no}", headers=token("test.lga")).json()
     assert detail["state"] == "closed"
-    assert [a["action"] for a in detail["actions"]] == ["created", "notified", "acknowledged", "resolved", "closed"]
+    people_and_policy = [a["action"] for a in detail["actions"] if a["action"] != "delivery_report"]   # SMS (I5)
+    assert people_and_policy == ["created", "notified", "acknowledged", "resolved", "closed"]
 
     deadline = time.monotonic() + 15
     while (status := asyncio.run(workflow_status(str(inc["id"])))) != WorkflowExecutionStatus.COMPLETED:

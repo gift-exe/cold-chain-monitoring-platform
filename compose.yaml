@@ -157,12 +157,56 @@ services:
       KAFKA_BOOTSTRAP: kafka:19092
       TEMPORAL_ADDRESS: temporal:7233
       AUDIT_ANCHOR_DIR: /app/anchors
+      CODE_SECRET: ${CODE_SECRET}
     volumes:
       - ./anchors:/app/anchors   # outside the database, on the host (Section 3.4.6)
     depends_on:
       postgres: { condition: service_healthy }
       kafka: { condition: service_healthy }
       temporal: { condition: service_healthy }
+
+  notification-service:
+    <<: *service
+    command: ["uvicorn", "coldchain.notify.service:app", "--host", "0.0.0.0", "--port", "8000"]
+    ports:
+      - "${NOTIFY_PORT}:8000"
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      COLDCHAIN_APP_PASSWORD: ${COLDCHAIN_APP_PASSWORD}
+      KAFKA_BOOTSTRAP: kafka:19092
+      TEMPORAL_ADDRESS: temporal:7233
+      AT_API_URL: ${SMS_GATEWAY_URL}
+      AT_USERNAME: ${AT_USERNAME}
+      AT_API_KEY: ${AT_API_KEY}
+      SMS_CALLBACK_TOKEN: ${SMS_CALLBACK_TOKEN}
+      CODE_SECRET: ${CODE_SECRET}
+    depends_on:
+      postgres: { condition: service_healthy }
+      kafka: { condition: service_healthy }
+      temporal: { condition: service_healthy }
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  sms-gateway:
+    # Emulator of the SMS gateway (Africa's Talking protocol) for failure testing; see README to use the
+    # Africa's Talking sandbox instead
+    <<: *service
+    command: ["uvicorn", "coldchain.simulator.sms_gateway:app", "--host", "0.0.0.0", "--port", "8000"]
+    ports:
+      - "${SMS_GATEWAY_PORT}:8000"
+    environment:
+      AT_API_KEY: ${AT_API_KEY}
+      SMS_DELIVERY_CALLBACK: http://notification-service:8000/sms/${SMS_CALLBACK_TOKEN}/delivery
+      SMS_INBOUND_CALLBACK: http://notification-service:8000/sms/${SMS_CALLBACK_TOKEN}/inbound
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
 
   api:
     <<: *service
@@ -178,6 +222,7 @@ services:
       KEYCLOAK_URL: http://keycloak:8080
       KEYCLOAK_PUBLIC_URL: http://localhost:${KEYCLOAK_PORT}
       AUDIT_ANCHOR_DIR: /app/anchors
+      CODE_SECRET: ${CODE_SECRET}
     volumes:
       - ./anchors:/app/anchors:ro
     depends_on:

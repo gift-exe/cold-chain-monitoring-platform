@@ -1,6 +1,7 @@
 """API service (Table 3.11): the interface used by the dashboard (I6) and, for now, by tests.
 
-Iteration I4 provides the commands for incidents and custody. Every request carries a Keycloak access
+Iteration I4 provides the commands for incidents and custody; I5 adds dashboard notifications and the
+administrator's control of phone numbers. Every request carries a Keycloak access
 token; the user is the token's subject, who must be an active user in the database. Each command runs in
 one database transaction; afterwards the affected workflow is told (incident) or started (handoff).
 
@@ -25,6 +26,7 @@ from coldchain.incidents import service as incidents
 from coldchain.incidents import store
 from coldchain.incidents.activities import db_url
 from coldchain.incidents.ownership import custodian_at
+from coldchain.notify import store as notifications
 
 CLIENTS = ("coldchain-dashboard", "coldchain-dev-cli")
 
@@ -35,7 +37,7 @@ async def lifespan(app: FastAPI):
     yield
 
 
-app = FastAPI(title="Cold chain integrity API", version="0.4.0", lifespan=lifespan)
+app = FastAPI(title="Cold chain integrity API", version="0.5.0", lifespan=lifespan)
 
 
 @lru_cache
@@ -140,7 +142,6 @@ async def get_incident(ref: str, user: User):
             raise NotPermitted("not permitted to view this incident")
         cur = conn.cursor(row_factory=dict_row)
         inc = cur.execute("SELECT * FROM incident WHERE id = %s", (incident_id,)).fetchone()
-        inc.pop("response_code_hash", None)
         inc["actions"] = cur.execute("""
             SELECT id, action, actor_id, channel, occurred_at, details FROM incident_action
             WHERE incident_id = %s ORDER BY id""", (inc["id"],)).fetchall()
@@ -227,6 +228,66 @@ async def custody_at(cid: str, user: User, at: datetime | None = None):
         return {"consignment_id": cid, "state": custody.state(conn, cid), "at": at or now(),
                 "holder": custodian_at(conn, cid, at or now())}
     return await asyncio.to_thread(_run, go)
+
+
+# Notifications and phone numbers -------------------------------------------------------------------------
+
+@app.get("/notifications")
+async def my_notifications(user: User, unread: bool = False, limit: int = 50):
+    """The user's dashboard notifications, newest first (FR9.1)."""
+    def go(conn):
+        return conn.cursor(row_factory=dict_row).execute("""
+            SELECT n.id, n.kind, n.incident_id, i.incident_no, n.consignment_id, n.body, n.created_at, n.read_at,
+                   i.notification_failed
+            FROM notification n LEFT JOIN incident i ON i.id = n.incident_id
+            WHERE n.recipient_id = %s AND n.channel = 'dashboard' AND (NOT %s OR n.read_at IS NULL)
+            ORDER BY n.created_at DESC LIMIT %s""", (user, unread, min(limit, 200))).fetchall()
+    return await asyncio.to_thread(_run, go)
+
+
+@app.post("/notifications/{nid}/read")
+async def read_notification(nid: str, user: User):
+    def go(conn):
+        if not notifications.mark_read(conn, user, nid):
+            raise NotFound(f"no notification {nid}")
+    await asyncio.to_thread(_run, go)
+    return {"id": nid, "read": True}
+
+
+class Phone(BaseModel):
+    phone_number: str = Field(pattern=r"^\+[1-9][0-9]{7,14}$")
+
+
+def _admin(conn: psycopg.Connection, user: str) -> None:
+    role = conn.execute("SELECT role FROM app_user WHERE id = %s AND active", (user,)).fetchone()
+    if role is None or role[0] != "admin":
+        raise NotPermitted("only an administrator can change phone numbers")
+
+
+@app.post("/users/{ref}/phone/deactivate")
+async def deactivate_phone(ref: str, user: User):
+    """A lost phone: every command from the number is rejected from now on (Section 3.4.6)."""
+    def go(conn):
+        _admin(conn, user)
+        conn.execute("UPDATE app_user SET phone_deactivated_at = coalesce(phone_deactivated_at, now()) WHERE id = %s",
+                     (_user_id(conn, ref),))
+    await asyncio.to_thread(_run, go)
+    return {"user": ref, "phone": "deactivated"}
+
+
+@app.put("/users/{ref}/phone")
+async def set_phone(ref: str, body: Phone, user: User):
+    """Register a (new) number for a user; it is active at once."""
+    def go(conn):
+        _admin(conn, user)
+        try:
+            with conn.transaction():
+                conn.execute("UPDATE app_user SET phone_number = %s, phone_deactivated_at = NULL WHERE id = %s",
+                             (body.phone_number, _user_id(conn, ref)))
+        except psycopg.errors.UniqueViolation:
+            raise InvalidState("the number belongs to another active user") from None
+    await asyncio.to_thread(_run, go)
+    return {"user": ref, "phone": "active"}
 
 
 # Audit ---------------------------------------------------------------------------------------------
