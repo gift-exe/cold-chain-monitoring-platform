@@ -164,4 +164,5 @@ def test_audit_verification_through_api(token):
         assert api.get("/audit/verify", headers=token("test.facility")).status_code == 403
         r = api.get("/audit/verify", headers=token("test.admin"))
     assert r.status_code == 200
-    assert {c["table"]: c["intact"] for c in r.json()} == {"incident_action": True, "custody_event": True}
+    assert {c["table"]: c["intact"] for c in r.json()} == {"incident_action": True, "custody_event": True,
+                                                              "admin_action": True}

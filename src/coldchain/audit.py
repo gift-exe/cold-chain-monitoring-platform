@@ -23,7 +23,7 @@ import psycopg
 
 from coldchain.config import get_settings
 
-CHAINS = {"incident_action": "id", "custody_event": "seq"}   # table: position column
+CHAINS = {"incident_action": "id", "custody_event": "seq", "admin_action": "id"}   # table: position column
 ANCHOR_FILE = "audit-anchors.jsonl"
 
 

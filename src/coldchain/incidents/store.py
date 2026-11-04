@@ -395,6 +395,13 @@ def _reviewer(conn: psycopg.Connection, inc: dict, user: dict) -> bool:
     return inc["severity"] == "warning" or user["id"] != inc["resolved_by"]
 
 
+def can_review(conn: psycopg.Connection, incident_id: str, user_id: str) -> bool:
+    """Whether the user may close or reopen the incident (it must also be resolved)."""
+    user = conn.cursor(row_factory=dict_row).execute(
+        "SELECT id::text, role, jurisdiction_id FROM app_user WHERE id = %s AND active", (user_id,)).fetchone()
+    return user is not None and _reviewer(conn, _get(conn, incident_id, lock=False), user)
+
+
 def _open_for_action(conn: psycopg.Connection, incident_id: str, user_id: str) -> dict:
     _user(conn, user_id)
     inc = _get(conn, incident_id)

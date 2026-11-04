@@ -3,7 +3,7 @@ COMPOSE = podman compose
 
 INFRA = postgres keycloak mosquitto kafka temporal
 
-.PHONY: dev env infra build up down reset migrate seed train test test-unit test-resilience lint logs
+.PHONY: dev env infra build up down reset migrate seed train demo test test-unit test-resilience lint logs
 
 dev: env anchors infra migrate seed models/default.joblib up  ## start the stack, apply migrations, load seed data, start services
 
@@ -16,8 +16,9 @@ env:  ## create .env from the example if it does not exist
 infra: env  ## start databases, identity server and brokers, and wait until they are healthy
 	$(COMPOSE) up -d --wait $(INFRA)
 
-build:  ## build the services image (podman build: compose --build hangs with Podman)
+build:  ## build the services and dashboard images (podman build: compose --build hangs with Podman)
 	podman build -q -t localhost/coldchain-services:dev -f Containerfile .
+	podman build -q -t localhost/coldchain-dashboard:dev -f dashboard/Containerfile dashboard
 
 up: env build  ## start everything, rebuilding the services image if the code changed
 	$(COMPOSE) up -d --wait
@@ -40,6 +41,9 @@ models/default.joblib:
 
 train:  ## retrain the anomaly model
 	uv run python scripts/train_anomaly.py
+
+demo:  ## keep the demo network reporting, with scripted incidents and an outreach trip (Ctrl-C to stop)
+	uv run python scripts/demo.py
 
 test:  ## all tests (stack must be running)
 	uv run pytest

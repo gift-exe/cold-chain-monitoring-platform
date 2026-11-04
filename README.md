@@ -13,7 +13,8 @@ and requirement numbers in the code (e.g. FR1.4, Table 3.18) refer to it.
 | I3 Detection | Rules for the integrity events (event time, hysteresis, gaps), device silence, anomaly warnings | Done |
 | I4 Incidents and custody | Incidents with ownership, escalation (Temporal), resolution and review; custody handoffs; hash-chained audit trail; API | Done |
 | I5 Notification | SMS alerts, escalations and RETRO digests; reply commands with one-time codes; delivery reports, retries and failure handling; dashboard notifications | Done |
-| I6–I8 | Dashboard, simulator calibration, evaluation | Planned |
+| I6 Dashboard | Role-based map, incident, performance, consignment and administration views; live updates; demo network | Done |
+| I7–I8 | Simulator calibration, evaluation | Planned |
 
 ## Requirements
 
@@ -25,6 +26,7 @@ and requirement numbers in the code (e.g. FR1.4, Table 3.18) refer to it.
 
 ```bash
 make dev      # create .env, start the stack, apply migrations, load seed data, train the anomaly model
+make demo     # keep the demo network reporting, with scripted incidents (Ctrl-C to stop); then open the dashboard
 make test     # run all tests (the stack must be running)
 make test-resilience   # restart services under load and check no reading is lost (slow)
 make down     # stop, keeping data; `make reset` also deletes data
@@ -37,14 +39,30 @@ make down     # stop, keeping data; `make reset` also deletes data
 | Mosquitto (MQTT) | localhost:1883 | Anonymous access in development only |
 | Kafka | localhost:9092 | Single node, KRaft mode, seven-day retention |
 | Temporal | localhost:7233; UI http://localhost:8233 | Development server; workflows persisted to SQLite on a volume |
+| Dashboard | http://localhost:3000 | Sign in as a test user (below); also serves the API under `/api` |
 | API | http://localhost:8000 (docs at /docs) | Needs a Keycloak access token (`Authorization: Bearer …`) |
 | Notification service | http://localhost:8001 | Sends SMS; the gateway's callbacks are `/sms/<SMS_CALLBACK_TOKEN>/inbound` and `/delivery` |
 | SMS gateway emulator | http://localhost:8002 | Speaks Africa's Talking's protocol; see below |
 | ingestion-bridge, storage-writer, detection, incident-service, notification-service, sms-gateway, api | — | Built from `Containerfile`; `make up` rebuilds after code changes |
+| dashboard | — | Built from `dashboard/Containerfile` (Vite build served by nginx); `make up` rebuilds it |
 
 Audit anchors (the daily copy of each audit chain's latest hash) are written to `anchors/` on the host,
 outside the database. `make reset` deletes them with the data they describe. To verify the audit trail
 by hand: `uv run python -m coldchain.audit verify`.
+
+### Dashboard
+
+The dashboard (`dashboard/`, React with MapLibre and OpenStreetMap tiles) shows each role the views and
+actions of Table 3.21, filtered to its jurisdiction: a map of facilities and mobile units by status, the
+incident list and each incident's readings and timeline, response performance (MTTA, MTTR), consignments,
+and administration (product limits for national officers; phone numbers and system status for
+administrators). It updates live over a WebSocket (`/api/ws`) when incidents, notifications, custody or
+readings change.
+
+`make demo` keeps the demo network (`seeds/dev_z_demo_network.sql`: three Kano LGAs, invented facilities
+named "Demo") reporting, with a heat excursion, a freezing event, a power cut, a silent logger and an
+outreach team with GPS positions. For development with hot reload: `cd dashboard && npm install && npm run
+dev`, then http://localhost:5173 (Vite forwards `/api` to the API).
 
 ### SMS
 
@@ -93,16 +111,21 @@ compose.yaml              local stack
 infra/                    configuration for PostgreSQL, Keycloak and Mosquitto
 migrations/               database schema (Alembic, written in SQL)
 seeds/                    development reference data and test users
-scripts/                  seed loader; generator for the Keycloak realm and test users
+scripts/                  seed loader; generator for the Keycloak realm and test users; demo feeder
 src/coldchain/            messages.py (device message format), ingestion/ (bridge, writer),
                           detection/ (rules, anomaly, service), incidents/ (policy, ownership, store,
                           workflows, service), notify/ (templates, codes, commands, gateway, store,
-                          service), custody.py, audit.py, outbox.py, api/, simulator/ (devices, SMS gateway)
+                          service), custody.py, admin.py, audit.py, outbox.py, api/ (app, views),
+                          simulator/ (devices, SMS gateway)
+dashboard/                React dashboard (Vite), its Containerfile and nginx configuration
 models/                   trained anomaly models (make train; not committed)
 tests/                    acceptance and unit tests
 ```
 
 ## Test users
+
+Sign in to the dashboard as any of `test.national`, `test.state`, `test.lga`, `test.facility`,
+`test.outreach`, `test.driver` or `test.admin`; their passwords are in the realm file below.
 
 `scripts/gen_dev_identity.py` defines one test user per role and writes both the Keycloak realm
 (`infra/keycloak/coldchain-realm.json`, including generated passwords) and the matching `app_user` rows

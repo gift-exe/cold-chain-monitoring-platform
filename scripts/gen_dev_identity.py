@@ -78,8 +78,11 @@ def realm(passwords: dict[str, str]) -> dict:
         "clients": [
             {"clientId": "coldchain-dashboard", "name": "Dashboard", "publicClient": True,
              "standardFlowEnabled": True, "directAccessGrantsEnabled": False,
-             "redirectUris": ["http://localhost:5173/*"], "webOrigins": ["http://localhost:5173"],
-             "attributes": {"pkce.code.challenge.method": "S256"}, "protocolMappers": MAPPERS},
+             "redirectUris": ["http://localhost:3000/*", "http://localhost:5173/*"],
+             "webOrigins": ["http://localhost:3000", "http://localhost:5173"],
+             "attributes": {"pkce.code.challenge.method": "S256",
+                            "post.logout.redirect.uris": "http://localhost:3000/*##http://localhost:5173/*"},
+             "protocolMappers": MAPPERS},
             # Development and test only: allows tests to obtain tokens with a username and password
             {"clientId": "coldchain-dev-cli", "name": "Development CLI (dev only)", "publicClient": True,
              "standardFlowEnabled": False, "directAccessGrantsEnabled": True, "protocolMappers": MAPPERS},

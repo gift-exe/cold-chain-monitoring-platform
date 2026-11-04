@@ -19,6 +19,7 @@ dependencies = [
     "sqlalchemy>=2.0",
     "temporalio>=1.35",
     "uvicorn>=0.35",
+    "websockets>=17.4",
 ]
 
 [dependency-groups]

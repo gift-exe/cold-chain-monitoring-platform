@@ -238,6 +238,13 @@ services:
       timeout: 5s
       retries: 20
 
+  dashboard:
+    image: localhost/coldchain-dashboard:dev
+    ports:
+      - "${DASHBOARD_PORT:-3000}:80"
+    depends_on:
+      api: { condition: service_healthy }
+
 volumes:
   temporaldata:
   pgdata:
