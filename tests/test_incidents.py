@@ -78,6 +78,17 @@ def test_replayed_event_creates_no_second_incident(db):
     assert db.execute("SELECT count(*) FROM incident WHERE integrity_event_id = %s", (ev,)).fetchone()[0] == 1
 
 
+
+def test_second_event_with_the_same_start_joins_the_existing_incident(db):
+    dev = fixed_device(db)
+    start = now(db) - 60 * MIN
+    first = store.on_event(db, event(db, dev, start=start))
+    later = store.on_event(db, event(db, dev, start=start, end=start + 20 * MIN))
+    assert later.incident_id == first.incident_id
+    assert db.execute("SELECT count(*) FROM integrity_event WHERE incident_id = %s",
+                      (first.incident_id,)).fetchone()[0] == 2
+    assert actions(db, first.incident_id) == ["created", "updated"]
+
 def test_event_ended_15_minutes_before_detection_is_retrospective_and_copied_to_lga(db):
     t = now(db)
     inc = incident(db, new_incident(db, start=t - 3 * 60 * MIN, end=t - 15 * MIN, detected=t))

@@ -96,7 +96,9 @@ def reconcile(conn: psycopg.Connection, device_id: str, detected: list[Detected]
               lo: datetime, hi: datetime) -> list[dict]:
     """Bring stored integrity events in line with what the rules now find. An event already stored that
     overlaps a detected one is the same event (its start, end or peak may change as late readings
-    arrive); otherwise a new event is created. Returns the events created or changed."""
+    arrive); otherwise a new event is created. Each stored event is the same event as at most one detected
+    event, taken in time order, so an event that a data gap now splits in two keeps its start and the
+    later part becomes a new event. Returns the events created or changed."""
     cur = conn.cursor(row_factory=dict_row)
     existing = cur.execute("""
         SELECT id::text, type, severity, event_start, event_end, peak_value, borderline, details
@@ -106,10 +108,12 @@ def reconcile(conn: psycopg.Connection, device_id: str, detected: list[Detected]
         ORDER BY event_start""", (device_id, list(RULE_TYPES), hi, lo)).fetchall()
 
     changed = []
-    for d in detected:
+    claimed: set[str] = set()   # a stored event is matched to at most one detected event
+    for d in sorted(detected, key=lambda x: x.start):
         d_end = d.end or datetime.max.replace(tzinfo=d.start.tzinfo)
-        same = [e for e in existing if e["type"] == d.type and e["event_start"] <= d_end
-                and (e["event_end"] is None or e["event_end"] >= d.start)]
+        same = [e for e in existing if e["id"] not in claimed and e["type"] == d.type
+                and e["event_start"] <= d_end and (e["event_end"] is None or e["event_end"] >= d.start)]
+        claimed.update(e["id"] for e in same)
         new = {"severity": d.severity, "event_start": d.start, "event_end": d.end,
                "peak_value": None if d.peak is None else round(d.peak, 2), "borderline": d.borderline,
                "details": d.details}

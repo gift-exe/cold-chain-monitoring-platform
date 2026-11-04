@@ -125,10 +125,18 @@ def _create(conn: psycopg.Connection, ev: dict) -> Outcome:
                               consignment_id, jurisdiction_id, cc_ids, ownership, condition_cleared,
                               received_at, detected_at)
         VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s::uuid[], %s, %s, %s, %s)
+        ON CONFLICT (incident_key) DO NOTHING
         RETURNING id::text, incident_no""",
         (key, ev["id"], ev["type"], ev["severity"], mode, own.owner_id, ev["device_id"],
          own.consignment_id or ev["consignment_id"], own.jurisdiction_id, cc, own.rule,
          ev["event_end"] is not None, received, ev["detected_at"])).fetchone()
+    if row is None:
+        # An incident already exists for this condition and start (detection re-split an event): the
+        # event joins that incident rather than creating a second one.
+        incident_id = conn.execute("SELECT id::text FROM incident WHERE incident_key = %s", (key,)).fetchone()[0]
+        conn.execute("UPDATE integrity_event SET incident_id = %s WHERE id = %s", (incident_id, ev["id"]))
+        record(conn, incident_id, "updated", {"integrity_event_id": ev["id"], "joined": "same start"})
+        return _update(conn, {**ev, "incident_id": incident_id})
     incident_id = row[0]
     conn.execute("UPDATE integrity_event SET incident_id = %s WHERE id = %s", (incident_id, ev["id"]))
     record(conn, incident_id, "created", {

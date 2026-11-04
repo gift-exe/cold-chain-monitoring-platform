@@ -120,6 +120,30 @@ def test_late_readings_reveal_earlier_start_of_same_event(mqtt, register):
     assert evs[0]["event_start"] == start + 30 * MIN and evs[0]["updated_at"] > evs[0]["detected_at"]
 
 
+
+def test_gap_splitting_a_stored_event_keeps_its_start(app_conn):
+    """A stored ongoing event that a data gap now splits in two keeps its start and gets the first part's
+    end; the part after the gap becomes a new event (it must not take over the stored one)."""
+    from coldchain.detection import store
+    from coldchain.detection.rules import Detected
+    conn = app_conn
+    t = conn.execute("SELECT date_trunc('minute', now())").fetchone()[0]
+    dev = conn.execute("""INSERT INTO device (serial_no, facility_id, type, equipment_type)
+                          VALUES (%s, %s, 'fixed', 'test_fridge') RETURNING id::text""",
+                       (f"DET-{uuid.uuid4().hex[:10]}", FACILITY)).fetchone()[0]
+    stored = conn.execute("""INSERT INTO integrity_event (device_id, type, severity, event_start, peak_value)
+                             VALUES (%s, 'freeze', 'critical', %s, -1.5) RETURNING id::text""",
+                          (dev, t - 300 * MIN)).fetchone()[0]
+    before = Detected("freeze", "critical", t - 300 * MIN, t - 60 * MIN, -1.5)
+    after = Detected("freeze", "critical", t - 20 * MIN, None, -1.5)
+    changed = store.reconcile(conn, dev, [after, before], t - 400 * MIN, t)
+    assert {(c["change"], c["event_start"]) for c in changed} == {("updated", t - 300 * MIN), ("created", t - 20 * MIN)}
+    rows = conn.execute("SELECT id::text, event_start, event_end FROM integrity_event WHERE device_id = %s "
+                        "ORDER BY event_start", (dev,)).fetchall()
+    assert rows[0] == (stored, t - 300 * MIN, t - 60 * MIN)
+    assert rows[1][1:] == (t - 20 * MIN, None)
+    assert store.reconcile(conn, dev, [before, after], t - 400 * MIN, t) == []   # stable on re-run
+
 # Retrospective and incomplete data --------------------------------------------------
 
 def test_retrospective_freeze_from_24_hour_old_upload(mqtt, register):
