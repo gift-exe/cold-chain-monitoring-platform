@@ -160,6 +160,9 @@ def compose(conn: psycopg.Connection, n: dict, now: datetime) -> tuple[str, str]
             JOIN app_user u ON u.id = h.from_user WHERE h.id = %s""", (n["handoff_id"],)).fetchone()
         code = codes.issue(conn, recipient, now, handoff_id=n["handoff_id"])
         text = templates.handoff(h[0], templates.name(h[3]), h[1], h[2], code)
+    elif kind == "reply" and n["reason"] == "code":   # an acknowledgement repeats the code for RES
+        code = codes.issue(conn, recipient, now, incident_id=n["incident_id"], keep_earlier=True)
+        text = n["body"].replace("****", code)
     else:                                   # composed when created: digest, reply, notices
         text = n["body"]
     return text, re.sub(rf"\b{code}\b", "****", text) if code else text
@@ -195,6 +198,10 @@ def send_one(conn: psycopg.Connection, n: dict, now: datetime, client: httpx.Cli
                sent_at = %s, gateway_status = %s, gateway_message_id = %s
         WHERE id = %s""", (stored, now, now, result.status, result.message_id, n["id"]))
     n.update(attempts=n["attempts"] + 1, first_sent_at=n["first_sent_at"] or now)
+    if result.outcome == "sent" and get_settings().sms_trust_sent:     # later reports then change nothing
+        conn.execute("UPDATE notification SET status = 'delivered', delivered_at = %s WHERE id = %s", (now, n["id"]))
+        _audit(conn, n, "delivered", "accepted by the gateway; delivery reports not used", now)
+        return []
     if result.outcome == "sent":
         conn.execute("UPDATE notification SET status = 'sent' WHERE id = %s", (n["id"],))
         return []

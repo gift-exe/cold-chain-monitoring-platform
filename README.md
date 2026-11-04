@@ -59,12 +59,30 @@ curl -s -X PUT localhost:8002/_sim/numbers/+2348000000004 -H 'Content-Type: appl
      -d '{"outcome": "failed", "times": 2}'                          # the next two messages to it fail
 ```
 
-To use the Africa's Talking sandbox instead: create an account at africastalking.com, open the sandbox
-app and generate an API key; in `.env` set `SMS_GATEWAY_URL=https://api.sandbox.africastalking.com` and
-`AT_API_KEY=<the key>`, then `podman compose up -d notification-service`. Messages then appear in the
-sandbox's phone simulator. For replies and delivery reports to reach the prototype, the sandbox's
-callback URLs must be set to a public HTTPS address that forwards to port 8001 (for example a tunnel),
-followed by `/sms/<SMS_CALLBACK_TOKEN>/inbound` and `/sms/<SMS_CALLBACK_TOKEN>/delivery`.
+To use the Africa's Talking sandbox instead (tried on 4 November 2026):
+
+1. Create an account at africastalking.com and generate an API key in the **sandbox** app. Create a
+   shortcode under SMS → Shortcodes.
+2. In `.env` set `SMS_GATEWAY_URL=https://api.sandbox.africastalking.com`, `AT_API_KEY=<the key>`, and the
+   development settings below. Set `SMS_CALLBACK_TOKEN` to a long random value.
+3. Start a tunnel to the notification service (`cloudflared tunnel --url http://localhost:8001`) and set
+   the sandbox's callback URLs to `<tunnel address>/sms/<SMS_CALLBACK_TOKEN>/inbound` (incoming
+   messages) and `.../delivery` (delivery reports). The address changes each time the tunnel starts.
+4. Launch the simulator phone with a number in Nigerian mobile format (e.g. +2348031234567; 0800 numbers
+   are refused as `UnsupportedNumberType`) and give a test user that number (`PUT /users/{ref}/phone`).
+5. `podman compose up -d notification-service`. Replies are sent to the shortcode; messages from the
+   system arrive from the sandbox's default sender, AFRICASTKNG (the shortcode is refused as a sender).
+
+Development settings, never for real use:
+
+| Setting | Effect |
+|---|---|
+| `SMS_REDIRECT_TO=<number>` | Every SMS goes to this one phone, so all tiers can be seen on one simulator. Replies still act as the user that number belongs to. |
+| `SMS_TRUST_SENT=true` | A message the gateway accepts counts as delivered. The sandbox reported messages as `Failed` that reached the phone, and sent no reports for others, so its reports would escalate every alert. |
+
+The automated tests use the emulator; switch `.env` back (`SMS_GATEWAY_URL=http://sms-gateway:8000`,
+the two settings empty/false, the test user's number restored) before running them. If messages from the
+simulator stop arriving, relaunch the simulator phone: idle sessions stopped forwarding in testing.
 
 After editing a file in `infra/`, restart that service (e.g. `podman compose restart mosquitto`): containers read their configuration only at start.
 

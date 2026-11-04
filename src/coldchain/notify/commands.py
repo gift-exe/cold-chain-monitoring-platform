@@ -54,6 +54,7 @@ class Result:
     changed: bool = False
     links: dict = field(default_factory=dict)
     wrong_code_for: dict | None = None   # incident_id or handoff_id whose code was wrong
+    reply_code: bool = False             # the reply carries a fresh response code for the incident
 
 
 def parse(text: str) -> tuple[str, tuple]:
@@ -100,7 +101,8 @@ def handle(conn: psycopg.Connection, gateway_id: str, from_number: str, text: st
          result.links.get("consignment_id"), inbound[0]))
     if result.reply and user:
         store._direct(conn, "reply", user, templates.gsm(result.reply)[:templates.LIMIT], now, sms_only=True,
-                      incident_id=result.links.get("incident_id"), consignment_id=result.links.get("consignment_id"))
+                      incident_id=result.links.get("incident_id"), consignment_id=result.links.get("consignment_id"),
+                      reason="code" if result.reply_code else None)
     return result
 
 
@@ -159,8 +161,10 @@ def _ack(conn, user_id, args, now, result: Result) -> None:
     outcome = incidents.acknowledge(conn, result.incident_id, user_id, "sms")
     result.changed = outcome.changed
     result.outcome = "accepted" if outcome.changed else "no_effect"
-    result.reply = (f"OK #{number} acknowledged. When fixed: RES {number} <code> <note>" if outcome.changed
-                    else f"#{number} was already acknowledged; no change.")
+    if outcome.changed:   # the code is put in place of **** when the reply is sent (store.compose)
+        result.reply, result.reply_code = f"OK #{number} acknowledged. When fixed: RES {number} **** note", True
+    else:
+        result.reply = f"#{number} was already acknowledged; no change."
 
 
 def _res(conn, user_id, args, now, result: Result) -> None:

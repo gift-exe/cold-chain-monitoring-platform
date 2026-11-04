@@ -449,6 +449,12 @@ def resolve(conn: psycopg.Connection, incident_id: str, user_id: str, note: str,
     record(conn, incident_id, "resolved", {"note": note, "condition_cleared": inc["condition_cleared"]},
            user_id, channel)
     codes.void(conn, incident_id=incident_id)
+    # the officers it reached, or the LGA officers, are asked to review it on the dashboard
+    tier = inc["current_tier"] if inc["current_tier"] != "owner" else "lga"
+    reviewers = [u for u in ownership.officers(conn, inc["jurisdiction_id"], tier) if u != user_id]
+    if reviewers:
+        now = conn.execute("SELECT now()").fetchone()[0]
+        _notify(conn, inc, "review", tier, reviewers, now, now, how="dashboard")
     return Outcome(incident_id, True, f"incident {inc['incident_no']} resolved")
 
 

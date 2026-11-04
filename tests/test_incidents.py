@@ -230,7 +230,7 @@ def test_recurrence_within_60_minutes_reopens_and_renotifies(db):
     inc = incident(db, inc_id)
     assert (inc["state"], inc["reopen_count"], inc["ack_stage"]) == ("open", 1, -1)
     store.apply_due(db, inc_id, inc["ack_due_from"])
-    assert [n["kind"] for n in notices(db, inc_id)] == ["alert", "alert"]
+    assert [n["kind"] for n in notices(db, inc_id)] == ["alert", "review", "alert"]
 
 
 def test_condition_after_60_minutes_is_a_new_incident(db):

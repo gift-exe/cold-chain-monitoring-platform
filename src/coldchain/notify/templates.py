@@ -184,5 +184,6 @@ def dashboard(kind: str, i: Incident | None, now: datetime, consignment_no: int 
         return f"Consignment {consignment_no}: handoff to you awaiting confirmation" if kind == "handoff" \
             else kind
     heading = {"alert": "New incident", "cc": "Copied", "escalation": "Escalated to you", "overdue": "Overdue",
-               "reminder": "Overdue reminder", "reopened": "Reopened", "undelivered": "SMS not delivered"}
+               "reminder": "Overdue reminder", "reopened": "Reopened", "undelivered": "SMS not delivered",
+               "review": "Resolved, awaiting your review"}
     return f"{heading.get(kind, kind)}: {i.label()} #{i.no} {gsm(i.place)}: {i.reading(now)}"

@@ -3,6 +3,8 @@ REC and REJ for handoffs.
 
 Each SMS that invites such a reply carries a fresh code for its recipient; issuing one voids that
 recipient's earlier codes for the same incident or handoff, so only the code in the latest message works.
+The exception is the reply to ACK, which repeats a code for convenience: it adds one without voiding the
+code in the alert, so either works (and using one voids the other).
 A code is single-use, valid for one incident or handoff, expires after 7 days, and is voided when the
 incident is resolved or closed or the handoff settled. Only an HMAC of the code is stored. Five wrong
 codes for the same incident or handoff void the recipient's code, so a short code cannot be guessed
@@ -33,10 +35,11 @@ def _subject(incident_id: str | None, handoff_id: str | None) -> tuple[str, str]
 
 
 def issue(conn: psycopg.Connection, user_id: str, now: datetime, *, incident_id: str | None = None,
-          handoff_id: str | None = None) -> str:
+          handoff_id: str | None = None, keep_earlier: bool = False) -> str:
     column, subject = _subject(incident_id, handoff_id)
-    conn.execute(f"""UPDATE response_code SET voided_at = %s WHERE user_id = %s AND {column} = %s
-                     AND used_at IS NULL AND voided_at IS NULL""", (now, user_id, subject))
+    if not keep_earlier:
+        conn.execute(f"""UPDATE response_code SET voided_at = %s WHERE user_id = %s AND {column} = %s
+                         AND used_at IS NULL AND voided_at IS NULL""", (now, user_id, subject))
     code = ""
     while not any(c.isdigit() for c in code):   # a digit keeps codes distinct from words such as HEAT
         code = "".join(secrets.choice(ALPHABET) for _ in range(LENGTH))
@@ -47,27 +50,33 @@ def issue(conn: psycopg.Connection, user_id: str, now: datetime, *, incident_id:
 
 def check(conn: psycopg.Connection, user_id: str, code: str, now: datetime, *, incident_id: str | None = None,
           handoff_id: str | None = None) -> str | None:
-    """Use the code if it is the user's current code. Returns None if accepted, otherwise the reason it
-    was not. The caller's transaction decides: a code is only marked used if the command succeeds."""
+    """Use the code if it is one of the user's current codes. Returns None if accepted, otherwise the
+    reason it was not. The caller's transaction decides: a code is only marked used if the command
+    succeeds."""
     column, subject = _subject(incident_id, handoff_id)
-    row = conn.execute(f"""SELECT id, code_hash, expires_at FROM response_code
-                           WHERE user_id = %s AND {column} = %s AND used_at IS NULL AND voided_at IS NULL
-                           ORDER BY issued_at DESC LIMIT 1 FOR UPDATE""", (user_id, subject)).fetchone()
-    if row is None:
+    rows = conn.execute(f"""SELECT id, code_hash, expires_at FROM response_code
+                            WHERE user_id = %s AND {column} = %s AND used_at IS NULL AND voided_at IS NULL
+                            ORDER BY issued_at DESC FOR UPDATE""", (user_id, subject)).fetchall()
+    if not rows:
         return "no valid code: it has been used, replaced or withdrawn"
-    code_id, stored, expires = row
-    if now >= expires:
-        conn.execute("UPDATE response_code SET voided_at = %s WHERE id = %s", (now, code_id))
+    live = [r for r in rows if now < r[2]]
+    if len(live) < len(rows):
+        conn.execute("UPDATE response_code SET voided_at = %s WHERE id = ANY(%s)",
+                     (now, [r[0] for r in rows if r not in live]))
+    if not live:
         return "code expired"
-    if not hmac.compare_digest(stored, _hash(code)):
+    match = next((r[0] for r in live if hmac.compare_digest(r[1], _hash(code))), None)
+    if match is None:
         return WRONG             # the caller records it with failed(), outside the command's savepoint
-    conn.execute("UPDATE response_code SET used_at = %s WHERE id = %s", (now, code_id))
+    conn.execute("UPDATE response_code SET used_at = %s WHERE id = %s", (now, match))
+    conn.execute("UPDATE response_code SET voided_at = %s WHERE id = ANY(%s)",
+                 (now, [r[0] for r in live if r[0] != match]))
     return None
 
 
 def failed(conn: psycopg.Connection, user_id: str, now: datetime, *, incident_id: str | None = None,
            handoff_id: str | None = None) -> None:
-    """Count a wrong code against the user's current code; the fifth voids it."""
+    """Count a wrong code against the user's current codes; the fifth voids them."""
     column, subject = _subject(incident_id, handoff_id)
     conn.execute(f"""UPDATE response_code SET failed_attempts = failed_attempts + 1,
                             voided_at = CASE WHEN failed_attempts + 1 >= %s THEN %s END

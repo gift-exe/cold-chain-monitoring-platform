@@ -7,10 +7,12 @@ import json
 from datetime import timedelta
 
 import httpx
+import psycopg
 import pytest
 
+from coldchain.config import get_settings
 from coldchain.incidents import store as incidents
-from coldchain.notify import codes, store
+from coldchain.notify import codes, gateway, store
 from tests.conftest import HEALTH_FACILITY, PRODUCT, USERS
 from tests.test_incidents import actions, incident, new_incident, notices
 
@@ -41,7 +43,9 @@ class FakeGateway:
 
 
 @pytest.fixture
-def gw():
+def gw(monkeypatch):
+    monkeypatch.setattr(get_settings(), "sms_redirect_to", None)     # whatever .env says
+    monkeypatch.setattr(get_settings(), "sms_trust_sent", False)
     g = FakeGateway()
     g.client = httpx.Client(transport=httpx.MockTransport(g.handler))
     return g
@@ -207,6 +211,58 @@ def test_user_without_usable_number_counts_as_undeliverable(db, gw):
     touched = store.expand(db, req, now(db))
     assert touched == [inc] and sms(db, inc)[0]["failure_reason"] == "phone number deactivated"
     assert gw.sent == [] and incident(db, inc)["current_tier"] == "lga"
+
+
+def test_development_redirect_sends_every_sms_to_one_phone(gw, monkeypatch):
+    monkeypatch.setattr(get_settings(), "sms_redirect_to", PHONES["oic"])
+    assert gateway.send(PHONES["lga"], "test", gw.client).outcome == "sent"
+    assert gw.sent[-1]["to"] == PHONES["oic"]
+
+
+def test_development_trust_sent_counts_accepted_sms_as_delivered(db, gw, monkeypatch):
+    monkeypatch.setattr(get_settings(), "sms_trust_sent", True)
+    inc, req = alerted(db)
+    store.expand(db, req, now(db))
+    store.dispatch(db, now(db), gw.client)
+    assert sms(db, inc)[0]["status"] == "delivered"
+    report(db, sms(db, inc)[0], "Failed", "DeliveryFailure")      # what the sandbox reports
+    assert sms(db, inc)[0]["status"] == "delivered" and incident(db, inc)["current_tier"] == "owner"
+
+
+# Found in sandbox testing ------------------------------------------------------------------------------
+
+def test_acknowledgement_reply_carries_a_working_code(db, gw):
+    from coldchain.notify import commands
+    inc, req = alerted(db)
+    no = incident(db, inc)["incident_no"]
+    store.expand(db, req, now(db))
+    store.dispatch(db, now(db), gw.client)
+    alert_code = gw.to(PHONES["oic"])[-1].split()[-2]
+    commands.handle(db, "ack-1", PHONES["oic"], f"ACK {no}", now(db))
+    store.dispatch(db, now(db), gw.client)
+    text = gw.to(PHONES["oic"])[-1]
+    assert text.startswith(f"OK #{no} acknowledged. When fixed: RES {no} ") and "****" not in text
+    assert "****" in sms(db, inc, kind="reply")[0]["body"]                     # stored masked
+    code = text.split()[-2]
+    assert code != alert_code
+    with db.transaction():                              # either code works: the alert's still does...
+        r = commands.handle(db, "res-1", PHONES["oic"], f"RES {no} {alert_code} done", now(db))
+        assert r.outcome == "accepted"
+        raise psycopg.Rollback()
+    r = commands.handle(db, "res-2", PHONES["oic"], f"RES {no} {code} moved stock", now(db))   # ...and the new
+    assert r.outcome == "accepted"
+    assert db.execute("SELECT count(*) FROM response_code WHERE incident_id = %s AND used_at IS NULL "
+                      "AND voided_at IS NULL", (inc,)).fetchone()[0] == 0        # using one voided the other
+
+
+def test_resolution_asks_the_lga_officer_to_review_on_the_dashboard(db, gw):
+    inc, _ = alerted(db)
+    incidents.resolve(db, inc, USERS["oic"], "moved stock")
+    req = notices(db, inc)[-1]
+    assert (req["kind"], req["recipients"], req["urgency"]) == ("review", [USERS["lga"]], "dashboard")
+    store.expand(db, req, now(db))
+    rows = db.execute("SELECT channel, body FROM notification WHERE request_id = %s", (req["id"],)).fetchall()
+    assert len(rows) == 1 and rows[0][0] == "dashboard" and rows[0][1].startswith("Resolved, awaiting your review")
 
 
 # Custody --------------------------------------------------------------------------------------------------

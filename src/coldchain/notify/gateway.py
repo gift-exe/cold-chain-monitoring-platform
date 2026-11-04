@@ -35,7 +35,7 @@ class SendResult:
 
 def send(phone: str, message: str, client: httpx.Client | None = None) -> SendResult:
     s = get_settings()
-    data = {"username": s.at_username, "to": phone, "message": message, "bulkSMSMode": "1"}
+    data = {"username": s.at_username, "to": s.sms_redirect_to or phone, "message": message, "bulkSMSMode": "1"}
     if s.at_sender_id:
         data["from"] = s.at_sender_id
     own = client is None
