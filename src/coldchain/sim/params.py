@@ -81,6 +81,7 @@ GRID_BANDS = {"A": (20.0, 24.0), "B": (16.0, 20.0), "C": (12.0, 16.0), "D": (8.0
 DEFAULTS = {
     "start": "2024-03-01T00:00:00+00:00",
     "days": 30,
+    "minutes": 0,                                       # if set, the run lasts this many minutes instead (load runs)
     "network": {
         "seed": 0,                                      # the network's own seed: runs share one network
         "lgas": [],                                     # empty: every LGA in the state
@@ -90,16 +91,25 @@ DEFAULTS = {
         "ownership": ["Public"],
         "state_store": {"name": "Kano State Cold Store", "lat": 12.0000, "lon": 8.5167},
         "outreach_teams_per_lga": 2,                    # ASSUMPTION
+        # Load network (Table 3.7): the scenario network replicated as synthetic states until it has this many
+        # fixed units, plus this many mobile units. 0 means the scenario network itself.
+        "load_fixed_units": 0,
+        "load_mobile_units": 0,
         "interval_s": 60,                               # Table 3.7: one reading per minute when connected
         # Power-source mix of health facilities. Grid share 0.43 from Ilegogie (2025); the split of the rest
         # and of grid facilities with a generator is an ASSUMPTION pending the source figures.
         "power_mix": {"solar": 0.40, "grid": 0.25, "grid_generator": 0.18, "generator": 0.17},
-        # ASSUMPTION: tariff band of grid-connected facilities (northern, largely rural).
-        "grid_bands": {"A": 0.05, "B": 0.10, "C": 0.20, "D": 0.30, "E": 0.35},
+        # Tariff band of grid-connected facilities. Ilegogie (2025): 57% of grid-connected PHCs receive about
+        # 5 hours a day (Band E); the split of the rest across Bands A–D is an ASSUMPTION.
+        "grid_bands": {"A": 0.03, "B": 0.05, "C": 0.12, "D": 0.23, "E": 0.57},
         # ASSUMPTION: share of units in poor condition (worn seals, ice lining not frozen), whose heat gain is
-        # multiplied by the factor. Calibrated against time in range in I7b.
+        # multiplied by the factor. Factor calibrated against time above range (Lutukai et al., 2019, baseline).
         "degraded_share": 0.15,
-        "degraded_factor": 4.0,
+        "degraded_factor": 10.0,
+        # ASSUMPTION: share of powered units whose thermostat is set too cold (cut-in and cut-out lowered by the
+        # offset), the usual cause of freezing exposure in fridges. Calibrated against time below range in I7b.
+        "cold_thermostat_share": 0.10,
+        "cold_thermostat_offset": -3.0,
     },
     "power": {
         "mean_outage_h": 3.0,                           # ASSUMPTION: mean grid outage duration
@@ -108,6 +118,20 @@ DEFAULTS = {
         "generator_hours": [8, 18],                     # ASSUMPTION: generators run 08:00–18:00 WAT
         "fuel_gaps_per_1000_days": 15.0,                # ASSUMPTION
         "fuel_gap_days": [1, 5],                        # ASSUMPTION
+    },
+    "movement": {                                       # ASSUMPTIONS: routine outreach schedule (movement.py)
+        "days_per_week": 3,                             # outreach days per team per week...
+        "weekdays": [1, 2, 3, 4, 5],                    # ...chosen from Monday to Friday
+        "outreach_site_levels": ["Health Post"],        # GRID3 levels served by outreach sessions
+        "min_session_min": 120,                         # shortest session at the outreach site
+        "max_trip_h": 14,                               # a longer planned trip is not made that day
+    },
+    "connectivity": {                                   # ASSUMPTIONS, varied in sensitivity runs (Table 3.13)
+        # Kano metropolitan LGAs count as urban; the rest as rural
+        "urban_lgas": ["Dala", "Fagge", "Gwale", "Kano Municipal", "Kumbotso", "Nasarawa", "Tarauni", "Ungogo"],
+        "urban": {"offline_share": 0.01, "mean_gap_min": 30.0},
+        "rural": {"offline_share": 0.05, "mean_gap_min": 120.0},
+        "mobile_offline_on_trip": True,                 # Table 3.13: offline between departure and return
     },
     "climate": {"peak_hour_wat": 15.0},                 # Section 3.3.5: daily cycle peaking mid-afternoon
     "sensor": {                                          # ASSUMPTIONS within ±0.5 °C accuracy (Section 3.4.4)

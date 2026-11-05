@@ -50,6 +50,7 @@ class Unit:
     interval_s: int
     cell: int                   # index into the climate cells
     degraded: bool
+    thermostat_offset: float = 0.0   # °C added to cut-in and cut-out (a thermostat set too cold is negative)
 
 
 @dataclass
@@ -160,11 +161,56 @@ def build(net: dict, seed: int = 0) -> Network:
         n_by_lga[code] += 1
         equipment = ("walk_in_cold_room" if s.tier != "health_facility"
                      else "solar_direct_drive" if s.power_source == "solar" else "ice_lined_refrigerator")
+        degraded = bool(rng.random() < net["degraded_share"])
+        cold = bool(rng.random() < net["cold_thermostat_share"])
         units.append(Unit(f"SIM-{code}-{n_by_lga[code]:04d}", s.id, False, equipment, s.power_source != "solar",
-                          True, net["interval_s"], _nearest(cells, s.lat, s.lon),
-                          bool(rng.random() < net["degraded_share"])))
+                          True, net["interval_s"], _nearest(cells, s.lat, s.lon), degraded,
+                          net["cold_thermostat_offset"] if cold else 0.0))
         if s.tier == "lga_store":
             for t in range(net["outreach_teams_per_lga"]):
                 units.append(Unit(f"SIM-{code}-M{t + 1:03d}", s.id, True, "vaccine_carrier", False, False,
                                   net["interval_s"], _nearest(cells, s.lat, s.lon), False))
     return Network(sites, units, codes, cells)
+
+
+def load_network(scenario: Network, fixed: int, mobile: int) -> Network:
+    """The load network (Section 3.3.5, Table 3.7): copies of the scenario network as synthetic states
+    (jurisdictions NG-L01, NG-L02, ...) at the same locations, until there are `fixed` fixed units, with
+    `mobile` outreach carriers shared among the copies' LGA stores. Only volume matters for load tests;
+    locations are reused so that the climate, power and movement models still apply."""
+    sites, units = [], []
+    fixed_units = [u for u in scenario.units if not u.mobile]
+    copies = math.ceil(fixed / len(fixed_units))
+    stores = []
+    for r in range(1, copies + 1):
+        state = f"NG-L{r:02d}"
+        ids = {s.id: str(uuid.uuid5(NAMESPACE, f"load:{r}:{s.id}")) for s in scenario.sites}
+        for s in scenario.sites:
+            jur = state if s.tier == "state_store" else f"{state}-{s.jurisdiction_id.rsplit('-', 1)[-1]}"
+            sites.append(Site(ids[s.id], f"{s.name} (load {r})", s.tier, s.lga, jur,
+                              ids.get(s.parent_id), s.lat, s.lon, s.power_source, s.grid_band, s.source))
+            if s.tier == "lga_store":
+                stores.append(sites[-1])
+        for u in fixed_units:
+            if len(units) < fixed:
+                units.append(Unit(f"LD{r:02d}-{u.serial[4:]}", ids[u.site_id], False, u.equipment,
+                                  u.has_power_signal, u.has_door_sensor, u.interval_s, u.cell, u.degraded,
+                                  u.thermostat_offset))
+    used = {u.site_id for u in units}
+    sites = [s for s in sites if s.id in used or s.tier == "state_store"]
+    stores = [s for s in stores if s.id in used]
+    cell = {u.site_id: u.cell for u in units}
+    for i in range(mobile):
+        store = stores[i % len(stores)]
+        units.append(Unit(f"LDM-{i + 1:05d}", store.id, True, "vaccine_carrier", False, False,
+                          fixed_units[0].interval_s, cell[store.id], False))
+    return Network(sites, units, scenario.lga_codes, scenario.cells)
+
+
+def build_for(cfg) -> Network:
+    """The network a run configuration asks for: the scenario network, or the load network built from it."""
+    net = cfg["network"]
+    scenario = build(net, net["seed"])
+    if net["load_fixed_units"] or net["load_mobile_units"]:
+        return load_network(scenario, net["load_fixed_units"] or len(scenario.units), net["load_mobile_units"])
+    return scenario

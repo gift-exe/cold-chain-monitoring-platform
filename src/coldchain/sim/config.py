@@ -27,7 +27,12 @@ class RunConfig:
 
     @property
     def minutes(self) -> int:
-        return int(self.values["days"] * 1440)
+        return int(self.values["minutes"] or self.values["days"] * 1440)
+
+    @property
+    def days(self) -> float:
+        """Simulated days (fractional for a run given in minutes)."""
+        return self.minutes / 1440
 
 
 def merge(base: dict, override: dict) -> dict:

@@ -39,8 +39,8 @@ seed:
 models/default.joblib:
 	uv run python scripts/train_anomaly.py
 
-sim-sources:  ## rebuild the simulator's derived data extracts from data/
-	uv run python -m coldchain.sim sources
+sim-sources:  ## rebuild the simulator's derived data extracts from data/ (GTS=<export folder> to redo movement)
+	uv run --with duckdb python -m coldchain.sim sources $(if $(GTS),--gts $(GTS))
 
 calibrate:  ## simulator calibration checks (Table 3.13); report in runs/calibration/
 	uv run python -m coldchain.sim calibrate

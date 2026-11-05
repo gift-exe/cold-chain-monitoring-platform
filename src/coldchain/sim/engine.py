@@ -7,8 +7,11 @@ Processes:
 - grid: one per grid-connected unit, an alternating renewal process of supply and outage.
 - fuel: one per generator-backed unit, interrupting the generator's fuel supply.
 - injector: one per failure type, introducing labelled failures (ground truth).
+- link: one per unit, the connectivity model's alternating periods online and offline.
 
-Only fixed units are simulated here; mobile units (vaccine carriers on outreach) move in the movement model.
+Mobile units (outreach vaccine carriers) sit in their LGA store's cold room between trips, so their
+temperature follows the store's; on an outreach trip (movement model) the carrier warms passively towards
+ambient, reports its position along the route, and is offline from departure to return.
 
 Outputs: the failure injector's ground-truth labels, the true condition windows of every unit (above the
 upper limit, at or below the freezing limit, without power, door open), and summary statistics used by the
@@ -27,6 +30,7 @@ import numpy as np
 import simpy
 
 from coldchain.sim.config import RunConfig
+from coldchain.sim.movement import Movement, Trip
 from coldchain.sim.network import Network
 from coldchain.sim.params import EQUIPMENT, GRID_BANDS
 from coldchain.sim.sources import CLIMATE
@@ -103,18 +107,27 @@ class Simulation:
         self.rng = np.random.default_rng(cfg.seed)
         self.env = (simpy.rt.RealtimeEnvironment(factor=realtime_factor, strict=False) if realtime_factor
                     else simpy.Environment())
-        self.units = [u for u in network.units if not u.mobile]
+        self.units = list(network.units)
         self.sites = [network.site(u.site_id) for u in self.units]
         n = len(self.units)
+        self.mobile = np.array([u.mobile for u in self.units], bool)
+        self.fixed = ~self.mobile
+        fixed_at = {u.site_id: i for i, u in enumerate(self.units) if not u.mobile}
+        self.home = np.array([fixed_at[u.site_id] if u.mobile else i for i, u in enumerate(self.units)])
+        cc = cfg["connectivity"]
+        self.location_class = ["mobile" if u.mobile else "urban" if (s.lga is None or s.lga in cc["urban_lgas"])
+                               else "rural" for u, s in zip(self.units, self.sites, strict=True)]
         eq = [EQUIPMENT[u.equipment] for u in self.units]
         nc = cfg["network"]
         self.base_k = np.array([e.k for e in eq]) * np.where([u.degraded for u in self.units], nc["degraded_factor"], 1.0)
         self.c = np.array([e.c for e in eq])
-        self.cut_in = np.array([e.cut_in for e in eq])
-        self.cut_out = np.array([e.cut_out for e in eq])
+        offset = np.array([u.thermostat_offset for u in self.units])
+        self.cut_in = np.array([e.cut_in for e in eq]) + offset
+        self.cut_out = np.array([e.cut_out for e in eq]) + offset
         self.target = np.array([e.cooling_target for e in eq])
         self.powered = np.array([e.powered for e in eq])
         self.T = np.array([e.start_temp for e in eq], dtype=float)
+        self.T[self.mobile] = self.T[self.home[self.mobile]]
         self.cell = np.array([u.cell for u in self.units])
         power = [s.power_source for s in self.sites]
         self.has_grid = np.array([p in ("grid", "grid_generator") for p in power])
@@ -142,6 +155,22 @@ class Simulation:
         self.buffers: dict[int, list[dict]] = defaultdict(list)
         self.seq = np.zeros(n, np.int64)
         self.climate = Climate(network.cells, cfg["climate"]["peak_hour_wat"])
+        # connectivity and movement
+        self.link_off = np.zeros(n, bool)
+        self.on_trip = np.zeros(n, bool)
+        self.trip_of: dict[int, Trip] = {}
+        self.trip_start: dict[int, int] = {}
+        self.trips: list[Trip] = []
+        self.trip_events: dict[int, list[tuple[int, Trip | None]]] = defaultdict(list)
+        self.gaps: list[dict] = []
+        self.offline_minutes = np.zeros(n)
+        if self.mobile.any():
+            index = {u.serial: i for i, u in enumerate(self.units)}
+            self.trips = Movement(network, cfg).plan(np.random.default_rng([cfg.seed, 1]))
+            for trip in self.trips:
+                u = index[trip.team]
+                self.trip_events[max(0, math.ceil((trip.depart - cfg.start).total_seconds() / 60))].append((u, trip))
+                self.trip_events[math.ceil((trip.returned - cfg.start).total_seconds() / 60)].append((u, None))
         # outputs
         self.injections: list[Injection] = []
         self.active: dict[int, set[str]] = defaultdict(set)
@@ -150,9 +179,11 @@ class Simulation:
         self.peaks: dict[str, np.ndarray] = {}
         self.conditions: list[dict] = []
         self.in_range = np.zeros(n)
+        self.too_warm = np.zeros(n)
+        self.too_cold = np.zeros(n)
         self.mains_minutes = np.zeros(n)
         self.power_minutes = np.zeros(n)
-        self.ambient_sum = np.zeros((cfg["days"] + 1, len(network.cells)))
+        self.ambient_sum = np.zeros((math.ceil(cfg.days) + 1, len(network.cells)))
         self.target_supply = np.full(n, np.nan)
 
     # ---- time --------------------------------------------------------------------------------------
@@ -182,6 +213,26 @@ class Simulation:
             yield self.env.timeout(self.rng.uniform(*p["fuel_gap_days"]) * 1440)
             self.fuel_ok[u] = True
 
+    # ---- connectivity model ----------------------------------------------------------------------------
+    def link(self, u: int):
+        """Alternating online and offline periods with exponential durations, by location class (a mobile unit
+        uses its store's class while at the store)."""
+        cls = self.location_class[self.home[u]]
+        spec = self.cfg["connectivity"][cls]
+        share, gap = spec["offline_share"], spec["mean_gap_min"]
+        if share <= 0:
+            return
+        up = gap * (1 - share) / share
+        while True:
+            yield self.env.timeout(self.rng.exponential(up))
+            start = self.env.now
+            self.link_off[u] = True
+            yield self.env.timeout(self.rng.exponential(gap))
+            self.link_off[u] = False
+            self.gaps.append({"serial": self.units[u].serial, "class": cls, "cause": "network",
+                              "start": self.t(start).isoformat(), "end": self.t().isoformat(),
+                              "minutes": round(self.env.now - start)})
+
     def availability(self, t: datetime) -> tuple[np.ndarray, np.ndarray]:
         """Power reaching each unit, and mains or generator supply (what a power sensor reports)."""
         p = self.cfg["power"]
@@ -202,7 +253,7 @@ class Simulation:
             return
         us = self.cfg["usage"]
         h0, h1 = us["clinic_hours"]
-        counts = self.rng.poisson(us["openings_per_day"], len(self.units))
+        counts = self.rng.poisson(us["openings_per_day"], len(self.units)) * self.fixed
         for u in np.flatnonzero(counts):
             for _ in range(counts[u]):
                 start = day_start + int(self.rng.uniform(h0 - WAT, h1 - WAT) * 60)
@@ -253,9 +304,7 @@ class Simulation:
         self._fault(kind, u, inj, +1)
         yield self.env.timeout(minutes)
         self._fault(kind, u, inj, -1)
-        self.active[u].discard(inj.id)
-        if kind == "connectivity_gap" and self.offline[u] == 0:
-            self.flush(u)
+        self.active[u].discard(inj.id)     # buffered readings go with the next reading sent (emit)
 
     def _fault(self, kind: str, u: int, inj: Injection, sign: int):
         if kind == "heat_excursion":      # cooling fails and the cabinet is left open or its seal fails
@@ -285,6 +334,8 @@ class Simulation:
                 self.plan_openings(minute)
             for u, length in self.door_starts.pop(minute, []):
                 self.door_until[u] = max(self.door_until[u], minute + length)
+            for u, trip in self.trip_events.pop(minute, []):
+                self.depart(u, trip, minute) if trip else self.arrive(u, minute)
             t = self.t(minute)
             ambient = self.climate.ambient(t)
             self.ambient_sum[minute // 1440] += ambient
@@ -298,7 +349,11 @@ class Simulation:
             door = (self.door_until > minute) | (self.door_injected > 0)
             k = self.base_k * self.heat_factor * np.where(door & (self.cooling_fault == 0), door_factor, 1.0)
             self.T = step(self.T, k, ta, self.c, running, self.target)
+            at_store = self.mobile & ~self.on_trip       # in the store's cold room between trips
+            self.T[at_store] = self.T[self.home[at_store]]
             self.in_range += (self.T >= lim["lower"]) & (self.T <= lim["upper"])
+            self.too_warm += self.T > lim["upper"]
+            self.too_cold += self.T < lim["lower"]
             self.track(t, {"above_upper": self.T > lim["upper"], "at_or_below_freeze": self.T <= lim["freeze"],
                            "no_power": self.powered & self.signal & ~supply, "door_open": door & self.door_sensor})
             if minute % every == 0:
@@ -306,8 +361,35 @@ class Simulation:
             yield self.env.timeout(1)
         self.close_windows(self.t(cfg.minutes))
 
+    # ---- movement ----------------------------------------------------------------------------------
+    def depart(self, u: int, trip: Trip, minute: int):
+        self.on_trip[u] = True
+        self.trip_of[u] = trip
+        self.trip_start[u] = minute
+
+    def arrive(self, u: int, minute: int):
+        self.on_trip[u] = False
+        self.trip_of.pop(u, None)
+        if self.cfg["connectivity"]["mobile_offline_on_trip"]:
+            start = self.trip_start.pop(u)
+            self.gaps.append({"serial": self.units[u].serial, "class": "mobile", "cause": "trip",
+                              "start": self.t(start).isoformat(), "end": self.t(minute).isoformat(),
+                              "minutes": minute - start})
+
+    def position(self, u: int, t: datetime) -> tuple[float, float]:
+        trip = self.trip_of.get(u)
+        pos = trip.position(t) if trip else None
+        site = self.sites[u]
+        return pos if pos else (site.lon, site.lat)
+
+    def offline_now(self) -> np.ndarray:
+        trip = self.on_trip & self.cfg["connectivity"]["mobile_offline_on_trip"]
+        return (self.offline > 0) | self.link_off | trip
+
     # ---- sensor model and device emulator ------------------------------------------------------------
     def emit(self, t: datetime, minute: int, supply: np.ndarray, door: np.ndarray, s: dict):
+        offline = self.offline_now()
+        self.offline_minutes += offline
         if self.sink is None:
             return
         noise = self.rng.normal(0, s["noise_sd"], len(self.units))
@@ -321,8 +403,14 @@ class Simulation:
                 r["power_ok"] = bool(supply[u])
             if self.door_sensor[u]:
                 r["door_open"] = bool(door[u])
-            if self.offline[u]:
+            if self.mobile[u]:
+                lon, lat = self.position(u, t)
+                r["lat"], r["lon"] = round(lat, 5), round(lon, 5)
+            if offline[u]:
                 self.buffers[u].append(r)
+            elif self.buffers.get(u):      # back online: the buffer goes up with this reading
+                self.buffers[u].append(r)
+                self.flush(u)
             else:
                 self.sink.send(self.units[u].serial, [r])
 
@@ -339,7 +427,10 @@ class Simulation:
             for u in np.flatnonzero(prev & ~mask):
                 self.end_window(self.windows.pop((kind, u)), t)
             for u in np.flatnonzero(mask & ~prev):
-                self.windows[(kind, u)] = Window(kind, u, t, None, set(self.active[u]))
+                causes = set(self.active[u])
+                if self.mobile[u] and not self.on_trip[u]:     # a carrier in the store's cold room
+                    causes |= self.active[self.home[u]]
+                self.windows[(kind, u)] = Window(kind, u, t, None, causes)
                 peak[u] = self.T[u]
             if kind == "above_upper":
                 np.maximum(peak, np.where(mask, self.T, -np.inf), out=peak)
@@ -370,6 +461,8 @@ class Simulation:
             self.env.process(self.grid(int(u)))
         for u in np.flatnonzero(self.has_gen):
             self.env.process(self.fuel(int(u)))
+        for u in range(len(self.units)):
+            self.env.process(self.link(u))
         for kind, spec in self.cfg["failures"].items():
             self.env.process(self.injector(kind, spec))
         self.env.process(self.clock())
@@ -379,7 +472,12 @@ class Simulation:
         return self
 
     # ---- outputs -----------------------------------------------------------------------------------
-    def expected_owner(self, u: int) -> str:
+    def expected_owner(self, u: int, t: datetime | None = None) -> str:
+        """Who should own an event on unit u starting at t (Table 3.16): an outreach carrier on a trip is held
+        by the outreach team; otherwise the unit's facility's officer-in-charge or the store's officer."""
+        if self.mobile[u] and t is not None and any(tr.team == self.units[u].serial and tr.depart <= t < tr.returned
+                                                     for tr in self.trips):
+            return f"outreach_lead:{self.units[u].serial}"
         site = self.sites[u]
         if site.tier == "health_facility":
             return f"facility_oic:{site.id}"
@@ -390,12 +488,12 @@ class Simulation:
     def ground_truth(self) -> list[dict]:
         return [{"id": i.id, "type": i.type, "serial": self.units[i.unit].serial, "site_id": self.sites[i.unit].id,
                  "site": self.sites[i.unit].name, "lga": self.sites[i.unit].lga or "", "tier": self.sites[i.unit].tier,
-                 "expected_owner": self.expected_owner(i.unit), "start": i.start.isoformat(), "end": i.end.isoformat(),
+                 "expected_owner": self.expected_owner(i.unit, i.start), "start": i.start.isoformat(), "end": i.end.isoformat(),
                  "truncated": i.truncated, "details": json.dumps(i.details)} for i in self.injections]
 
     def summary(self) -> dict:
-        days = self.cfg["days"]
-        unit_minutes = self.cfg.minutes * len(self.units)
+        days = self.cfg.days
+        fixed_minutes = self.cfg.minutes * int(self.fixed.sum())
         by_type = defaultdict(int)
         for i in self.injections:
             by_type[i.type] += 1
@@ -403,26 +501,32 @@ class Simulation:
         conds = defaultdict(lambda: {"natural": 0, "injected": 0})
         for c in self.conditions:
             conds[c["kind"]]["natural" if c["cause"] == "natural" else "injected"] += 1
-        return {"units": len(self.units), "unit_days": len(self.units) * days,
-                "time_in_range": float(self.in_range.sum() / unit_minutes) if unit_minutes else None,
+        share = (lambda a: float(a[self.fixed].sum() / fixed_minutes) if fixed_minutes else None)
+        offline = {c: float(np.mean([self.offline_minutes[u] / self.cfg.minutes for u in range(len(self.units))
+                                     if self.location_class[u] == c])) for c in set(self.location_class)}
+        return {"units": len(self.units), "fixed_units": int(self.fixed.sum()), "mobile_units": int(self.mobile.sum()),
+                "unit_days": len(self.units) * days,
+                "time_in_range": share(self.in_range), "time_above_upper": share(self.too_warm),
+                "time_below_lower": share(self.too_cold), "trips": len(self.trips),
+                "offline_share": {c: round(v, 4) for c, v in sorted(offline.items())},
                 "injections": dict(by_type), "injections_expected": expected,
                 "eligible_units": {k: len(self.eligible(k)) for k in self.cfg["failures"]},
                 "conditions": dict(conds)}
 
 
 class CsvSink:
-    """Readings to a gzipped CSV (serial, seq_no, event_time, temp, power_ok, door_open, uploaded_in_batch)."""
+    """Readings to a gzipped CSV (serial, seq_no, event_time, temp, power_ok, door_open, lat, lon, batch)."""
 
     def __init__(self, path: Path):
         self.f = gzip.open(path, "wt", newline="")  # noqa: SIM115 (closed by close())
         self.w = csv.writer(self.f)
-        self.w.writerow(["serial", "seq_no", "event_time", "temp", "power_ok", "door_open", "batch"])
+        self.w.writerow(["serial", "seq_no", "event_time", "temp", "power_ok", "door_open", "lat", "lon", "batch"])
 
     def send(self, serial: str, readings: list[dict]):
         batch = len(readings) > 1
         for r in readings:
             self.w.writerow([serial, r["seq_no"], r["event_time"], r["temp"], r.get("power_ok", ""),
-                             r.get("door_open", ""), batch])
+                             r.get("door_open", ""), r.get("lat", ""), r.get("lon", ""), batch])
 
     def close(self):
         self.f.close()

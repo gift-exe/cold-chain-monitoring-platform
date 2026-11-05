@@ -1,9 +1,11 @@
-"""Simulation service (I7a, Section 3.3.5): configuration and seed sets, network, equipment, power and
-climate models, failure injection with ground truth, and reproducibility. Runs offline (no services)."""
+"""Simulation service (I7, Section 3.3.5): configuration and seed sets, network, equipment, power, climate,
+movement and connectivity models, failure injection with ground truth, reproducibility, the load network, and
+(integration) registration and the MQTT device emulator."""
 import csv
 import gzip
 import json
 from collections import Counter
+from datetime import datetime, timedelta
 
 import numpy as np
 import pytest
@@ -11,8 +13,9 @@ import pytest
 from coldchain.sim import config
 from coldchain.sim.calibrate import holdover_minutes, pull_down_minutes
 from coldchain.sim.engine import CountingSink, CsvSink, Simulation
-from coldchain.sim.network import _quota, build, lga_codes
+from coldchain.sim.network import _quota, build, lga_codes, load_network
 from coldchain.sim.params import EQUIPMENT, GRID_BANDS
+from coldchain.sim.sources import MOVEMENT
 
 SMALL = {"lgas": ["Gwale", "Dala", "Ungogo"]}
 
@@ -124,7 +127,10 @@ def test_every_injection_is_labelled_with_its_expected_owner(net):
     for r in gt:
         assert r["start"] < r["end"] and r["serial"].startswith("SIM-")
         prefix = {"health_facility": "facility_oic:", "lga_store": "lga_officer:", "state_store": "state_officer:"}
-        assert r["expected_owner"].startswith(prefix[r["tier"]])
+        if r["expected_owner"].startswith("outreach_lead:"):          # a carrier away on an outreach trip
+            assert r["expected_owner"] == f"outreach_lead:{r['serial']}" and "-M" in r["serial"]
+        else:
+            assert r["expected_owner"].startswith(prefix[r["tier"]])
 
 
 def test_injected_heat_and_freeze_produce_conditions_attributed_to_them(net):
@@ -172,3 +178,116 @@ def test_readings_carry_power_and_door_only_where_the_logger_senses_them(net, tm
     assert mains and {r["power_ok"] for r in mains} <= {"True", "False"}
     assert all(abs(float(r["temp"]) * 10 - round(float(r["temp"]) * 10)) < 1e-9 for r in rows[:2000])
     json.dumps(sim.summary())
+
+
+# Movement, connectivity and mobile units (I7b) -----------------------------------------------------------
+
+@pytest.fixture(scope="module")
+def week(net):
+    return Simulation(cfg(days=7), net).run()
+
+
+def test_outreach_trips_leave_and_return_to_the_store_within_the_run(week):
+    sim = week
+    assert sim.trips and {t.team for t in sim.trips} == {u.serial for u in sim.units if u.mobile}
+    end = sim.t(sim.cfg.minutes)
+    inside = [t for t in sim.trips if sim.cfg.start <= t.depart and t.returned <= end]
+    assert len(inside) >= len(sim.trips) - 2 * len(sim.mobile.nonzero()[0])    # only trips at the run's edges cross it
+    for t in inside:
+        assert t.depart < t.session_start <= t.session_end < t.returned
+        store = sim.net.site(t.store_id)
+        for when in (t.depart, t.returned - timedelta(seconds=1)):
+            lon, lat = t.position(when)
+            assert abs(lon - store.lon) < 0.02 and abs(lat - store.lat) < 0.02    # nearest road junction
+        assert t.position(t.returned) is None and t.position(t.depart - timedelta(seconds=1)) is None
+        assert t.position(t.session_start + (t.session_end - t.session_start) / 2) == tuple(t.out.route[-1])
+
+
+def test_trip_speeds_and_stops_are_resampled_from_gts_vehicle_runs(week):
+    library = json.loads(MOVEMENT.read_text())["vehicle"]
+    speeds = {v for run in library["runs"] for v, _ in run}
+    stops = set(library["stop_minutes"])
+    for t in week.trips[:20]:
+        for leg in (t.out, t.back):
+            assert set(leg.speeds) <= speeds and set(leg.stops) <= stops
+            assert leg.d[-1] == pytest.approx(leg.dist[-1])                    # the whole route is covered
+
+
+def test_mobile_readings_carry_positions_and_upload_after_the_trip(net, tmp_path):
+    sim = Simulation(cfg(days=3), net, CsvSink(tmp_path / "r.csv.gz"))
+    sim.run()
+    sim.sink.close()
+    rows = list(csv.DictReader(gzip.decompress((tmp_path / "r.csv.gz").read_bytes()).decode().splitlines()))
+    trip = max((t for t in sim.trips if t.depart >= sim.cfg.start and t.returned <= sim.t(sim.cfg.minutes)),
+               key=lambda t: t.km)
+    mine = [r for r in rows if r["serial"] == trip.team]
+    on_trip = [r for r in mine if trip.depart <= datetime.fromisoformat(r["event_time"]) < trip.returned]
+    assert on_trip and all(r["batch"] == "True" for r in on_trip)             # buffered while away
+    assert len({(r["lat"], r["lon"]) for r in on_trip}) > 10                    # moving
+    assert all(r["lat"] and r["lon"] for r in mine)
+    gaps = [g for g in sim.gaps if g["cause"] == "trip" and g["serial"] == trip.team]
+    gap_start = datetime.fromisoformat(gaps[0]["start"])
+    assert timedelta(0) <= gap_start - trip.depart < timedelta(minutes=1)      # from the first whole minute away
+
+
+def test_carrier_at_the_store_follows_the_cold_room_and_warms_on_a_trip(week):
+    sim = week
+    at_store = sim.mobile & ~sim.on_trip
+    assert np.allclose(sim.T[at_store], sim.T[sim.home[at_store]])
+
+
+def test_connectivity_offline_share_follows_the_location_class(net):
+    c = cfg(days=7, connectivity={"urban": {"offline_share": 0.2, "mean_gap_min": 60.0},
+                                  "rural": {"offline_share": 0.0}, "mobile_offline_on_trip": False})
+    sim = Simulation(c, net, CountingSink()).run()
+    share = sim.summary()["offline_share"]
+    assert share["urban"] == pytest.approx(0.2, abs=0.05)          # Gwale, Dala and Ungogo are urban LGAs
+    assert sim.sink.batches > 0 and all(g["cause"] == "network" for g in sim.gaps)
+
+
+def test_time_in_range_counts_fixed_units_only(week):
+    s = week.summary()
+    assert s["fixed_units"] + s["mobile_units"] == s["units"]
+    assert s["time_in_range"] + s["time_above_upper"] + s["time_below_lower"] == pytest.approx(1.0)
+
+
+def test_load_network_matches_the_load_model():
+    scenario = build(cfg()["network"], 0)
+    load = load_network(scenario, 500, 60)
+    counts = load.counts()
+    assert (counts["fixed_units"], counts["mobile_units"]) == (500, 60)
+    assert len({u.serial for u in load.units}) == len(load.units)
+    assert len({s.id for s in load.sites}) == len(load.sites)
+    ids = {s.id for s in load.sites}
+    assert all(u.site_id in ids for u in load.units) and all(s.parent_id in ids for s in load.sites if s.parent_id)
+    assert {s.jurisdiction_id.split("-")[1] for s in load.sites} >= {"L01", "L02"}
+
+
+@pytest.mark.integration
+def test_registration_makes_devices_known_to_ingestion(net, owner_conn):
+    from coldchain.sim.register import register, retire
+    counts = register(owner_conn, net)
+    assert counts["devices"] == len(net.units)
+    n = owner_conn.execute("SELECT count(*) FROM device WHERE serial_no = ANY(%s) AND status = 'active'",
+                           ([u.serial for u in net.units],)).fetchone()[0]
+    assert n == len(net.units)
+    mobile = owner_conn.execute("SELECT count(*) FROM device WHERE serial_no LIKE 'SIM-%%-M%%' AND type = 'mobile'"
+                                " AND serial_no = ANY(%s)", ([u.serial for u in net.units],)).fetchone()[0]
+    assert mobile == sum(u.mobile for u in net.units)
+    assert retire(owner_conn, net) == len(net.units)
+
+
+@pytest.mark.integration
+def test_emulator_publishes_every_reading_with_acknowledgement(net):
+    from coldchain.config import get_settings
+    from coldchain.sim.emulator import MqttSink
+    s = get_settings()
+    serials = [u.serial for u in net.units][:30]
+    sink = MqttSink(s.mqtt_host, s.mqtt_port, serials, 3, client_prefix="pytest-sim", topic_prefix="simtest")
+    for i, serial in enumerate(serials):
+        sink.send(serial, [{"seq_no": 1, "event_time": "2026-01-01T00:00:00+00:00", "temp": 4.0}])
+        sink.send(serial, [{"seq_no": k, "event_time": "2026-01-01T00:00:00+00:00", "temp": 4.0}
+                           for k in range(2, 2 + 600 + i)])                         # split into batches of 500
+    sink.close(timeout=30)
+    assert sink.stats["readings"] == sum(601 + i for i in range(30))
+    assert sink.stats["acked"] == sink.stats["messages"] == 30 * 3 and sink.stats["unacked"] == 0

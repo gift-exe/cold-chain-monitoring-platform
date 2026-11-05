@@ -1,6 +1,6 @@
-# Simulator calibration (I7a)
+# Simulator calibration (I7)
 
-Generated 2026-11-05T06:28:47+00:00; calibration seeds 21–30, 30 simulated days each; network {'sites': {'state_store': 1, 'lga_store': 44, 'health_facility': 541}, 'fixed_units': 586, 'mobile_units': 88, 'lgas': 44}.
+Generated 2026-11-05T09:18:47+00:00; calibration seeds 21–30, 30 simulated days each; network {'sites': {'state_store': 1, 'lga_store': 44, 'health_facility': 541}, 'fixed_units': 586, 'mobile_units': 88, 'lgas': 44}.
 
 | Model | Check | Source | Criterion | Result | Passed |
 |---|---|---|---|---|---|
@@ -15,20 +15,30 @@ Generated 2026-11-05T06:28:47+00:00; calibration seeds 21–30, 30 simulated day
 | Network | Vaccine-holding health facilities | GRID3 v2.0 (Kano) | equal to the source count (541) | 541 | yes |
 | Network | LGA stores | one per LGA | equal to the number of LGAs (44) | 44 | yes |
 | Power (source mix) | Facilities by power source | Ilegogie (2025) grid share; rest ASSUMPTION | each share within ±0.5 percentage points of the configuration | solar 40.1%, grid 25.0%, grid_generator 17.9%, generator 17.0% | yes |
-| Power (grid) | Mean daily supply, Band A (140 unit-runs) | NERC (n.d.); outage durations ASSUMPTION | 20–24 h per day | 22.2 h (units: 18.7–24.0) | yes |
-| Power (grid) | Mean daily supply, Band B (280 unit-runs) | NERC (n.d.); outage durations ASSUMPTION | 16–20 h per day | 18.1 h (units: 14.3–21.2) | yes |
-| Power (grid) | Mean daily supply, Band C (560 unit-runs) | NERC (n.d.); outage durations ASSUMPTION | 12–16 h per day | 14.0 h (units: 10.7–18.0) | yes |
-| Power (grid) | Mean daily supply, Band D (830 unit-runs) | NERC (n.d.); outage durations ASSUMPTION | 8–12 h per day | 10.1 h (units: 6.7–14.2) | yes |
-| Power (grid) | Mean daily supply, Band E (960 unit-runs) | NERC (n.d.); outage durations ASSUMPTION | 4–8 h per day | 6.0 h (units: 3.2–8.9) | yes |
+| Power (source mix) | Facilities connected to the grid | Ilegogie (2025) | 43% ±0.5 percentage points | 42.9% | yes |
+| Power (grid) | Grid-connected facilities with about 5 hours a day (Band E) | Ilegogie (2025) | 57% ±0.5 percentage points | 56.9% | yes |
+| Power (grid) | Mean daily supply, Band A (130 unit-runs) | NERC (n.d.); outage durations ASSUMPTION | 20–24 h per day | 22.0 h (units: 18.5–24.0) | yes |
+| Power (grid) | Mean daily supply, Band B (180 unit-runs) | NERC (n.d.); outage durations ASSUMPTION | 16–20 h per day | 17.9 h (units: 13.9–21.2) | yes |
+| Power (grid) | Mean daily supply, Band C (440 unit-runs) | NERC (n.d.); outage durations ASSUMPTION | 12–16 h per day | 13.9 h (units: 10.1–17.4) | yes |
+| Power (grid) | Mean daily supply, Band D (830 unit-runs) | NERC (n.d.); outage durations ASSUMPTION | 8–12 h per day | 10.1 h (units: 6.7–13.6) | yes |
+| Power (grid) | Mean daily supply, Band E (2070 unit-runs) | NERC (n.d.); outage durations ASSUMPTION | 4–8 h per day | 6.0 h (units: 3.4–9.5) | yes |
 | Climate | Simulated daily mean air temperature (360 cell-days) | NASA POWER daily T2M, 2024 | within ±1 °C of the source on every cell-day | largest difference 0.000 °C | yes |
 | Power (solar) | Daily irradiance used (360 cell-days) | NASA POWER daily ALLSKY_SFC_SW_DWN, 2024 | identical to the source series | 0 differences | yes |
-| Failure injector | Injected heat excursion events | run configuration | within the Poisson range of 3516 (3358–3677; 95% family-wise) | 3566 | yes |
-| Failure injector | Injected freeze events | run configuration | within the Poisson range of 3516 (3358–3677; 95% family-wise) | 3427 | yes |
-| Failure injector | Injected power loss events | run configuration | within the Poisson range of 2214 (2088–2342; 95% family-wise) | 2187 | yes |
-| Failure injector | Injected door open events | run configuration | within the Poisson range of 3516 (3358–3677; 95% family-wise) | 3447 | yes |
-| Failure injector | Injected device silence events | run configuration | within the Poisson range of 3516 (3358–3677; 95% family-wise) | 3463 | yes |
-| Failure injector | Injected connectivity gap events | run configuration | within the Poisson range of 3516 (3358–3677; 95% family-wise) | 3483 | yes |
-| Failure injector | Injected sensor drift events | run configuration | within the Poisson range of 879 (800–960; 95% family-wise) | 857 | yes |
-| Failure injector | Ground-truth labels complete | Section 3.3.5 | every injection has type, unit, start, end and expected owner | 20430 labels | yes |
+| Movement | Moving speed on outreach trips (461660 simulated, 5000 GTS) | GTS tracks, Kano, held-out devices | two-sample Kolmogorov–Smirnov p > 0.05 | D = 0.020, p = 0.60; medians 5.8 vs 5.8 m/s | yes |
+| Movement | En-route stop duration on outreach trips (49753 simulated, 5000 GTS) | GTS tracks, Kano, held-out devices | two-sample Kolmogorov–Smirnov p > 0.05 | D = 0.013, p = 0.96; medians 6.7 vs 6.8 min | yes |
+| Movement | Outreach trips planned and completed | Section 3.3.5 | every mobile unit makes trips | 11076 trips | yes |
+| Overall | Proportion of time in range (2–8 °C), fixed units | Lutukai et al. (2019), baseline | within ±10 percentage points of 83.9% | 90.8% (above 8 °C 3.2%, below 2 °C 6.0%; published 2.9% and 6.5%) | yes |
+| Failure injector | Injected heat excursion events | run configuration | within the Poisson range of 3516 (3358–3677; 95% family-wise) | 3489 | yes |
+| Failure injector | Injected freeze events | run configuration | within the Poisson range of 3516 (3358–3677; 95% family-wise) | 3472 | yes |
+| Failure injector | Injected power loss events | run configuration | within the Poisson range of 2214 (2088–2342; 95% family-wise) | 2204 | yes |
+| Failure injector | Injected door open events | run configuration | within the Poisson range of 3516 (3358–3677; 95% family-wise) | 3469 | yes |
+| Failure injector | Injected device silence events | run configuration | within the Poisson range of 4044 (3874–4216; 95% family-wise) | 4061 | yes |
+| Failure injector | Injected connectivity gap events | run configuration | within the Poisson range of 4044 (3874–4216; 95% family-wise) | 4046 | yes |
+| Failure injector | Injected sensor drift events | run configuration | within the Poisson range of 1011 (927–1098; 95% family-wise) | 1055 | yes |
+| Failure injector | Ground-truth labels complete | Section 3.3.5 | every injection has type, unit, start, end and expected owner | 21796 labels | yes |
 
-Time in range (true temperature, 2–8 °C), by seed: 94.8%, 94.7%, 94.9%, 94.5%, 95.0%, 94.9%, 94.4%, 94.8%, 94.6%, 95.2%. Reported for information; the check against published figures is part of I7b.
+Time in range (true temperature, 2–8 °C, fixed units), by seed: 90.9%, 90.6%, 90.8%, 90.9%, 90.8%, 90.7%, 90.6%, 90.9%, 90.9%, 91.0%.
+
+Connectivity (assumption, not calibrated; Table 3.13), mean share of time offline by location class: mobile 18.8%, rural 5.0%, urban 1.0%.
+
+Each seed is run twice: without injected failures (Table 3.14) for every check except the injector's, and with injection at the check rates for the injector checks; connectivity and sensor parameters are assumptions, not calibrated.

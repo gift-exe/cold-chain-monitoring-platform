@@ -1,0 +1,23 @@
+# Load scenario set (Table 3.14), test seed 101: the load network of Table 3.7 (about 14,500 fixed and
+# 5,000 mobile devices at campaign peak) reporting once a minute, with background failures at the
+# detection rates' order of magnitude. Thirty minutes at target; publish in real time with
+#   uv run python -m coldchain.sim register configs/sim/load-101.toml
+#   uv run python -m coldchain.sim emulate configs/sim/load-101.toml --now --speed 1 --connections 2000
+name = "load-101"
+purpose = "test"
+seed = 101
+start = "2024-04-02T08:00:00+00:00"   # a Tuesday morning, with outreach teams out
+minutes = 30
+
+[network]
+load_fixed_units = 14500
+load_mobile_units = 5000
+
+[failures.heat_excursion]
+rate = 1.0
+[failures.power_loss]
+rate = 1.0
+[failures.device_silence]
+rate = 1.0
+[failures.connectivity_gap]
+rate = 1.0

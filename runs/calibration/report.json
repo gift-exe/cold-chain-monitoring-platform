@@ -1,6 +1,6 @@
 {
   "info": {
-    "generated": "2026-11-05T06:28:47+00:00",
+    "generated": "2026-11-05T09:18:47+00:00",
     "seeds": [
       21,
       22,
@@ -25,18 +25,23 @@
       "lgas": 44
     },
     "time_in_range_by_seed": [
-      0.9477379203008469,
-      0.9467073536847428,
-      0.948724205220579,
-      0.9454713768802933,
-      0.9499166113639237,
-      0.9486785409556314,
-      0.9442749415371002,
-      0.9481799472253823,
-      0.9456418673366199,
-      0.9517134369864745
+      0.9087801399949438,
+      0.9062636676779168,
+      0.907939301289344,
+      0.9090118979901403,
+      0.9079088847806851,
+      0.9073989934900771,
+      0.9057555144735179,
+      0.9090641590822904,
+      0.9089289043736569,
+      0.9100964242826444
     ],
-    "note": "Time in range is reported for information; its check against published figures is in I7b."
+    "offline_share_by_class": {
+      "mobile": 0.18777999999999997,
+      "rural": 0.05003,
+      "urban": 0.01005
+    },
+    "note": "Each seed is run twice: without injected failures (Table 3.14) for every check except the injector's, and with injection at the check rates for the injector checks; connectivity and sensor parameters are assumptions, not calibrated."
   },
   "checks": [
     {
@@ -128,27 +133,43 @@
       "passed": true
     },
     {
+      "model": "Power (source mix)",
+      "check": "Facilities connected to the grid",
+      "source": "Ilegogie (2025)",
+      "criterion": "43% \u00b10.5 percentage points",
+      "result": "42.9%",
+      "passed": true
+    },
+    {
       "model": "Power (grid)",
-      "check": "Mean daily supply, Band A (140 unit-runs)",
+      "check": "Grid-connected facilities with about 5 hours a day (Band E)",
+      "source": "Ilegogie (2025)",
+      "criterion": "57% \u00b10.5 percentage points",
+      "result": "56.9%",
+      "passed": true
+    },
+    {
+      "model": "Power (grid)",
+      "check": "Mean daily supply, Band A (130 unit-runs)",
       "source": "NERC (n.d.); outage durations ASSUMPTION",
       "criterion": "20\u201324 h per day",
-      "result": "22.2 h (units: 18.7\u201324.0)",
+      "result": "22.0 h (units: 18.5\u201324.0)",
       "passed": true
     },
     {
       "model": "Power (grid)",
-      "check": "Mean daily supply, Band B (280 unit-runs)",
+      "check": "Mean daily supply, Band B (180 unit-runs)",
       "source": "NERC (n.d.); outage durations ASSUMPTION",
       "criterion": "16\u201320 h per day",
-      "result": "18.1 h (units: 14.3\u201321.2)",
+      "result": "17.9 h (units: 13.9\u201321.2)",
       "passed": true
     },
     {
       "model": "Power (grid)",
-      "check": "Mean daily supply, Band C (560 unit-runs)",
+      "check": "Mean daily supply, Band C (440 unit-runs)",
       "source": "NERC (n.d.); outage durations ASSUMPTION",
       "criterion": "12\u201316 h per day",
-      "result": "14.0 h (units: 10.7\u201318.0)",
+      "result": "13.9 h (units: 10.1\u201317.4)",
       "passed": true
     },
     {
@@ -156,15 +177,15 @@
       "check": "Mean daily supply, Band D (830 unit-runs)",
       "source": "NERC (n.d.); outage durations ASSUMPTION",
       "criterion": "8\u201312 h per day",
-      "result": "10.1 h (units: 6.7\u201314.2)",
+      "result": "10.1 h (units: 6.7\u201313.6)",
       "passed": true
     },
     {
       "model": "Power (grid)",
-      "check": "Mean daily supply, Band E (960 unit-runs)",
+      "check": "Mean daily supply, Band E (2070 unit-runs)",
       "source": "NERC (n.d.); outage durations ASSUMPTION",
       "criterion": "4\u20138 h per day",
-      "result": "6.0 h (units: 3.2\u20138.9)",
+      "result": "6.0 h (units: 3.4\u20139.5)",
       "passed": true
     },
     {
@@ -184,11 +205,43 @@
       "passed": true
     },
     {
+      "model": "Movement",
+      "check": "Moving speed on outreach trips (461660 simulated, 5000 GTS)",
+      "source": "GTS tracks, Kano, held-out devices",
+      "criterion": "two-sample Kolmogorov\u2013Smirnov p > 0.05",
+      "result": "D = 0.020, p = 0.60; medians 5.8 vs 5.8 m/s",
+      "passed": true
+    },
+    {
+      "model": "Movement",
+      "check": "En-route stop duration on outreach trips (49753 simulated, 5000 GTS)",
+      "source": "GTS tracks, Kano, held-out devices",
+      "criterion": "two-sample Kolmogorov\u2013Smirnov p > 0.05",
+      "result": "D = 0.013, p = 0.96; medians 6.7 vs 6.8 min",
+      "passed": true
+    },
+    {
+      "model": "Movement",
+      "check": "Outreach trips planned and completed",
+      "source": "Section 3.3.5",
+      "criterion": "every mobile unit makes trips",
+      "result": "11076 trips",
+      "passed": true
+    },
+    {
+      "model": "Overall",
+      "check": "Proportion of time in range (2\u20138 \u00b0C), fixed units",
+      "source": "Lutukai et al. (2019), baseline",
+      "criterion": "within \u00b110 percentage points of 83.9%",
+      "result": "90.8% (above 8 \u00b0C 3.2%, below 2 \u00b0C 6.0%; published 2.9% and 6.5%)",
+      "passed": true
+    },
+    {
       "model": "Failure injector",
       "check": "Injected heat excursion events",
       "source": "run configuration",
       "criterion": "within the Poisson range of 3516 (3358\u20133677; 95% family-wise)",
-      "result": "3566",
+      "result": "3489",
       "passed": true
     },
     {
@@ -196,7 +249,7 @@
       "check": "Injected freeze events",
       "source": "run configuration",
       "criterion": "within the Poisson range of 3516 (3358\u20133677; 95% family-wise)",
-      "result": "3427",
+      "result": "3472",
       "passed": true
     },
     {
@@ -204,7 +257,7 @@
       "check": "Injected power loss events",
       "source": "run configuration",
       "criterion": "within the Poisson range of 2214 (2088\u20132342; 95% family-wise)",
-      "result": "2187",
+      "result": "2204",
       "passed": true
     },
     {
@@ -212,31 +265,31 @@
       "check": "Injected door open events",
       "source": "run configuration",
       "criterion": "within the Poisson range of 3516 (3358\u20133677; 95% family-wise)",
-      "result": "3447",
+      "result": "3469",
       "passed": true
     },
     {
       "model": "Failure injector",
       "check": "Injected device silence events",
       "source": "run configuration",
-      "criterion": "within the Poisson range of 3516 (3358\u20133677; 95% family-wise)",
-      "result": "3463",
+      "criterion": "within the Poisson range of 4044 (3874\u20134216; 95% family-wise)",
+      "result": "4061",
       "passed": true
     },
     {
       "model": "Failure injector",
       "check": "Injected connectivity gap events",
       "source": "run configuration",
-      "criterion": "within the Poisson range of 3516 (3358\u20133677; 95% family-wise)",
-      "result": "3483",
+      "criterion": "within the Poisson range of 4044 (3874\u20134216; 95% family-wise)",
+      "result": "4046",
       "passed": true
     },
     {
       "model": "Failure injector",
       "check": "Injected sensor drift events",
       "source": "run configuration",
-      "criterion": "within the Poisson range of 879 (800\u2013960; 95% family-wise)",
-      "result": "857",
+      "criterion": "within the Poisson range of 1011 (927\u20131098; 95% family-wise)",
+      "result": "1055",
       "passed": true
     },
     {
@@ -244,7 +297,7 @@
       "check": "Ground-truth labels complete",
       "source": "Section 3.3.5",
       "criterion": "every injection has type, unit, start, end and expected owner",
-      "result": "20430 labels",
+      "result": "21796 labels",
       "passed": true
     }
   ]

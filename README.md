@@ -15,7 +15,7 @@ and requirement numbers in the code (e.g. FR1.4, Table 3.18) refer to it.
 | I5 Notification | SMS alerts, escalations and RETRO digests; reply commands with one-time codes; delivery reports, retries and failure handling; dashboard notifications | Done |
 | I6 Dashboard | Role-based map, incident, performance, consignment and administration views; live updates; demo network | Done |
 | I7a Simulator core | Kano network (GRID3), equipment (WHO PQS), power (NERC bands, solar, generator), climate (NASA POWER) and sensor models; failure injector with ground truth; run configurations and seed sets; calibration checks | Done |
-| I7b Simulator completion | Movement (GTS tracks), connectivity, MQTT device emulator, load network, time-in-range and source-mix checks, calibration report | Planned |
+| I7b Simulator completion | Movement on the Kano road network with speeds and stops resampled from GTS tracks; connectivity model; outreach carriers; MQTT device emulator and database registration; load network (Table 3.7); time-in-range (Lutukai et al., 2019) and source-mix (Ilegogie, 2025) checks; calibration report (32/32) | Done |
 | I8 | Evaluation | Planned |
 
 ## Requirements
@@ -106,20 +106,36 @@ simulator stop arriving, relaunch the simulator phone: idle sessions stopped for
 
 ### Simulation
 
-The simulation service (Section 3.3.5) runs offline from a configuration file in `configs/sim/`; the data it
-draws on is described in `data/README.md`.
+The simulation service (Section 3.3.5) runs from a configuration file in `configs/sim/`; the data it draws
+on is described in `data/README.md`.
 
 ```
-make sim-sources                                               # once: derived extracts from data/
-uv run python -m coldchain.sim network                          # summarise the Kano network
-uv run python -m coldchain.sim run configs/sim/detection-101.toml [--readings]
+make sim-sources [GTS=<GTS export folder>]                      # once: derived extracts from data/
+uv run python -m coldchain.sim network [CONFIG]                 # summarise the network
+uv run python -m coldchain.sim run configs/sim/detection-101.toml [--readings]   # offline
 make calibrate                                                  # Table 3.13 checks, runs/calibration/report.md
 ```
 
+To send a run's readings to the running stack, register its devices once, then emulate:
+
+```
+uv run python -m coldchain.sim register configs/sim/load-101.toml
+uv run python -m coldchain.sim emulate configs/sim/load-101.toml --now --speed 1 --connections 2000
+uv run python -m coldchain.sim register configs/sim/load-101.toml --retire     # stop accepting them
+```
+
+`--now` starts the run at the current minute, `--speed` is simulated minutes per real minute (omit it to
+publish as fast as possible). Emulating the scenario network in real time raises real incidents and sends
+SMS to the officers on file (or to `SMS_REDIRECT_TO`). For 2,000 connections, raise the open-file limit
+first (`ulimit -n 8192`).
+
 A run writes `runs/<name>/`: the effective configuration, the network (`sites.csv`, `units.csv`), the
 failure injector's ground truth (`ground_truth.csv`), every true condition window with its cause
-(`conditions.csv`), a summary, and with `--readings` every reading (`readings.csv.gz`). Seeds must belong
-to the set for the run's purpose (training 1–20, calibration 21–30, test 101–110; Table 3.14).
+(`conditions.csv`), outreach trips (`trips.csv`), connectivity gaps (`connectivity.csv`), a summary, and
+with `--readings` every reading (`readings.csv.gz`). Seeds must belong to the set for the run's purpose
+(training 1–20, calibration 21–30, test 101–110; Table 3.14). A configuration with
+`network.load_fixed_units` and `load_mobile_units` uses the load network: copies of the Kano network as
+synthetic states (`NG-L01`, ...), with serials `LDnn-...` and `LDM-nnnnn`.
 
 After editing a file in `infra/`, restart that service (e.g. `podman compose restart mosquitto`): containers read their configuration only at start.
 
@@ -136,7 +152,8 @@ src/coldchain/            messages.py (device message format), ingestion/ (bridg
                           workflows, service), notify/ (templates, codes, commands, gateway, store,
                           service), custody.py, admin.py, audit.py, outbox.py, api/ (app, views),
                           simulator/ (basic devices, SMS gateway), sim/ (simulation service:
-                          sources, params, config, network, engine, calibrate)
+                          sources, gts, params, config, network, movement,
+                          engine, emulator, register, calibrate)
 configs/sim/              simulation run configurations
 data/                     simulator source data (raw files not committed; derived/ extracts are)
 runs/                     simulation outputs (not committed, except the calibration report)
