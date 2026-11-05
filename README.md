@@ -14,7 +14,9 @@ and requirement numbers in the code (e.g. FR1.4, Table 3.18) refer to it.
 | I4 Incidents and custody | Incidents with ownership, escalation (Temporal), resolution and review; custody handoffs; hash-chained audit trail; API | Done |
 | I5 Notification | SMS alerts, escalations and RETRO digests; reply commands with one-time codes; delivery reports, retries and failure handling; dashboard notifications | Done |
 | I6 Dashboard | Role-based map, incident, performance, consignment and administration views; live updates; demo network | Done |
-| I7–I8 | Simulator calibration, evaluation | Planned |
+| I7a Simulator core | Kano network (GRID3), equipment (WHO PQS), power (NERC bands, solar, generator), climate (NASA POWER) and sensor models; failure injector with ground truth; run configurations and seed sets; calibration checks | Done |
+| I7b Simulator completion | Movement (GTS tracks), connectivity, MQTT device emulator, load network, time-in-range and source-mix checks, calibration report | Planned |
+| I8 | Evaluation | Planned |
 
 ## Requirements
 
@@ -102,6 +104,23 @@ The automated tests use the emulator; switch `.env` back (`SMS_GATEWAY_URL=http:
 the two settings empty/false, the test user's number restored) before running them. If messages from the
 simulator stop arriving, relaunch the simulator phone: idle sessions stopped forwarding in testing.
 
+### Simulation
+
+The simulation service (Section 3.3.5) runs offline from a configuration file in `configs/sim/`; the data it
+draws on is described in `data/README.md`.
+
+```
+make sim-sources                                               # once: derived extracts from data/
+uv run python -m coldchain.sim network                          # summarise the Kano network
+uv run python -m coldchain.sim run configs/sim/detection-101.toml [--readings]
+make calibrate                                                  # Table 3.13 checks, runs/calibration/report.md
+```
+
+A run writes `runs/<name>/`: the effective configuration, the network (`sites.csv`, `units.csv`), the
+failure injector's ground truth (`ground_truth.csv`), every true condition window with its cause
+(`conditions.csv`), a summary, and with `--readings` every reading (`readings.csv.gz`). Seeds must belong
+to the set for the run's purpose (training 1–20, calibration 21–30, test 101–110; Table 3.14).
+
 After editing a file in `infra/`, restart that service (e.g. `podman compose restart mosquitto`): containers read their configuration only at start.
 
 ## Layout
@@ -116,7 +135,11 @@ src/coldchain/            messages.py (device message format), ingestion/ (bridg
                           detection/ (rules, anomaly, service), incidents/ (policy, ownership, store,
                           workflows, service), notify/ (templates, codes, commands, gateway, store,
                           service), custody.py, admin.py, audit.py, outbox.py, api/ (app, views),
-                          simulator/ (devices, SMS gateway)
+                          simulator/ (basic devices, SMS gateway), sim/ (simulation service:
+                          sources, params, config, network, engine, calibrate)
+configs/sim/              simulation run configurations
+data/                     simulator source data (raw files not committed; derived/ extracts are)
+runs/                     simulation outputs (not committed, except the calibration report)
 dashboard/                React dashboard (Vite), its Containerfile and nginx configuration
 models/                   trained anomaly models (make train; not committed)
 tests/                    acceptance and unit tests

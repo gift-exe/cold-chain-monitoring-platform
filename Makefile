@@ -3,7 +3,7 @@ COMPOSE = podman compose
 
 INFRA = postgres keycloak mosquitto kafka temporal
 
-.PHONY: dev env infra build up down reset migrate seed train demo test test-unit test-resilience lint logs
+.PHONY: dev env infra build up down reset migrate seed train demo test test-unit test-resilience lint logs sim-sources calibrate
 
 dev: env anchors infra migrate seed models/default.joblib up  ## start the stack, apply migrations, load seed data, start services
 
@@ -38,6 +38,12 @@ seed:
 
 models/default.joblib:
 	uv run python scripts/train_anomaly.py
+
+sim-sources:  ## rebuild the simulator's derived data extracts from data/
+	uv run python -m coldchain.sim sources
+
+calibrate:  ## simulator calibration checks (Table 3.13); report in runs/calibration/
+	uv run python -m coldchain.sim calibrate
 
 train:  ## retrain the anomaly model
 	uv run python scripts/train_anomaly.py

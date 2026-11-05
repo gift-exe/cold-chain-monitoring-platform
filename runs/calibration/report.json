@@ -1,0 +1,251 @@
+{
+  "info": {
+    "generated": "2026-11-05T06:28:47+00:00",
+    "seeds": [
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30
+    ],
+    "days": 30,
+    "network": {
+      "sites": {
+        "state_store": 1,
+        "lga_store": 44,
+        "health_facility": 541
+      },
+      "fixed_units": 586,
+      "mobile_units": 88,
+      "lgas": 44
+    },
+    "time_in_range_by_seed": [
+      0.9477379203008469,
+      0.9467073536847428,
+      0.948724205220579,
+      0.9454713768802933,
+      0.9499166113639237,
+      0.9486785409556314,
+      0.9442749415371002,
+      0.9481799472253823,
+      0.9456418673366199,
+      0.9517134369864745
+    ],
+    "note": "Time in range is reported for information; its check against published figures is in I7b."
+  },
+  "checks": [
+    {
+      "model": "Equipment",
+      "check": "Hold-over, Solar direct-drive ice-lined refrigerator",
+      "source": "WHO PQS E003-164, B Medical Systems TCW 50R SDD (hold-over 94:15 at +43 \u00b0C)",
+      "criterion": "within \u00b120% of 94.2 h",
+      "result": "94.2 h (+0.0%)",
+      "passed": true
+    },
+    {
+      "model": "Equipment",
+      "check": "Pull-down to 3.0 \u00b0C, Solar direct-drive ice-lined refrigerator",
+      "source": "ASSUMPTION (pull-down time not in the PQS record)",
+      "criterion": "within \u00b120% of 8.0 h",
+      "result": "8.0 h",
+      "passed": true
+    },
+    {
+      "model": "Equipment",
+      "check": "Hold-over, Mains ice-lined refrigerator",
+      "source": "WHO PQS E003-151, B Medical Systems TCW 240R AC (hold-over 115:19 at +43 \u00b0C)",
+      "criterion": "within \u00b120% of 115.3 h",
+      "result": "115.3 h (+0.0%)",
+      "passed": true
+    },
+    {
+      "model": "Equipment",
+      "check": "Pull-down to 3.0 \u00b0C, Mains ice-lined refrigerator",
+      "source": "ASSUMPTION (pull-down time not in the PQS record)",
+      "criterion": "within \u00b120% of 8.0 h",
+      "result": "8.0 h",
+      "passed": true
+    },
+    {
+      "model": "Equipment",
+      "check": "Hold-over, Walk-in cold room (state and LGA stores)",
+      "source": "ASSUMPTION: PQS E001 cold rooms state no hold-over; 24 h assumed",
+      "criterion": "within \u00b120% of 24.0 h",
+      "result": "24.0 h (+0.0%)",
+      "passed": true
+    },
+    {
+      "model": "Equipment",
+      "check": "Pull-down to 3.5 \u00b0C, Walk-in cold room (state and LGA stores)",
+      "source": "ASSUMPTION (pull-down time not in the PQS record)",
+      "criterion": "within \u00b120% of 6.0 h",
+      "result": "6.0 h",
+      "passed": true
+    },
+    {
+      "model": "Equipment",
+      "check": "Hold-over, Long-range cold box",
+      "source": "WHO PQS E004-084, Mark Enterprises MCBX-01 (cold life 129:56 at +43 \u00b0C)",
+      "criterion": "within \u00b120% of 129.9 h",
+      "result": "129.9 h (+0.0%)",
+      "passed": true
+    },
+    {
+      "model": "Equipment",
+      "check": "Hold-over, Long-range vaccine carrier",
+      "source": "WHO PQS E004-078, Trimurti Plast TPVC 46 (cold life 47:02 at +43 \u00b0C)",
+      "criterion": "within \u00b120% of 47.0 h",
+      "result": "47.0 h (+0.0%)",
+      "passed": true
+    },
+    {
+      "model": "Network",
+      "check": "Vaccine-holding health facilities",
+      "source": "GRID3 v2.0 (Kano)",
+      "criterion": "equal to the source count (541)",
+      "result": "541",
+      "passed": true
+    },
+    {
+      "model": "Network",
+      "check": "LGA stores",
+      "source": "one per LGA",
+      "criterion": "equal to the number of LGAs (44)",
+      "result": "44",
+      "passed": true
+    },
+    {
+      "model": "Power (source mix)",
+      "check": "Facilities by power source",
+      "source": "Ilegogie (2025) grid share; rest ASSUMPTION",
+      "criterion": "each share within \u00b10.5 percentage points of the configuration",
+      "result": "solar 40.1%, grid 25.0%, grid_generator 17.9%, generator 17.0%",
+      "passed": true
+    },
+    {
+      "model": "Power (grid)",
+      "check": "Mean daily supply, Band A (140 unit-runs)",
+      "source": "NERC (n.d.); outage durations ASSUMPTION",
+      "criterion": "20\u201324 h per day",
+      "result": "22.2 h (units: 18.7\u201324.0)",
+      "passed": true
+    },
+    {
+      "model": "Power (grid)",
+      "check": "Mean daily supply, Band B (280 unit-runs)",
+      "source": "NERC (n.d.); outage durations ASSUMPTION",
+      "criterion": "16\u201320 h per day",
+      "result": "18.1 h (units: 14.3\u201321.2)",
+      "passed": true
+    },
+    {
+      "model": "Power (grid)",
+      "check": "Mean daily supply, Band C (560 unit-runs)",
+      "source": "NERC (n.d.); outage durations ASSUMPTION",
+      "criterion": "12\u201316 h per day",
+      "result": "14.0 h (units: 10.7\u201318.0)",
+      "passed": true
+    },
+    {
+      "model": "Power (grid)",
+      "check": "Mean daily supply, Band D (830 unit-runs)",
+      "source": "NERC (n.d.); outage durations ASSUMPTION",
+      "criterion": "8\u201312 h per day",
+      "result": "10.1 h (units: 6.7\u201314.2)",
+      "passed": true
+    },
+    {
+      "model": "Power (grid)",
+      "check": "Mean daily supply, Band E (960 unit-runs)",
+      "source": "NERC (n.d.); outage durations ASSUMPTION",
+      "criterion": "4\u20138 h per day",
+      "result": "6.0 h (units: 3.2\u20138.9)",
+      "passed": true
+    },
+    {
+      "model": "Climate",
+      "check": "Simulated daily mean air temperature (360 cell-days)",
+      "source": "NASA POWER daily T2M, 2024",
+      "criterion": "within \u00b11 \u00b0C of the source on every cell-day",
+      "result": "largest difference 0.000 \u00b0C",
+      "passed": true
+    },
+    {
+      "model": "Power (solar)",
+      "check": "Daily irradiance used (360 cell-days)",
+      "source": "NASA POWER daily ALLSKY_SFC_SW_DWN, 2024",
+      "criterion": "identical to the source series",
+      "result": "0 differences",
+      "passed": true
+    },
+    {
+      "model": "Failure injector",
+      "check": "Injected heat excursion events",
+      "source": "run configuration",
+      "criterion": "within the Poisson range of 3516 (3358\u20133677; 95% family-wise)",
+      "result": "3566",
+      "passed": true
+    },
+    {
+      "model": "Failure injector",
+      "check": "Injected freeze events",
+      "source": "run configuration",
+      "criterion": "within the Poisson range of 3516 (3358\u20133677; 95% family-wise)",
+      "result": "3427",
+      "passed": true
+    },
+    {
+      "model": "Failure injector",
+      "check": "Injected power loss events",
+      "source": "run configuration",
+      "criterion": "within the Poisson range of 2214 (2088\u20132342; 95% family-wise)",
+      "result": "2187",
+      "passed": true
+    },
+    {
+      "model": "Failure injector",
+      "check": "Injected door open events",
+      "source": "run configuration",
+      "criterion": "within the Poisson range of 3516 (3358\u20133677; 95% family-wise)",
+      "result": "3447",
+      "passed": true
+    },
+    {
+      "model": "Failure injector",
+      "check": "Injected device silence events",
+      "source": "run configuration",
+      "criterion": "within the Poisson range of 3516 (3358\u20133677; 95% family-wise)",
+      "result": "3463",
+      "passed": true
+    },
+    {
+      "model": "Failure injector",
+      "check": "Injected connectivity gap events",
+      "source": "run configuration",
+      "criterion": "within the Poisson range of 3516 (3358\u20133677; 95% family-wise)",
+      "result": "3483",
+      "passed": true
+    },
+    {
+      "model": "Failure injector",
+      "check": "Injected sensor drift events",
+      "source": "run configuration",
+      "criterion": "within the Poisson range of 879 (800\u2013960; 95% family-wise)",
+      "result": "857",
+      "passed": true
+    },
+    {
+      "model": "Failure injector",
+      "check": "Ground-truth labels complete",
+      "source": "Section 3.3.5",
+      "criterion": "every injection has type, unit, start, end and expected owner",
+      "result": "20430 labels",
+      "passed": true
+    }
+  ]
+}

@@ -11,3 +11,15 @@ models/
 anchors/
 node_modules/
 .claude/
+
+# Raw source data (large; licensed separately). Derived extracts live in data/derived/ and are committed.
+data/*
+!data/derived/
+!data/README.md
+
+# Simulation outputs (reproducible from configs/sim/ and the seed)
+runs/*
+!runs/calibration/
+runs/calibration/*
+!runs/calibration/report.md
+!runs/calibration/report.json
