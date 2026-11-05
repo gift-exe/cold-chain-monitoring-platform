@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 import psycopg
 from psycopg.rows import dict_row
 
-from coldchain.detection.rules import Detected, Limits, Reading
+from coldchain.detection.rules import HYSTERESIS, Detected, Limits, Reading
 
 log = logging.getLogger("detection.store")
 
@@ -79,17 +79,33 @@ def abnormal(r: Reading) -> bool:
 
 def load_context(conn: psycopg.Connection, dev: DeviceInfo, t_from: datetime, t_to: datetime,
                  default: Limits) -> tuple[list[Reading], datetime, datetime]:
-    """Readings around the new ones, extended backwards while the earliest is abnormal, so that an event
-    that began before the new readings is seen whole. Late readings (beyond 72 h) are excluded (FR2.3)."""
+    """Readings around the new ones, so that a condition they touch is seen whole: CONTEXT either side,
+    extended backwards while the earliest reading is abnormal (the event began earlier) and forwards while
+    the latest ones are (late data may change how an event already stored ends). Late readings (beyond
+    72 h) are excluded (FR2.3).
+
+    The forward extension stops at the device's latest reading. It is bounded by the condition rather than
+    taken to the latest reading outright, because when detection runs behind storage (a backlog after a
+    restart, or an accelerated replay) the latest reading can be days ahead, and loading days of readings
+    for every batch made detection fall further behind (found in I8)."""
     latest = conn.execute("SELECT last_event_time FROM device_status WHERE device_id = %s", (dev.id,)).fetchone()
-    hi = max(t_to, latest[0]) if latest else t_to   # include later readings: late data may change an end
-    lo, step = t_from - CONTEXT, CONTEXT
+    end = max(t_to, latest[0]) if latest and latest[0] else t_to
+    lo, hi = t_from - CONTEXT, min(end, t_to + CONTEXT)
+    back = fwd = CONTEXT
     while True:
         readings = load_readings(conn, dev.id, lo, hi, default)
-        if not readings or not abnormal(readings[0]) or t_from - lo >= MAX_LOOKBACK:
+        head = [r for r in readings if r.t <= lo + HYSTERESIS + dev.interval]
+        earlier = any(abnormal(r) for r in head) and t_from - lo < MAX_LOOKBACK
+        tail = [r for r in readings if r.t >= hi - HYSTERESIS - dev.interval]
+        later = hi < end and any(abnormal(r) for r in tail) and hi - t_to < MAX_LOOKBACK
+        if not (earlier or later):
             return readings, lo, hi
-        step *= 2
-        lo = max(t_from - MAX_LOOKBACK, lo - step)
+        if earlier:
+            back *= 2
+            lo = max(t_from - MAX_LOOKBACK, lo - back)
+        if later:
+            fwd *= 2
+            hi = min(end, hi + fwd)
 
 
 def reconcile(conn: psycopg.Connection, device_id: str, detected: list[Detected],
@@ -129,6 +145,8 @@ def reconcile(conn: psycopg.Connection, device_id: str, detected: list[Detected]
             changed.append({**row, "change": "created"})
             continue
         e = same[0]
+        if e["event_start"] < lo and d.start > e["event_start"]:
+            new["event_start"] = e["event_start"]   # began before the readings loaded: the window cannot see it
         if len(same) > 1:   # late readings joined two events into one
             log.warning("device %s: %s events %s now form one event", device_id, d.type, [x["id"] for x in same])
             new["details"] = {**d.details, "merged": [x["id"] for x in same[1:]]}
@@ -141,7 +159,7 @@ def reconcile(conn: psycopg.Connection, device_id: str, detected: list[Detected]
                 WHERE id = %s
                 RETURNING id::text, device_id::text, type, severity, event_start, event_end, peak_value,
                           borderline, details, detected_at, updated_at""",
-                (d.severity, d.start, d.end, new["peak_value"], d.borderline, json.dumps(new["details"]),
+                (d.severity, new["event_start"], d.end, new["peak_value"], d.borderline, json.dumps(new["details"]),
                  e["id"])).fetchone()
             changed.append({**row, "change": "updated"})
     return changed

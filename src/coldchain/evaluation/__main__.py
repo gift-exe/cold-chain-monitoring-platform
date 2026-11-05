@@ -3,6 +3,7 @@
     uv run python -m coldchain.evaluation replay [--seeds 101-110] [--no-reset]
     uv run python -m coldchain.evaluation report
     uv run python -m coldchain.evaluation e7            (E7; evaluation stack, switched to live mode)
+    uv run python -m coldchain.evaluation e5            (E5; any database with the seed data, e.g. make e5-db)
     uv run python -m coldchain.evaluation coverage      (E12; development stack running)
 
 replay: for each test seed of the detection scenario set (Table 3.14), reset the evaluation stack, register
@@ -32,6 +33,7 @@ from coldchain.sim import config as config_mod
 ROOT = Path(__file__).resolve().parents[3]
 OUT = ROOT / "runs" / "eval" / "detection"
 TEMPLATE = ROOT / "configs" / "sim" / "detection-101.toml"
+REPLAY_RATE = 3000   # messages/s: below the bridge's ~5,000/s, so the broker's queue for it cannot overflow
 
 
 def sh(cmd: str) -> str:
@@ -92,7 +94,7 @@ def replicate(seed: int, reset: bool) -> None:
     net = build_for(cfg)
     s = get_settings()
     sink = MqttSink(s.mqtt_host, s.mqtt_port, [u.serial for u in net.units], max(1, len(net.units) // 10),
-                    client_prefix=f"eval-{cfg.name}")
+                    client_prefix=f"eval-{cfg.name}", max_rate=REPLAY_RATE)
     began = time.monotonic()
     sim = Simulation(cfg, net, sink).run()
     sink.close(timeout=600)
@@ -100,7 +102,9 @@ def replicate(seed: int, reset: bool) -> None:
     sent = time.monotonic() - began
     print(f"{cfg.name}: {summary['mqtt']['readings']} readings sent in {sent:.0f} s; waiting for the pipeline",
           flush=True)
-    pipeline = {"send_seconds": round(sent, 1), **drain(summary["mqtt"]["readings"])}
+    pipeline = {"send_seconds": round(sent, 1), **drain(summary["mqtt"]["readings"]),
+                "broker_drop_warnings": sh("podman logs coldchain-eval-mosquitto-1 2>&1 | "
+                                           "grep -c 'messages are being dropped' || true").strip()}
     (out / "pipeline.json").write_text(json.dumps(pipeline, indent=2))
     with _db() as conn:
         (out / "score.json").write_text(json.dumps(e12.score(out, conn), indent=2, default=str))
@@ -128,6 +132,8 @@ def main(argv=None) -> None:
     sub.add_parser("report")
     e7 = sub.add_parser("e7", help="E7 offline recovery on the evaluation stack in live mode")
     e7.add_argument("--seeds", default="101-110")
+    e5 = sub.add_parser("e5", help="E5 escalation with scripted responders (time-skipping Temporal server)")
+    e5.add_argument("--seeds", default="101-110")
     sub.add_parser("coverage", help="E12: run the test suite (development stack) and score tests/requirements.toml")
     args = ap.parse_args(argv)
     if args.cmd == "replay":
@@ -146,6 +152,15 @@ def main(argv=None) -> None:
         offline.OUT.mkdir(parents=True, exist_ok=True)
         (offline.OUT / "offline.json").write_text(json.dumps(doc, indent=2))
         print(json.dumps(doc["totals"], indent=2))
+    elif args.cmd == "e5":
+        from coldchain.evaluation import escalation
+        lo, _, hi = args.seeds.partition("-")
+        doc = escalation.run(range(int(lo), int(hi or lo) + 1))
+        escalation.OUT.mkdir(parents=True, exist_ok=True)
+        (escalation.OUT / "escalation.json").write_text(json.dumps(doc, indent=2, default=str))
+        print(json.dumps({k: v for k, v in doc.items() if k not in ("results", "wrong")}, indent=2))
+        for w in doc["wrong"][:10]:
+            print(json.dumps(w, default=str))
     elif args.cmd == "coverage":
         from coldchain.evaluation import coverage
         doc = coverage.score(coverage.outcomes(coverage.run_tests()))

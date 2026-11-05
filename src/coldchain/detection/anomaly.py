@@ -31,6 +31,7 @@ BASELINE_HOURS = 24          # the unit's own recent behaviour
 MIN_BASELINE_HOURS = 12
 CYCLE_BAND = 0.2             # °C either side of the hourly mean, to count compressor cycles
 ZSCORE_LIMIT = 3.0
+PASSIVE = {"vaccine_carrier", "cold_box"}   # no compressor: no cycle to learn, so no anomaly model
 FEATURES = ["mean_temp", "rate_of_change", "temp_range", "deviation_from_baseline", "powered_fraction",
             "cooling_cycles"]
 
@@ -165,6 +166,8 @@ def evaluate(conn: psycopg.Connection, models: dict[str, Model], dev, t_from: da
     one event per device and hour, updated if rescored)."""
     from coldchain.detection import store  # local import: store imports rules only
 
+    if dev.equipment_type in PASSIVE:
+        return []
     model = models.get(dev.equipment_type) or models.get("default")
     if model is None:
         return []

@@ -83,8 +83,9 @@ def test_zscore_baseline_flags_step_change():
 
 def test_models_per_equipment_type():
     """FR4.1: one model for each equipment type with a compressor (scripts/train_anomaly.py); passive vaccine
-    carriers have none, so they raise no anomaly warnings."""
+    carriers have none, so they raise no anomaly warnings. The fallback (default) model, trained on the basic
+    simulator, serves the development and test devices."""
     from coldchain.detection.anomaly import load_models
     models = load_models()
-    assert set(models) == {"walk_in_cold_room", "ice_lined_refrigerator", "solar_direct_drive"}
+    assert set(models) == {"walk_in_cold_room", "ice_lined_refrigerator", "solar_direct_drive", "default"}
     assert all(isinstance(m, Model) and m.threshold > 0 for m in models.values())

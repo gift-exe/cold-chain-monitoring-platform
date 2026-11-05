@@ -6,7 +6,8 @@ connections (Table 3.7: 20,000 devices over at least 2,000 connections), all ser
 
 Two modes:
 - fast: messages are published as soon as the simulation produces them, with back-pressure so that no more
-  than `max_pending` messages wait for the broker's acknowledgement;
+  than `max_pending` messages wait for the broker's acknowledgement, and optionally at most `max_rate` a
+  second;
 - paced (real time, or a speed-up): each device's readings are spread over the reporting interval by a
   fixed per-device offset, so the broker sees a steady rate rather than a burst at every simulated minute.
 """
@@ -25,11 +26,17 @@ BATCH_SIZE = 500     # readings per uploaded batch (as coldchain.simulator.basic
 
 class MqttSink:
     def __init__(self, host: str, port: int, serials: list[str], connections: int, client_prefix: str = "sim",
-                 topic_prefix: str = "devices", paced_interval_s: float | None = None, max_pending: int = 20000):
+                 topic_prefix: str = "devices", paced_interval_s: float | None = None, max_pending: int = 20000,
+                 max_rate: float | None = None):
         self.topic_prefix = topic_prefix
         self.n = max(1, min(connections, len(serials)))
         self.paced = paced_interval_s
         self.max_pending = max_pending
+        # Fast mode only: at most this many messages a second. The broker acknowledges a message once it
+        # has it, not once the bridge has it; faster than the bridge consumes, its queue for the bridge
+        # overflows (max_queued_messages) and messages are dropped (found in I8).
+        self.max_rate = max_rate
+        self._next_send = time.monotonic()
         self.stats = Counter()
         self._pending = 0
         self._cond = threading.Condition()
@@ -78,6 +85,10 @@ class MqttSink:
         return self.clients[zlib.crc32(serial.encode()) % self.n]
 
     def _publish(self, serial: str, payload: bytes):
+        if self.max_rate:
+            self._next_send = max(self._next_send + 1 / self.max_rate, time.monotonic() - 1)
+            if (wait := self._next_send - time.monotonic()) > 0:
+                time.sleep(wait)
         with self._cond:
             while self._pending >= self.max_pending:
                 self._cond.wait(1)
