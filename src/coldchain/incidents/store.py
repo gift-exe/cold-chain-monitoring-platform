@@ -152,12 +152,26 @@ def _create(conn: psycopg.Connection, ev: dict) -> Outcome:
 
 
 def _update(conn: psycopg.Connection, ev: dict) -> Outcome:
-    severity, cleared = conn.execute("SELECT severity, condition_cleared FROM incident WHERE id = %s FOR UPDATE",
-                                     (ev["incident_id"],)).fetchone()
+    severity, cleared, mode, acknowledged = conn.execute(
+        "SELECT severity, condition_cleared, mode, acknowledged_at IS NOT NULL FROM incident WHERE id = %s FOR UPDATE",
+        (ev["incident_id"],)).fetchone()
     changed = False
     if ev["severity"] == "critical" and severity == "warning":
         conn.execute("UPDATE incident SET severity = 'critical' WHERE id = %s", (ev["incident_id"],))
         record(conn, ev["incident_id"], "updated", {"severity": "critical", "integrity_event_id": ev["id"]})
+        changed = True
+    if mode == "retrospective" and mode_for(ev["event_end"], ev["detected_at"]) == "operational":
+        # An episode that is still under way (or has only just ended) joins a retrospective incident: the
+        # condition can now be corrected, so the incident follows the operational policy from now on (E7,
+        # I8): the owner is alerted urgently and escalation runs on the operational clock.
+        conn.execute("""UPDATE incident SET mode = 'operational',
+                            ack_due_from = CASE WHEN %(ack)s THEN ack_due_from ELSE now() END,
+                            ack_stage = CASE WHEN %(ack)s THEN ack_stage ELSE -1 END,
+                            resolve_due_from = CASE WHEN %(ack)s THEN now() ELSE resolve_due_from END,
+                            resolve_stage = CASE WHEN %(ack)s THEN 0 ELSE resolve_stage END
+                        WHERE id = %(id)s""", {"ack": acknowledged, "id": ev["incident_id"]})
+        record(conn, ev["incident_id"], "updated", {"mode": "operational", "integrity_event_id": ev["id"],
+                                                    "reason": "a new episode is under way"})
         changed = True
     ongoing = conn.execute("""
         SELECT EXISTS (SELECT 1 FROM integrity_event e JOIN incident i ON i.id = e.incident_id

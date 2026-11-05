@@ -253,6 +253,25 @@ def test_new_episode_while_open_updates_the_incident(db):
     assert db.execute("SELECT count(*) FROM integrity_event WHERE incident_id = %s", (inc_id,)).fetchone()[0] == 2
 
 
+def test_ongoing_episode_turns_a_retrospective_incident_operational(db):
+    """E7 found that a live excursion joining a retrospective incident (same device, within 24 h) was handled
+    only by the slow retrospective policy. The condition can now be corrected, so the incident becomes
+    operational and the owner is alerted by SMS at once."""
+    dev = fixed_device(db)
+    t = now(db)
+    inc_id = store.on_event(db, event(db, dev, start=t - 300 * MIN, end=t - 240 * MIN)).incident_id
+    store.apply_due(db, inc_id, t)
+    assert incident(db, inc_id)["mode"] == "retrospective"
+    out = store.on_event(db, event(db, dev, start=t - 40 * MIN))
+    assert out.incident_id == inc_id and out.changed
+    store.apply_due(db, inc_id, t)
+    assert incident(db, inc_id)["mode"] == "operational"
+    alert = notices(db, inc_id)[-1]
+    assert (alert["kind"], alert["recipients"], alert["urgency"]) == ("alert", [USERS["oic"]], "sms")
+    store.apply_due(db, inc_id, t + 16 * MIN)
+    assert incident(db, inc_id)["current_tier"] == "lga"
+
+
 def test_new_episode_a_day_after_the_last_is_a_new_incident_even_if_open(db):
     dev = fixed_device(db)
     t = now(db)
