@@ -11,7 +11,10 @@ not a difference of definitions:
   qualified (a fault in a unit that was already cold, or one too short to matter) is counted and reported,
   but it is not an event the prototype should have detected;
 - E1 recall: an injected failure is detected if an integrity event of the same type on the same unit,
-  linked to an incident, starts within 10 minutes of the start of the qualifying condition it caused. (Table
+  linked to an incident, starts within 10 minutes of the start of the qualifying condition it caused
+  (strict). Also reported (overlap): the event overlaps the condition and starts no later than 10 minutes
+  after it; it differs from strict only for events that start more than 10 minutes *early*, which happens
+  when a slow cool-down or warm-up hovers at the limit and sensor noise crosses it first. (Table
   3.10 says "of the injected start"; the condition's start is used because a fault can take hours to drive
   the temperature out of range, e.g. a stuck thermostat, and the prototype cannot detect a condition before
   it exists.)
@@ -62,12 +65,29 @@ def observed(conn: psycopg.Connection, serials: list[str]) -> tuple[list[dict], 
     return ev, inc
 
 
-def score(run_dir: Path, conn: psycopg.Connection) -> dict:
+def save_observed(run_dir: Path, conn: psycopg.Connection) -> None:
+    """Keep the prototype's events and incidents with the run, so it can be rescored without the database."""
+    import json
+    serials = [u["serial"] for u in _read(run_dir / "units.csv")]
+    events, incidents = observed(conn, serials) if conn is not None else _load_observed(run_dir)
+    (run_dir / "observed.json").write_text(json.dumps({"events": events, "incidents": incidents}, default=str))
+
+
+def _load_observed(run_dir: Path) -> tuple[list[dict], dict[str, dict]]:
+    import json
+    doc = json.loads((run_dir / "observed.json").read_text())
+    for e in doc["events"]:
+        e["start"] = _t(e["start"])
+        e["end"] = _t(e["end"]) if e["end"] else None
+    return doc["events"], doc["incidents"]
+
+
+def score(run_dir: Path, conn: psycopg.Connection | None = None) -> dict:
     summary_units = _read(run_dir / "units.csv")
     serials = [u["serial"] for u in summary_units]
     conditions = [c for c in _read(run_dir / "conditions.csv") if c["kind"] in KIND_TO_TYPE]
     injections = [g for g in _read(run_dir / "ground_truth.csv") if g["type"] in RULES]
-    events, incidents = observed(conn, serials)
+    events, incidents = observed(conn, serials) if conn is not None else _load_observed(run_dir)
     end_of_run = max(_t(c["end"]) for c in conditions) if conditions else None
 
     by_unit_type = defaultdict(list)
@@ -94,8 +114,15 @@ def score(run_dir: Path, conn: psycopg.Connection) -> dict:
             continue
         r["events"] += 1
         c0 = _t(qualifying[0]["start"])
-        hit = [e for e in by_unit_type[(g["serial"], g["type"])] if abs(e["start"] - c0) <= MATCH]
-        if any(e["incident"] for e in hit):
+        cands = [e for e in by_unit_type[(g["serial"], g["type"])] if e["incident"]]
+        # overlap: the event overlaps the condition and began no later than 10 minutes after it (an event
+        # that began earlier, because noisy readings crossed the limit first, still detected it)
+        overlap = [e for e in cands if e["start"] <= c0 + MATCH and (e["end"] or end_of_run) >= c0]
+        r["detected_overlap"] += bool(overlap)
+        if overlap:
+            r["early_minutes_sum"] += max(0.0, (c0 - min(e["start"] for e in overlap)).total_seconds() / 60)
+        hit = [e for e in cands if abs(e["start"] - c0) <= MATCH]
+        if hit:
             r["detected"] += 1
         else:
             near = min(by_unit_type[(g["serial"], g["type"])], key=lambda e: abs(e["start"] - c0), default=None)
@@ -167,7 +194,11 @@ def aggregate(results: list[dict]) -> dict:
     out = {"replications": len(results), "unit_days": unit_days, "recall": {}, "precision": {}}
     for t, c in [*sorted(rec.items()), ("critical (heat + freeze)", crit)]:
         out["recall"][t] = {**c, "recall": round(c["detected"] / c["events"], 4) if c["events"] else None,
-                            "ci95": wilson(c["detected"], c["events"])}
+                            "ci95": wilson(c["detected"], c["events"]),
+                            "recall_overlap": round(c["detected_overlap"] / c["events"], 4) if c["events"] else None,
+                            "ci95_overlap": wilson(c["detected_overlap"], c["events"]),
+                            "mean_early_minutes": round(c["early_minutes_sum"] / c["detected_overlap"], 1)
+                            if c["detected_overlap"] else None}
     for k, c in sorted(prec.items()):
         out["precision"][k] = {**c, "precision": round(c["true"] / c["incidents"], 4) if c["incidents"] else None,
                                "ci95": wilson(c["true"], c["incidents"]),
@@ -176,6 +207,8 @@ def aggregate(results: list[dict]) -> dict:
     pc = prec["critical"]
     out["false_critical_per_1000_device_days"] = round(1000 * (pc["incidents"] - pc["true"]) / unit_days, 3)
     out["criteria"] = {
-        "E1 recall >= 0.95 (critical)": bool(crit["events"]) and crit["detected"] / crit["events"] >= 0.95,
+        "E1 recall >= 0.95 (critical, strict)": bool(crit["events"]) and crit["detected"] / crit["events"] >= 0.95,
+        "E1 recall >= 0.95 (critical, overlap)": bool(crit["events"])
+        and crit["detected_overlap"] / crit["events"] >= 0.95,
         "E2 precision >= 0.90 (critical)": bool(pc["incidents"]) and pc["true"] / pc["incidents"] >= 0.90}
     return out

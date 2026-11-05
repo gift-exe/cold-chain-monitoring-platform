@@ -79,8 +79,8 @@ eval-up: env  ## start the evaluation stack on the pinned image (stop the develo
 	uv run python scripts/seed.py --no-demo
 	uv run python -m coldchain.sim register $(EVAL_NET)
 
-eval-replay:  ## switch the evaluation stack to accelerated replay (late flag and silence sweep off; 3 detection replicas)
-	$(EVAL) -f compose.replay.yaml up -d --wait --scale detection=3 ingestion-bridge detection
+eval-replay:  ## switch the evaluation stack to accelerated replay (late flag and silence sweep off; 6 detection replicas, one per partition)
+	$(EVAL) -f compose.replay.yaml up -d --wait --scale detection=6 ingestion-bridge detection
 
 eval-live:  ## switch the evaluation stack back to real receipt times (one detection replica: it runs the silence sweep)
 	$(EVAL) up -d --wait --scale detection=1 ingestion-bridge detection

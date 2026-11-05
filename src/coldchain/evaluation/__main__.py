@@ -36,9 +36,15 @@ TEMPLATE = ROOT / "configs" / "sim" / "detection-101.toml"
 REPLAY_RATE = 3000   # messages/s: below the bridge's ~5,000/s, so the broker's queue for it cannot overflow
 
 
-def sh(cmd: str) -> str:
+def sh(cmd: str, attempts: int = 1) -> str:
     print(f"$ {cmd}", flush=True)
-    return subprocess.run(cmd, shell=True, check=True, cwd=ROOT, capture_output=True, text=True).stdout
+    for attempt in range(1, attempts + 1):
+        p = subprocess.run(cmd, check=False, shell=True, cwd=ROOT, capture_output=True, text=True)
+        if p.returncode == 0:
+            return p.stdout
+        print(f"  failed (attempt {attempt}/{attempts}): {(p.stdout + p.stderr)[-1500:]}", flush=True)
+        time.sleep(30)
+    raise RuntimeError(f"{cmd} failed")
 
 
 def _db() -> psycopg.Connection:
@@ -88,9 +94,9 @@ def replicate(seed: int, reset: bool) -> None:
     out = OUT / cfg.name
     out.mkdir(parents=True, exist_ok=True)
     if reset:
-        sh("make eval-reset")
-        sh(f"make eval-up EVAL_NET={TEMPLATE}")
-    sh("make eval-replay")
+        sh("make eval-reset", attempts=2)
+        sh(f"make eval-up EVAL_NET={TEMPLATE}", attempts=3)   # a slow health check occasionally times out
+    sh("make eval-replay", attempts=3)
     net = build_for(cfg)
     s = get_settings()
     sink = MqttSink(s.mqtt_host, s.mqtt_port, [u.serial for u in net.units], max(1, len(net.units) // 10),
@@ -107,6 +113,7 @@ def replicate(seed: int, reset: bool) -> None:
                                            "grep -c 'messages are being dropped' || true").strip()}
     (out / "pipeline.json").write_text(json.dumps(pipeline, indent=2))
     with _db() as conn:
+        e12.save_observed(out, conn)
         (out / "score.json").write_text(json.dumps(e12.score(out, conn), indent=2, default=str))
         (out / "anomaly.json").write_text(json.dumps(e3.score(out, conn), indent=2, default=str))
     print(f"{cfg.name}: scored", flush=True)
