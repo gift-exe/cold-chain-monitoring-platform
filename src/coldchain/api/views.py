@@ -84,8 +84,8 @@ INCIDENT_COLUMNS = """
     i.id::text, i.incident_no, i.type, i.severity, i.mode, i.state, i.current_tier, i.overdue,
     i.notification_failed, i.condition_cleared, i.reopen_count, i.ownership, i.created_at, i.received_at,
     i.detected_at, i.notified_at, i.acknowledged_at, i.resolved_at, i.closed_at, i.jurisdiction_id,
-    e.event_start, e.event_end, e.peak_value, e.borderline,
-    d.serial_no AS device_serial, d.type AS device_type, d.equipment_type,
+    e.event_start, ep.event_end, coalesce(ep.peak_value, e.peak_value) AS peak_value, e.borderline,
+    ep.episodes, d.serial_no AS device_serial, d.type AS device_type, d.equipment_type,
     f.id::text AS facility_id, f.name AS facility_name, j.name AS jurisdiction_name,
     i.consignment_id::text, c.consignment_no, i.owner_id::text, o.full_name AS owner_name,
     ab.full_name AS acknowledged_by_name, rb.full_name AS resolved_by_name, cb.full_name AS closed_by_name
@@ -93,6 +93,11 @@ INCIDENT_COLUMNS = """
 INCIDENT_FROM = """
     FROM incident i
     LEFT JOIN integrity_event e ON e.id = i.integrity_event_id
+    LEFT JOIN LATERAL (   -- an incident may hold several episodes of its condition (new episodes join it)
+        SELECT CASE WHEN bool_or(x.event_end IS NULL) THEN NULL ELSE max(x.event_end) END AS event_end,
+               CASE WHEN i.type = 'freeze' THEN min(x.peak_value) ELSE max(x.peak_value) END AS peak_value,
+               count(*) AS episodes
+        FROM integrity_event x WHERE x.incident_id = i.id AND x.type = i.type) ep ON true
     LEFT JOIN device d ON d.id = i.device_id
     LEFT JOIN facility f ON f.id = d.facility_id
     LEFT JOIN jurisdiction j ON j.id = i.jurisdiction_id

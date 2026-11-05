@@ -252,6 +252,33 @@ def test_condition_after_60_minutes_is_a_new_incident(db):
     assert store.on_event(db, event(db, dev, start=t + 61 * MIN)).incident_id != inc_id
 
 
+
+def test_new_episode_while_open_updates_the_incident(db):
+    dev = fixed_device(db)
+    t = now(db)
+    inc_id = store.on_event(db, event(db, dev, "device_silence", "warning", start=t - 300 * MIN,
+                                      end=t - 240 * MIN)).incident_id
+    out = store.on_event(db, event(db, dev, "device_silence", "critical", start=t - 60 * MIN))
+    assert out.incident_id == inc_id and out.changed
+    inc = incident(db, inc_id)
+    assert (inc["severity"], inc["condition_cleared"]) == ("critical", False)
+    assert db.execute("SELECT count(*) FROM integrity_event WHERE incident_id = %s", (inc_id,)).fetchone()[0] == 2
+
+
+def test_new_episode_a_day_after_the_last_is_a_new_incident_even_if_open(db):
+    dev = fixed_device(db)
+    t = now(db)
+    inc_id = store.on_event(db, event(db, dev, start=t - 30 * 60 * MIN, end=t - 25 * 60 * MIN)).incident_id
+    assert store.on_event(db, event(db, dev, start=t - 60 * MIN)).incident_id != inc_id
+
+
+def test_new_episode_after_resolution_is_a_new_incident(db):
+    dev = fixed_device(db)
+    t = now(db)
+    inc_id = store.on_event(db, event(db, dev, start=t - 300 * MIN, end=t - 240 * MIN)).incident_id
+    store.resolve(db, inc_id, USERS["oic"], "fixed")
+    assert store.on_event(db, event(db, dev, start=t + 120 * MIN)).incident_id != inc_id
+
 def test_every_change_is_hash_chained(db):
     inc_id = new_incident(db)
     store.acknowledge(db, inc_id, USERS["oic"])

@@ -21,6 +21,7 @@ from coldchain.notify import codes
 
 RETROSPECTIVE_AFTER = timedelta(minutes=15)   # Section 3.4.4
 RECURRENCE_WITHIN = timedelta(minutes=60)     # FR5.5
+SAME_INCIDENT_WITHIN = timedelta(hours=24)    # a new episode this soon after the last joins the open incident
 ALARM_LINK_WITHIN = timedelta(minutes=30)     # a local alarm this close to an excursion belongs to it
 REVIEWER_ROLES = ("lga_officer", "state_officer", "national_officer")
 
@@ -96,6 +97,9 @@ def on_event(conn: psycopg.Connection, event_id: str) -> Outcome | None:
         return _update(conn, ev)
     if ev["type"] == "local_alarm":
         return _link_alarm(conn, ev)
+    joined = _join_open(conn, ev)
+    if joined:
+        return joined
     reopened = _recurrence(conn, ev)
     if reopened:
         return reopened
@@ -170,6 +174,29 @@ def _update(conn: psycopg.Connection, ev: dict) -> Outcome:
                 **({} if not ongoing else {"condition": "resumed"})})
         changed = True
     return Outcome(ev["incident_id"], changed, "updated" if changed else "no change")
+
+
+def _join_open(conn: psycopg.Connection, ev: dict) -> Outcome | None:
+    """A new episode of the same condition on the same device while its incident is still unresolved
+    updates that incident rather than raising another, unless it starts 24 hours or more after the
+    incident's last episode ended; then it is a new incident."""
+    if not ev["device_id"]:
+        return None
+    row = conn.execute("""
+        SELECT i.id::text, i.incident_no FROM incident i
+        WHERE i.device_id = %s AND i.type = %s AND i.state NOT IN ('resolved', 'closed')
+          AND (SELECT max(coalesce(e.event_end, 'infinity')) FROM integrity_event e
+               WHERE e.incident_id = i.id) > %s
+        ORDER BY i.created_at DESC LIMIT 1 FOR UPDATE OF i""",
+        (ev["device_id"], ev["type"], ev["event_start"] - SAME_INCIDENT_WITHIN)).fetchone()
+    if row is None:
+        return None
+    incident_id = row[0]
+    conn.execute("UPDATE integrity_event SET incident_id = %s WHERE id = %s", (incident_id, ev["id"]))
+    record(conn, incident_id, "updated", {"new_episode": True, "integrity_event_id": ev["id"],
+                                          "event_start": ev["event_start"], "event_end": ev["event_end"]})
+    _update(conn, {**ev, "incident_id": incident_id})
+    return Outcome(incident_id, True, f"incident {row[1]} updated with a new episode")
 
 
 def _recurrence(conn: psycopg.Connection, ev: dict) -> Outcome | None:

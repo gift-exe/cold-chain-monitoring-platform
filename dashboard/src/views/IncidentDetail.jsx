@@ -58,7 +58,7 @@ export default function IncidentDetail() {
             <dd>{inc.acknowledged_at ? <>{time(inc.acknowledged_at)} by {inc.acknowledged_by_name} <span className="muted">({duration(minutes(inc.created_at, inc.acknowledged_at))} after creation)</span></> : "not yet"}</dd>
             {inc.resolved_at && <><dt>Resolved</dt><dd>{time(inc.resolved_at)} by {inc.resolved_by_name}</dd></>}
             {inc.closed_at && <><dt>Closed</dt><dd>{time(inc.closed_at)} by {inc.closed_by_name}</dd></>}
-            <dt>Condition</dt><dd>{inc.event_end ? (inc.condition_cleared ? "Back to normal" : "Ended") : <b>Ongoing</b>}</dd>
+            <dt>Condition</dt><dd>{inc.event_end ? (inc.condition_cleared ? "Back to normal" : "Ended") : <b>Ongoing</b>}{inc.episodes > 1 && <span className="muted"> ({inc.episodes} episodes)</span>}</dd>
           </dl>
         </section>
         <Actions inc={inc} reload={reload} />
@@ -214,7 +214,8 @@ function describe(a, inc) {
     case "overdue": return "Marked overdue";
     case "notification_failed": return "SMS could not be delivered";
     case "condition_cleared": return "Readings back within limits";
-    case "updated": return "Event updated with new readings";
+    case "updated": return d.new_episode ? "The condition occurred again; added to this incident"
+      : d.joined ? "A further event added to this incident" : "Event updated with new readings";
     case "linked": return "Linked to an earlier incident";
     default: return label({}, a.action);
   }
