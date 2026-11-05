@@ -6,7 +6,7 @@ EVAL_NET ?= configs/sim/detection-101.toml
 
 INFRA = postgres keycloak mosquitto kafka temporal
 
-.PHONY: eval-up eval-down eval-reset eval-replay eval-live dev env infra build up down reset migrate seed train demo test test-unit test-resilience lint logs sim-sources calibrate
+.PHONY: eval-image eval-up eval-down eval-reset eval-replay eval-live dev env infra build up down reset migrate seed train demo test test-unit test-resilience lint logs sim-sources calibrate
 
 dev: env anchors infra migrate seed models/default.joblib up  ## start the stack, apply migrations, load seed data, start services
 
@@ -69,7 +69,10 @@ lint:
 logs:
 	$(COMPOSE) logs -f --tail=100
 
-eval-up: env build  ## start the evaluation stack (stop the development stack first), migrate, seed, register the Kano network
+eval-image: build  ## pin the current code as the image under evaluation
+	podman tag localhost/coldchain-services:dev localhost/coldchain-services:eval
+
+eval-up: env  ## start the evaluation stack on the pinned image (stop the development stack first), migrate, seed, register the Kano network
 	mkdir -p runs/eval/anchors
 	$(EVAL) up -d --wait
 	uv run alembic upgrade head

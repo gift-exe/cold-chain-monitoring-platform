@@ -126,11 +126,16 @@ tests = ["test_dashboard_views.py::test_stale_and_silent_units_are_marked", "tes
 tests = ["test_dashboard_views.py::test_response_metrics_by_facility_and_tier"]
 
 [FR11_1]
-tests = ["test_dashboard_views.py::test_product_limits_changed_by_national_officer_only_and_recorded",
+tests = ["test_admin.py::test_administrator_adds_and_changes_users", "test_admin.py::test_inconsistent_users_refused",
+         "test_admin.py::test_jurisdictions_facilities_and_devices", "test_admin.py::test_national_officer_changes_escalation_limits_in_order",
+         "test_admin.py::test_only_administrators_manage_users_facilities_and_devices",
+         "test_admin.py::test_only_national_officers_change_the_escalation_policy",
+         "test_dashboard_views.py::test_product_limits_changed_by_national_officer_only_and_recorded",
          "test_dashboard_views.py::test_phone_changes_by_administrator_only_and_recorded"]
-status = "partial: products and phone numbers only; users, roles, jurisdictions, facilities, devices and escalation policies are managed in seed data and Keycloak, not through the prototype"
 [FR11_2]
-tests = ["test_dashboard_views.py::test_product_limits_changed_by_national_officer_only_and_recorded",
+tests = ["test_admin.py::test_administrator_adds_and_changes_users", "test_admin.py::test_jurisdictions_facilities_and_devices",
+         "test_admin.py::test_national_officer_changes_escalation_limits_in_order",
+         "test_dashboard_views.py::test_product_limits_changed_by_national_officer_only_and_recorded",
          "test_dashboard_views.py::test_phone_changes_by_administrator_only_and_recorded"]
 
 [FR12_1]

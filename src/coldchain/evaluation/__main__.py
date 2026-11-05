@@ -57,8 +57,8 @@ def lag() -> dict[str, int]:
 def drain(expected: int, poll: float = 15, quiet: int = 3) -> dict:
     """Wait until all readings are stored and no consumer group has a backlog for `quiet` polls in a row."""
     began, still = time.monotonic(), 0
-    last = None
-    while still < quiet:
+    last = (0, 0, 0)
+    while still < quiet or (last[0] < expected and still < 8):   # a shortfall is recorded, not waited for
         time.sleep(poll)
         with _db() as conn:
             stored, events, incidents = conn.execute(
@@ -66,13 +66,13 @@ def drain(expected: int, poll: float = 15, quiet: int = 3) -> dict:
                 "(SELECT count(*) FROM incident)").fetchone()
         backlog = lag()
         state = (stored, events, incidents)
-        done = stored >= expected and not any(backlog.values())
+        done = not any(backlog.values())
         still = still + 1 if done and state == last else 0
         last = state
         print(f"  {time.monotonic() - began:6.0f} s  stored {stored}/{expected}  events {events}  "
               f"incidents {incidents}  lag {backlog}", flush=True)
-    return {"stored": last[0], "integrity_events": last[1], "incidents": last[2],
-            "drain_seconds": round(time.monotonic() - began - poll * quiet, 1)}
+    return {"stored": last[0], "shortfall": max(0, expected - last[0]), "integrity_events": last[1], "incidents": last[2],
+            "drain_seconds": round(time.monotonic() - began - poll * still, 1)}
 
 
 def replicate(seed: int, reset: bool) -> None:

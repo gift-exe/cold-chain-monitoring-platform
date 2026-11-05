@@ -5,13 +5,24 @@
 # Africa's Talking key from .env is not passed to any container.
 x-eval-sms: &eval-sms
   AT_API_KEY: eval-at-key
+# The evaluation runs on a pinned image (make eval-image), so development can continue during long runs
+# without changing the system under test.
+x-eval-image: &eval-image localhost/coldchain-services:eval
 
 services:
+  ingestion-bridge:
+    image: *eval-image
+  storage-writer:
+    image: *eval-image
+  detection:
+    image: *eval-image
   incident-service:
+    image: *eval-image
     volumes: !override
       - ./runs/eval/anchors:/app/anchors
 
   notification-service:
+    image: *eval-image
     environment:
       <<: *eval-sms
       AT_API_URL: http://sms-gateway:8000
@@ -21,9 +32,11 @@ services:
       SMS_TRUST_SENT: "false"
 
   sms-gateway:
+    image: *eval-image
     environment:
       <<: *eval-sms
 
   api:
+    image: *eval-image
     volumes: !override
       - ./runs/eval/anchors:/app/anchors:ro

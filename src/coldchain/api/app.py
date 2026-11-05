@@ -361,6 +361,156 @@ async def list_users(user: User):
     return await asyncio.to_thread(_run, admin.users, user)
 
 
+class NewUser(BaseModel):
+    username: str = Field(pattern=r"^[a-z0-9][a-z0-9._-]{2,63}$")
+    full_name: str = Field(min_length=2, max_length=120)
+    role: str
+    jurisdiction_id: str
+    facility_id: str | None = None
+    phone_number: str | None = None
+
+
+class UserChange(BaseModel):
+    full_name: str | None = Field(None, min_length=2, max_length=120)
+    role: str | None = None
+    jurisdiction_id: str | None = None
+    facility_id: str | None = None
+    active: bool | None = None
+
+
+class NewJurisdiction(BaseModel):
+    id: str
+    level: Literal["state", "lga"]
+    name: str = Field(min_length=2, max_length=120)
+    parent_id: str
+
+
+class Rename(BaseModel):
+    name: str = Field(min_length=2, max_length=120)
+
+
+class NewFacility(BaseModel):
+    name: str = Field(min_length=2, max_length=200)
+    tier: str
+    jurisdiction_id: str
+    parent_facility_id: str | None = None
+    power_source: str
+    lat: float
+    lon: float
+
+
+class FacilityChange(BaseModel):
+    name: str | None = Field(None, min_length=2, max_length=200)
+    tier: str | None = None
+    jurisdiction_id: str | None = None
+    parent_facility_id: str | None = None
+    power_source: str | None = None
+    lat: float | None = None
+    lon: float | None = None
+
+
+class NewDevice(BaseModel):
+    serial_no: str = Field(pattern=r"^[A-Za-z0-9][A-Za-z0-9-]{2,63}$")
+    type: Literal["fixed", "mobile"]
+    equipment_type: str = Field(min_length=2, max_length=60)
+    facility_id: str | None = None
+    has_door_sensor: bool = False
+    has_power_signal: bool = False
+    reporting_interval_s: int = Field(60, gt=0, le=86400)
+    sync_window_min: int = Field(1440, gt=0, le=20160)
+
+
+class DeviceChange(BaseModel):
+    facility_id: str | None = None
+    equipment_type: str | None = None
+    has_door_sensor: bool | None = None
+    has_power_signal: bool | None = None
+    reporting_interval_s: int | None = Field(None, gt=0, le=86400)
+    sync_window_min: int | None = Field(None, gt=0, le=20160)
+    status: Literal["active", "inactive", "retired"] | None = None
+
+
+class PolicyChange(BaseModel):
+    delay_min: int = Field(ge=0, le=43200)
+
+
+def _reader(roles: tuple[str, ...]):
+    """Reference lists for the administration screens."""
+    def check(conn, user):
+        admin._require(conn, user, roles, "administration")
+    return check
+
+
+@app.post("/users")
+async def create_user(body: NewUser, user: User):
+    return await asyncio.to_thread(_run, lambda conn: admin.create_user(conn, user, body.model_dump()))
+
+
+@app.patch("/users/{ref}")
+async def update_user(ref: str, body: UserChange, user: User):
+    return await asyncio.to_thread(_run, lambda conn: admin.update_user(
+        conn, user, ref, body.model_dump(exclude_unset=True)))
+
+
+@app.get("/jurisdictions")
+async def list_jurisdictions(user: User):
+    return await asyncio.to_thread(_run, lambda conn: (_reader(("admin",))(conn, user), admin.jurisdictions(conn))[1])
+
+
+@app.post("/jurisdictions")
+async def create_jurisdiction(body: NewJurisdiction, user: User):
+    return await asyncio.to_thread(_run, lambda conn: admin.create_jurisdiction(conn, user, body.model_dump()))
+
+
+@app.patch("/jurisdictions/{jid}")
+async def rename_jurisdiction(jid: str, body: Rename, user: User):
+    await asyncio.to_thread(_run, lambda conn: admin.rename_jurisdiction(conn, user, jid, body.name))
+    return {"id": jid, "name": body.name}
+
+
+@app.get("/facilities")
+async def list_facilities(user: User):
+    return await asyncio.to_thread(_run, lambda conn: (_reader(("admin",))(conn, user), admin.facilities(conn))[1])
+
+
+@app.post("/facilities")
+async def create_facility(body: NewFacility, user: User):
+    return await asyncio.to_thread(_run, lambda conn: admin.create_facility(conn, user, body.model_dump()))
+
+
+@app.patch("/facilities/{fid}")
+async def update_facility(fid: str, body: FacilityChange, user: User):
+    return await asyncio.to_thread(_run, lambda conn: admin.update_facility(
+        conn, user, fid, body.model_dump(exclude_unset=True)))
+
+
+@app.get("/devices")
+async def list_devices(user: User):
+    return await asyncio.to_thread(_run, lambda conn: (_reader(("admin",))(conn, user), admin.devices(conn))[1])
+
+
+@app.post("/devices")
+async def register_device(body: NewDevice, user: User):
+    return await asyncio.to_thread(_run, lambda conn: admin.register_device(conn, user, body.model_dump()))
+
+
+@app.patch("/devices/{ref}")
+async def update_device(ref: str, body: DeviceChange, user: User):
+    return await asyncio.to_thread(_run, lambda conn: admin.update_device(
+        conn, user, ref, body.model_dump(exclude_unset=True)))
+
+
+@app.get("/escalation-policy")
+async def escalation_policy(user: User):
+    return await asyncio.to_thread(_run, lambda conn: (
+        _reader(("national_officer", "admin"))(conn, user), admin.policy(conn))[1])
+
+
+@app.patch("/escalation-policy/{policy_id}")
+async def update_policy(policy_id: int, body: PolicyChange, user: User):
+    return await asyncio.to_thread(_run, lambda conn: admin.update_policy(conn, user, policy_id, body.delay_min))
+
+
 @app.get("/system/status")
 async def system_status(user: User):
     return await asyncio.to_thread(_run, admin.system_status, user)
