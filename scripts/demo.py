@@ -76,7 +76,20 @@ def reading(dev: SimDevice, t: datetime, rng: random.Random, temp: float | None,
 def send(client, serial: str, readings: list[dict]) -> None:
     if readings:
         msg = {"device_id": serial, "readings": readings} if len(readings) > 1 else {"device_id": serial, **readings[0]}
-        client.publish(topic(serial), json.dumps(msg), qos=1).wait_for_publish()
+        while True:   # keep going through broker restarts and the laptop sleeping
+            try:
+                info = client.publish(topic(serial), json.dumps(msg), qos=1)
+                info.wait_for_publish(timeout=30)
+                if info.is_published():
+                    return
+                raise RuntimeError("not acknowledged within 30 s")
+            except (RuntimeError, ValueError) as e:
+                print(f"publish failed ({e}); reconnecting in 5 s", flush=True)
+                time.sleep(5)
+                try:
+                    client.reconnect()
+                except OSError as e:
+                    print(f"reconnect failed: {e}", flush=True)
 
 
 def token(username: str) -> str:
