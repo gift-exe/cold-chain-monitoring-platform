@@ -1,4 +1,7 @@
-"""Load development seed data (seeds/*.sql, in name order) into the database."""
+"""Load development seed data (seeds/*.sql, in name order) into the database.
+
+--no-demo skips the demo network (the evaluation stack has only the simulated Kano network)."""
+import sys
 from pathlib import Path
 
 import psycopg
@@ -12,6 +15,8 @@ def main() -> None:
     url = get_settings().db_url("owner").replace("postgresql+psycopg://", "postgresql://")
     with psycopg.connect(url) as conn:
         for f in sorted(SEEDS.glob("*.sql")):
+            if "--no-demo" in sys.argv and "demo" in f.name:
+                continue
             conn.execute(f.read_text())
             print("loaded", f.name)
 

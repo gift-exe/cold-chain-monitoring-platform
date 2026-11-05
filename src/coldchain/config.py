@@ -23,6 +23,11 @@ class Settings(BaseSettings):
     bridge_client_id: str = "ingestion-bridge-1"
 
     detection_sweep_s: float = 15.0          # how often device silence is checked
+    # Evaluation replay only (Section 3.2.7): days of simulated readings are replayed in minutes, so receipt
+    # times mean nothing. The late flag (FR2.3) and the device-silence sweep, which both depend on receipt
+    # time, are switched off there and tested on runs whose receipt times are real.
+    late_horizon_h: float = 72.0             # 0 disables the late flag
+    silence_sweep: bool = True
     model_dir: str = "models"                # trained anomaly models (detection/anomaly.py)
 
     temporal_address: str = "localhost:7233"

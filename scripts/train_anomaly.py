@@ -1,16 +1,21 @@
-"""Train the anomaly model on simulated normal operation (Section 3.4.4).
+"""Train the anomaly models on simulated normal operation (Section 3.4.4, Table 3.14).
 
-Training and calibration data come from separate random seeds (Table 3.14): the forest is fitted on the
-training seeds, and the warning threshold is set on the calibration seeds so that normal operation produces
-no more than one false warning per 100 device-days (2,400 device-hours).
+One model per equipment type with a compressor (walk-in cold room, ice-lined refrigerator, solar direct-drive
+refrigerator); vaccine carriers are passive boxes with no compressor cycle to learn, so they have no model
+and raise no anomaly warnings.
 
-Until the calibrated simulator exists (I7), normal operation is the basic simulator's compressor cycle,
-and one model, default.joblib, serves all equipment types.
+Data: the calibrated simulator on the Kano scenario network with no injected failures. The forest is fitted
+on the training seeds (1-20); the warning threshold is set on the calibration seeds (21-30) so that normal
+operation produces no more than one false warning per 100 device-days (2,400 device-hours). Test seeds are
+never used. Natural events (power cuts, door openings, degraded units) are part of normal operation and stay
+in the data, as they would in the field.
 
-Run: uv run python scripts/train_anomaly.py
+Run: uv run python scripts/train_anomaly.py [--days 30] [--units 40]
 """
-import random
-from datetime import UTC, datetime, timedelta
+import argparse
+import time
+from collections import defaultdict
+from datetime import datetime, timedelta
 from pathlib import Path
 
 import joblib
@@ -21,49 +26,88 @@ from coldchain.config import get_settings
 from coldchain.detection.anomaly import HOUR, Model, features_by_hour
 from coldchain.detection.rules import Reading
 from coldchain.detection.store import FALLBACK
-from coldchain.simulator.basic import SimDevice
+from coldchain.sim import config as config_mod
+from coldchain.sim.engine import Simulation
+from coldchain.sim.network import build_for
 
-TRAINING_SEEDS = range(1, 21)        # Table 3.14
+TRAINING_SEEDS = range(1, 21)         # Table 3.14
 CALIBRATION_SEEDS = range(21, 31)
-DAYS = 10
-DEVICES_PER_SEED = 3
-FALSE_WARNINGS_PER_HOUR = 1 / 2400   # one per 100 device-days
-INTERVAL = timedelta(minutes=1)
+EQUIPMENT = ("walk_in_cold_room", "ice_lined_refrigerator", "solar_direct_drive")
+FALSE_WARNINGS_PER_HOUR = 1 / 2400    # one per 100 device-days
+WARM_UP_HOURS = 24                    # the first day has no baseline of the unit's own behaviour
 
 
-def normal_features(seed: int) -> np.ndarray:
-    rng = random.Random(seed)
-    start = datetime(2026, 1, 1, tzinfo=UTC)
-    rows = []
-    for d in range(DEVICES_PER_SEED):
-        dev = SimDevice(f"train-{seed}-{d}", cycle_minutes=rng.uniform(35, 55), phase=rng.random())
-        readings = [Reading(datetime.fromisoformat(r["event_time"]), r["temp"], FALLBACK, r["power_ok"])
-                    for r in dev.readings(start, DAYS * 24 * 60, 60, rng)]
-        hours = [start + k * HOUR for k in range(DAYS * 24)]
-        rows += list(features_by_hour(readings, INTERVAL, hours).values())
-    return np.array(rows)
+class Collect:
+    """Sink that keeps the readings of the chosen units."""
+
+    def __init__(self, serials: set[str]):
+        self.serials = serials
+        self.readings = defaultdict(list)
+
+    def send(self, serial, readings):
+        if serial in self.serials:
+            for r in readings:
+                self.readings[serial].append(Reading(datetime.fromisoformat(r["event_time"]), r["temp"], FALLBACK,
+                                                     r.get("power_ok")))
+
+    def close(self):
+        pass
+
+
+def features(purpose: str, seed: int, days: int, per_type: int) -> dict[str, np.ndarray]:
+    cfg = config_mod.from_dict({"name": f"anomaly-{purpose}-{seed}", "purpose": purpose, "seed": seed,
+                                "days": days, "start": "2024-01-01T00:00:00+00:00"})
+    net = build_for(cfg)
+    rng = np.random.default_rng(seed)
+    chosen = {}
+    for eq in EQUIPMENT:
+        serials = [u.serial for u in net.units if u.equipment == eq]
+        for s in rng.choice(serials, min(per_type, len(serials)), replace=False):
+            chosen[str(s)] = eq
+    # A different month per seed, so the models see the whole year's climate
+    start = datetime(2024, 1, 1, tzinfo=cfg.start.tzinfo) + timedelta(days=(seed * 37) % (366 - days))
+    cfg.values["start"] = start.isoformat()
+    sink = Collect(set(chosen))
+    Simulation(cfg, net, sink).run()
+    out = defaultdict(list)
+    hours = [start + k * HOUR for k in range(WARM_UP_HOURS, days * 24)]
+    for serial, readings in sink.readings.items():
+        interval = timedelta(seconds=net.units[0].interval_s)
+        out[chosen[serial]] += list(features_by_hour(readings, interval, hours).values())
+    return {eq: np.array(rows) for eq, rows in out.items()}
 
 
 def main() -> None:
-    train = np.vstack([normal_features(s) for s in TRAINING_SEEDS])
-    calib = np.vstack([normal_features(s) for s in CALIBRATION_SEEDS])
-    # max_samples=1024 rather than the default 256: with 256, an hour with the compressor stuck (flat
-    # temperature, no cycles) scored just below the threshold, because the noisy rate-of-change feature
-    # diluted the splits. Larger samples per tree separated both test faults with a clear margin.
-    forest = IsolationForest(n_estimators=300, max_samples=1024, random_state=0).fit(train)
-
-    calib_scores = -forest.score_samples(calib)
-    threshold = float(np.quantile(calib_scores, 1 - FALSE_WARNINGS_PER_HOUR))
-    median = np.median(train, axis=0)
-    scale = 1.4826 * np.median(np.abs(train - median), axis=0)
-    scale = np.where(scale > 0, scale, train.std(axis=0) + 1e-6)
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--days", type=int, default=30)
+    ap.add_argument("--units", type=int, default=40, help="units of each equipment type per seed")
+    args = ap.parse_args()
+    began = time.time()
+    train, calib = defaultdict(list), defaultdict(list)
+    for purpose, seeds, into in (("training", TRAINING_SEEDS, train), ("calibration", CALIBRATION_SEEDS, calib)):
+        for seed in seeds:
+            for eq, x in features(purpose, seed, args.days, args.units).items():
+                into[eq].append(x)
+            print(f"{purpose} seed {seed} done ({time.time() - began:.0f} s)", flush=True)
 
     out = Path(get_settings().model_dir)
     out.mkdir(exist_ok=True)
-    joblib.dump(Model(forest, threshold, median, scale), out / "default.joblib")
-    rate = float((calib_scores > threshold).mean())
-    print(f"trained on {len(train)} hours, calibrated on {len(calib)} hours; threshold {threshold:.4f}; "
-          f"calibration false-warning rate {rate * 2400:.2f} per 100 device-days -> {out / 'default.joblib'}")
+    for old in out.glob("*.joblib"):
+        old.unlink()   # the basic simulator's default model is replaced by one model per equipment type
+    for eq in EQUIPMENT:
+        x_train, x_calib = np.vstack(train[eq]), np.vstack(calib[eq])
+        # max_samples=1024 rather than the default 256: with 256 the noisy rate-of-change feature diluted the
+        # splits, and hours with a stuck compressor scored just below the threshold (I3).
+        forest = IsolationForest(n_estimators=300, max_samples=1024, random_state=0).fit(x_train)
+        scores = -forest.score_samples(x_calib)
+        threshold = float(np.quantile(scores, 1 - FALSE_WARNINGS_PER_HOUR))
+        median = np.median(x_train, axis=0)
+        scale = 1.4826 * np.median(np.abs(x_train - median), axis=0)
+        scale = np.where(scale > 0, scale, x_train.std(axis=0) + 1e-6)
+        joblib.dump(Model(forest, threshold, median, scale), out / f"{eq}.joblib")
+        rate = float((scores > threshold).mean())
+        print(f"{eq}: trained on {len(x_train)} hours, calibrated on {len(x_calib)} hours; threshold "
+              f"{threshold:.4f}; calibration false warnings {rate * 2400:.2f} per 100 device-days")
 
 
 if __name__ == "__main__":

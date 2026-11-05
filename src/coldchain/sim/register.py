@@ -8,9 +8,13 @@ keeping their readings and incidents.
     uv run python -m coldchain.sim register CONFIG
     uv run python -m coldchain.sim register CONFIG --retire
 """
+import uuid
+
 import psycopg
 
-from coldchain.sim.network import STATE_ID, Network
+from coldchain.sim.network import NAMESPACE, STATE_ID, Network
+
+PHONE_BASE = 2348100000000   # simulated users' phones: +23481000xxxxx, used only with the local SMS gateway
 
 
 def register(conn: psycopg.Connection, net: Network) -> dict:
@@ -43,7 +47,44 @@ def register(conn: psycopg.Connection, net: Network) -> dict:
                 reporting_interval_s = EXCLUDED.reporting_interval_s, status = 'active'""",
             [(u.serial, u.site_id, "mobile" if u.mobile else "fixed", u.equipment, u.has_door_sensor,
               u.has_power_signal, u.interval_s) for u in net.units])
-    return {"jurisdictions": len(states) + len(lgas), "facilities": len(net.sites), "devices": len(net.units)}
+        people = users(net)
+        cur.executemany("""
+            INSERT INTO app_user (id, username, full_name, role, jurisdiction_id, facility_id, phone_number)
+            VALUES (%(id)s, %(username)s, %(full_name)s, %(role)s, %(jurisdiction_id)s, %(facility_id)s, %(phone)s)
+            ON CONFLICT (id) DO UPDATE SET active = true""", people)
+    return {"jurisdictions": len(states) + len(lgas), "facilities": len(net.sites), "devices": len(net.units),
+            "users": len(people)}
+
+
+def users(net: Network) -> list[dict]:
+    """The people the incident service needs (FR5.2, FR6.1): an officer-in-charge for every site, an LGA
+    officer for every LGA, an outreach lead for every outreach carrier and a state officer for every load
+    state (Kano's state and national officers are in the reference data). They have no dashboard login;
+    they exist so that incidents have owners and escalations have recipients."""
+    people = []
+
+    def add(key: str, role: str, name: str, jurisdiction: str, facility: str | None):
+        people.append({"id": str(uuid.uuid5(NAMESPACE, f"user:{key}")), "username": f"sim.{key}",
+                       "full_name": name, "role": role, "jurisdiction_id": jurisdiction, "facility_id": facility,
+                       "phone": f"+{PHONE_BASE + len(people) + 1}"})
+
+    for s in net.sites:
+        add(f"oic.{s.id}", "facility_oic", f"OIC, {s.name}", s.jurisdiction_id, s.id)
+        if s.tier == "state_store" and s.jurisdiction_id != STATE_ID:
+            add(f"state.{s.jurisdiction_id}", "state_officer", f"State officer {s.jurisdiction_id}",
+                s.jurisdiction_id, None)
+    for jurisdiction in sorted({s.jurisdiction_id for s in net.sites if s.tier != "state_store"}):
+        add(f"lga.{jurisdiction}", "lga_officer", f"LGA officer {jurisdiction}", jurisdiction, None)
+    for u in net.units:
+        if u.mobile:
+            store = net.site(u.site_id)
+            add(f"outreach.{u.serial}", "outreach_lead", f"Outreach lead {u.serial}", store.jurisdiction_id,
+                store.id)
+    return people
+
+
+def user_id(key: str) -> str:
+    return str(uuid.uuid5(NAMESPACE, f"user:{key}"))
 
 
 def retire(conn: psycopg.Connection, net: Network) -> int:

@@ -1,0 +1,144 @@
+# E12 functional coverage (Table 3.10): the automated tests that demonstrate each functional requirement
+# (Table 3.3). A requirement counts as covered when it has at least one test and all of its tests pass.
+# `status` records a requirement that is dropped or only partly implemented, with the reason; it is
+# reported as such, never counted as covered. Run: uv run python -m coldchain.evaluation coverage
+
+[FR1_1]
+tests = ["test_messages.py::test_single_reading_accepted", "test_ingestion.py::test_live_readings_stored_once_each_despite_duplicates",
+         "test_sim.py::test_emulator_publishes_every_reading_with_acknowledgement"]
+[FR1_2]
+tests = ["test_messages.py::test_batch_accepted_in_any_order", "test_ingestion.py::test_24_hour_delayed_batch_stored_with_event_times",
+         "test_messages.py::test_one_bad_reading_does_not_reject_the_batch"]
+[FR1_3]
+tests = ["test_messages.py::test_malformed_messages_rejected_with_reason", "test_messages.py::test_unexpected_topic_rejected",
+         "test_ingestion.py::test_malformed_messages_rejected_with_reason", "test_ingestion.py::test_unknown_device_rejected",
+         "test_writer.py::test_unstorable_reading_rejected_and_rest_stored"]
+[FR1_4]
+tests = ["test_ingestion.py::test_live_readings_stored_once_each_despite_duplicates", "test_schema.py::test_duplicate_reading_stored_once",
+         "test_detection.py::test_live_heat_excursion_detected_once_even_if_replayed", "test_incidents.py::test_replayed_event_creates_no_second_incident"]
+[FR1_5]
+tests = ["test_ingestion.py::test_event_receipt_and_processing_times_recorded"]
+
+[FR2_1]
+tests = ["test_rules.py::test_readings_must_be_in_event_time_order_regardless_of_arrival", "test_messages.py::test_batch_accepted_in_any_order"]
+[FR2_2]
+tests = ["test_detection.py::test_late_readings_reveal_earlier_start_of_same_event", "test_detection.py::test_retrospective_freeze_from_24_hour_old_upload",
+         "test_detection.py::test_gap_splitting_a_stored_event_keeps_its_start"]
+[FR2_3]
+tests = ["test_messages.py::test_reading_beyond_72_hours_flagged_late", "test_ingestion.py::test_reading_beyond_72_hours_stored_and_flagged",
+         "test_schema.py::test_reading_72_hours_late_accepted"]
+[FR2_4]
+tests = ["test_messages.py::test_reading_up_to_five_minutes_ahead_accepted", "test_schema.py::test_reading_from_the_future_rejected"]
+
+[FR3_1]
+tests = ["test_rules.py::test_heat_excursion_of_30_minutes_detected", "test_rules.py::test_heat_of_29_minutes_not_detected",
+         "test_rules.py::test_freeze_detected", "test_rules.py::test_freeze_of_4_minutes_not_detected",
+         "test_rules.py::test_freeze_ignored_for_product_that_is_not_freeze_sensitive", "test_rules.py::test_product_specific_limits_used",
+         "test_rules.py::test_power_loss_warning", "test_rules.py::test_power_loss_critical_when_temperature_rising_towards_limit",
+         "test_rules.py::test_door_open_warning", "test_rules.py::test_door_open_needs_door_sensor", "test_rules.py::test_local_alarm_recorded",
+         "test_detection.py::test_power_loss_and_door_open_detected_with_inputs", "test_detection.py::test_power_and_door_not_reported_without_inputs",
+         "test_detection.py::test_device_silence_starts_and_ends", "test_detection.py::test_local_alarm_recorded",
+         "test_incident_e2e.py::test_rejected_handoff_through_api_raises_custody_gap_incident"]
+[FR3_2]
+tests = ["test_rules.py::test_no_detection_across_a_data_gap", "test_rules.py::test_episode_ends_at_last_observation_before_gap",
+         "test_detection.py::test_no_event_inferred_across_missing_data", "test_detection.py::test_device_silence_starts_and_ends",
+         "test_custody.py::test_assigned_mobile_logger_silent_after_its_sync_window"]
+[FR3_3]
+tests = ["test_rules.py::test_brief_dip_does_not_split_excursion", "test_rules.py::test_return_to_range_shorter_than_hysteresis_keeps_event_open",
+         "test_rules.py::test_readings_around_threshold_create_one_event_not_many"]
+[FR3_4]
+tests = ["test_rules.py::test_cumulative_exposure_counts_short_excursions_and_excludes_gaps"]
+
+[FR4_1]
+tests = ["test_anomaly.py::test_steady_drift_within_range_is_flagged_and_explained", "test_anomaly.py::test_compressor_stuck_off_cycles_flagged",
+         "test_anomaly.py::test_zscore_baseline_flags_step_change", "test_anomaly.py::test_models_per_equipment_type"]
+[FR4_2]
+tests = ["test_detection.py::test_anomaly_warning_with_explanation", "test_anomaly.py::test_steady_drift_within_range_is_flagged_and_explained"]
+
+[FR5_1]
+tests = ["test_incidents.py::test_replayed_event_creates_no_second_incident", "test_incidents.py::test_second_event_with_the_same_start_joins_the_existing_incident",
+         "test_incidents.py::test_new_episode_while_open_updates_the_incident", "test_schema.py::test_incident_key_prevents_duplicate_incidents"]
+[FR5_2]
+tests = ["test_incidents.py::test_facility_excursion_owned_by_officer_in_charge", "test_custody.py::test_event_during_handoff_owned_by_releaser_with_receiver_copied",
+         "test_custody.py::test_event_after_confirmation_owned_by_receiver", "test_custody.py::test_retrospective_event_owned_by_custodian_at_its_start_not_at_detection"]
+[FR5_3]
+tests = ["test_custody.py::test_event_with_no_custodian_goes_to_lga_officer_and_raises_custody_gap"]
+[FR5_4]
+tests = ["test_incidents.py::test_event_ended_15_minutes_before_detection_is_retrospective_and_copied_to_lga",
+         "test_incidents.py::test_event_ended_just_before_detection_is_operational", "test_policy.py::test_retrospective_critical_uses_slow_timers_and_no_reminders"]
+[FR5_5]
+tests = []
+status = "dropped (Gift, 2026-11-05): a condition after resolution is always a new incident (test_incidents.py::test_condition_soon_after_resolution_is_a_new_incident)"
+
+[FR6_1]
+tests = ["test_policy.py::test_critical_never_acknowledged_reaches_national_at_4_hours_then_overdue_with_daily_reminders",
+         "test_workflows.py::test_unacknowledged_critical_incident_escalates_at_15_60_and_240_minutes", "test_incidents.py::test_owner_notified_then_escalated_to_lga_after_15_minutes",
+         "test_policy.py::test_warning_goes_to_lga_after_24_hours_and_is_never_overdue"]
+[FR6_2]
+tests = ["test_policy.py::test_critical_acknowledged_in_time_escalates_only_if_unresolved_two_then_four_hours_later",
+         "test_workflows.py::test_acknowledgement_stops_escalation_and_starts_resolution_limit", "test_policy.py::test_retrospective_acknowledged_goes_to_state_after_seven_day_review_limit"]
+[FR6_3]
+tests = ["test_policy.py::test_acknowledgement_cancels_pending_acknowledgement_escalations",
+         "test_policy.py::test_late_acknowledgement_keeps_escalation_and_resolution_goes_above_highest_tier"]
+[FR6_4]
+tests = ["test_policy.py::test_critical_never_acknowledged_reaches_national_at_4_hours_then_overdue_with_daily_reminders",
+         "test_policy.py::test_acknowledged_at_national_tier_is_overdue_when_resolution_limit_passes"]
+
+[FR7_1]
+tests = ["test_incidents.py::test_every_change_is_hash_chained", "test_notify.py::test_delivered_sms_recorded_in_audit_trail",
+         "test_incident_e2e.py::test_live_excursion_to_closure"]
+[FR7_2]
+tests = ["test_audit.py::test_altered_record_detected", "test_audit.py::test_altered_actor_or_time_detected", "test_audit.py::test_removed_record_detected",
+         "test_audit.py::test_rewritten_chain_detected_by_anchor", "test_schema.py::test_services_cannot_alter_audit_trail",
+         "test_schema.py::test_even_schema_owner_cannot_alter_audit_trail"]
+[FR7_3]
+tests = ["test_audit.py::test_intact_chain_verifies", "test_incident_e2e.py::test_audit_verification_through_api", "test_audit.py::test_daily_verification_is_scheduled"]
+
+[FR8_1]
+tests = ["test_custody.py::test_normal_handoff_transfers_custody_when_confirmation_received", "test_custody.py::test_only_holder_releases_and_only_receiver_confirms",
+         "test_custody.py::test_custody_log_is_append_only_and_hash_chained", "test_sms_commands.py::test_receiver_confirms_receipt_by_sms"]
+[FR8_2]
+tests = ["test_schema.py::test_overlapping_custody_rejected", "test_schema.py::test_custodian_at_event_start_is_unique",
+         "test_custody.py::test_delayed_confirmation_ends_the_gap_and_transfers_at_confirmation", "test_custody.py::test_completion_ends_custody_and_logger_assignment"]
+[FR8_3]
+tests = ["test_custody.py::test_incomplete_handoff_raises_custody_gap_when_window_expires", "test_custody.py::test_rejected_handoff_keeps_custody_with_releaser_and_raises_gap",
+         "test_workflows.py::test_unconfirmed_handoff_raises_custody_gap_when_window_ends", "test_sms_commands.py::test_receiver_rejects_by_sms_with_reason"]
+
+[FR9_1]
+tests = ["test_notify.py::test_alert_goes_to_the_owner_by_sms_and_dashboard_and_is_sent_once", "test_templates.py::test_every_template_fits_one_gsm_sms",
+         "test_templates.py::test_alert_matches_the_example_in_section_3_4_6", "test_notify_e2e.py::test_dashboard_notifications_through_api"]
+[FR9_2]
+tests = ["test_sms_commands.py::test_owner_acknowledges_with_one_reply", "test_sms_commands.py::test_duplicate_delivery_processed_once_and_repeat_command_has_no_effect",
+         "test_sms_commands.py::test_unregistered_and_deactivated_numbers_rejected_without_reply", "test_sms_commands.py::test_registered_user_not_entitled_is_refused",
+         "test_sms_commands.py::test_expired_code_rejected", "test_sms_commands.py::test_code_is_single_use_and_bound_to_its_incident",
+         "test_notify_e2e.py::test_alert_acknowledged_and_resolved_by_sms"]
+[FR9_3]
+tests = ["test_notify.py::test_delivered_sms_recorded_in_audit_trail", "test_notify.py::test_temporary_failure_retried_three_times_over_five_minutes_then_next_tier",
+         "test_notify.py::test_rejected_number_not_retried_next_tier_and_administrator_told", "test_notify.py::test_no_final_status_within_ten_minutes_treated_as_undelivered",
+         "test_notify_e2e.py::test_rejected_alert_goes_to_the_next_tier_at_once"]
+
+[FR10_1]
+tests = ["test_dashboard_views.py::test_each_role_sees_only_its_jurisdiction", "test_dashboard_views.py::test_facility_officer_sees_own_facility_only",
+         "test_dashboard_views.py::test_outreach_lead_sees_incidents_on_consignments_they_handled", "test_dashboard_views.py::test_active_list_puts_critical_first_then_oldest"]
+[FR10_2]
+tests = ["test_dashboard_views.py::test_stale_and_silent_units_are_marked", "test_dashboard_views.py::test_facility_status_is_its_worst_unit"]
+[FR10_3]
+tests = ["test_dashboard_views.py::test_response_metrics_by_facility_and_tier"]
+
+[FR11_1]
+tests = ["test_dashboard_views.py::test_product_limits_changed_by_national_officer_only_and_recorded",
+         "test_dashboard_views.py::test_phone_changes_by_administrator_only_and_recorded"]
+status = "partial: products and phone numbers only; users, roles, jurisdictions, facilities, devices and escalation policies are managed in seed data and Keycloak, not through the prototype"
+[FR11_2]
+tests = ["test_dashboard_views.py::test_product_limits_changed_by_national_officer_only_and_recorded",
+         "test_dashboard_views.py::test_phone_changes_by_administrator_only_and_recorded"]
+
+[FR12_1]
+tests = ["test_sim.py::test_network_from_grid3_with_one_store_per_lga", "test_sim.py::test_mobile_readings_carry_positions_and_upload_after_the_trip",
+         "test_sim.py::test_load_network_matches_the_load_model", "test_sim.py::test_connectivity_offline_share_follows_the_location_class"]
+[FR12_2]
+tests = ["test_sim.py::test_every_injection_is_labelled_with_its_expected_owner", "test_sim.py::test_injected_heat_and_freeze_produce_conditions_attributed_to_them",
+         "test_sim.py::test_silence_sends_nothing_and_a_connectivity_gap_uploads_a_batch"]
+[FR12_3]
+tests = ["test_sim.py::test_runs_are_reproducible_from_their_configuration", "test_sim.py::test_network_is_the_same_whatever_the_run_seed",
+         "test_sim.py::test_seed_must_belong_to_the_purposes_set"]

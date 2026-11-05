@@ -1,0 +1,29 @@
+# Evaluation stack (Section 3.2.7): the development stack under its own project name, so it has its own
+# database, event log, workflow history and broker state, and the development data are untouched.
+#   make eval-up / eval-reset / eval-down          (stop the development stack first: same ports)
+# Every SMS goes to the local gateway emulator, never to Africa's Talking, whatever .env says, and the
+# Africa's Talking key from .env is not passed to any container.
+x-eval-sms: &eval-sms
+  AT_API_KEY: eval-at-key
+
+services:
+  incident-service:
+    volumes: !override
+      - ./runs/eval/anchors:/app/anchors
+
+  notification-service:
+    environment:
+      <<: *eval-sms
+      AT_API_URL: http://sms-gateway:8000
+      AT_USERNAME: sandbox
+      AT_SENDER_ID: ""
+      SMS_REDIRECT_TO: ""
+      SMS_TRUST_SENT: "false"
+
+  sms-gateway:
+    environment:
+      <<: *eval-sms
+
+  api:
+    volumes: !override
+      - ./runs/eval/anchors:/app/anchors:ro

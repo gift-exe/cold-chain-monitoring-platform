@@ -97,8 +97,11 @@ class Window:
     causes: set = field(default_factory=set)
 
 
-CONDITION_FOR = {"heat_excursion": "above_upper", "freeze": "at_or_below_freeze", "power_loss": "no_power",
-                 "door_open": "door_open"}
+# Conditions an injected failure causes. Freezing is logged at two levels: the WHO freeze-alarm level used by
+# the calibration (limits.freeze, -0.5 °C) and the prototype's own freeze rule (limits.freeze_rule, 0 °C),
+# which is the ground truth for the detection evaluation (E1).
+CONDITION_FOR = {"heat_excursion": ("above_upper",), "freeze": ("at_or_below_freeze", "at_or_below_zero"),
+                 "power_loss": ("no_power",), "door_open": ("door_open",)}
 
 
 class Simulation:
@@ -299,7 +302,7 @@ class Simulation:
         u, kind = inj.unit, inj.type
         self.active[u].add(inj.id)
         for (k, uu), w in self.windows.items():   # a condition already under way on this unit
-            if uu == u and k == CONDITION_FOR.get(kind):
+            if uu == u and k in CONDITION_FOR.get(kind, ()):
                 w.causes.add(inj.id)
         self._fault(kind, u, inj, +1)
         yield self.env.timeout(minutes)
@@ -355,6 +358,7 @@ class Simulation:
             self.too_warm += self.T > lim["upper"]
             self.too_cold += self.T < lim["lower"]
             self.track(t, {"above_upper": self.T > lim["upper"], "at_or_below_freeze": self.T <= lim["freeze"],
+                           "at_or_below_zero": self.T <= lim["freeze_rule"],
                            "no_power": self.powered & self.signal & ~supply, "door_open": door & self.door_sensor})
             if minute % every == 0:
                 self.emit(t, minute, supply, door, s)
@@ -434,15 +438,15 @@ class Simulation:
                 peak[u] = self.T[u]
             if kind == "above_upper":
                 np.maximum(peak, np.where(mask, self.T, -np.inf), out=peak)
-            elif kind == "at_or_below_freeze":
+            elif kind in ("at_or_below_freeze", "at_or_below_zero"):
                 np.minimum(peak, np.where(mask, self.T, np.inf), out=peak)
             self.prev[kind] = mask.copy()
 
     def end_window(self, w: Window, t: datetime, open_at_end: bool = False):
         unit = self.units[w.unit]
-        if w.kind in ("above_upper", "at_or_below_freeze"):
+        if w.kind in ("above_upper", "at_or_below_freeze", "at_or_below_zero"):
             w.peak = float(self.peaks[w.kind][w.unit])
-        relevant = {i for i in w.causes if CONDITION_FOR.get(i.rsplit("-", 1)[0]) == w.kind
+        relevant = {i for i in w.causes if w.kind in CONDITION_FOR.get(i.rsplit("-", 1)[0], ())
                     or (w.kind == "above_upper" and i.startswith("power_loss"))}
         self.conditions.append({
             "kind": w.kind, "serial": unit.serial, "site_id": unit.site_id, "start": w.start.isoformat(),

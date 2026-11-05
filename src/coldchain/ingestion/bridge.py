@@ -10,7 +10,7 @@ Run: uv run python -m coldchain.ingestion.bridge
 import json
 import logging
 import threading
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 
 import paho.mqtt.client as mqtt
 
@@ -29,6 +29,7 @@ class Bridge:
         s = get_settings()
         kafka.ensure_topics()
         self.registry = DeviceRegistry()
+        self.late_horizon = timedelta(hours=s.late_horizon_h) if s.late_horizon_h > 0 else None
         self.producer = kafka.producer()
         self._pending: dict[int, int] = {}   # MQTT message id -> Kafka records awaiting confirmation
         self._failed: set[int] = set()
@@ -47,7 +48,7 @@ class Bridge:
 
     def _on_message(self, client, userdata, msg):
         received_at = datetime.now(UTC)  # receipt time (FR1.5)
-        accepted, rejected = parse(msg.topic, msg.payload, received_at)
+        accepted, rejected = parse(msg.topic, msg.payload, received_at, self.late_horizon)
 
         records = []
         for a in accepted:

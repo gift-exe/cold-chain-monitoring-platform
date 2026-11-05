@@ -92,7 +92,10 @@ def main() -> None:
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(name)s %(levelname)s %(message)s")
     kafka.ensure_topics()
     d = Detector()
-    threading.Thread(target=d.run_silence_sweep, daemon=True, name="silence-sweep").start()
+    if d.settings.silence_sweep:
+        threading.Thread(target=d.run_silence_sweep, daemon=True, name="silence-sweep").start()
+    else:
+        log.warning("device-silence sweep is off (evaluation replay)")
     d.run_stored_consumer()
 
 

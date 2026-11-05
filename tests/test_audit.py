@@ -92,3 +92,25 @@ def test_broken_chain_is_not_anchored(owner_conn, tmp_path):
     with pytest.raises(RuntimeError, match="not anchoring"):
         audit.anchor(owner_conn, tmp_path)
     assert audit.load_anchors(tmp_path) == []
+
+
+def test_daily_verification_is_scheduled():
+    """FR7.3: the audit chains are verified and anchored every day at 23:55 WAT, by a Temporal schedule."""
+    import asyncio
+
+    from coldchain.incidents.service import ensure_audit_schedule
+
+    class Client:
+        def __init__(self):
+            self.created = []
+
+        async def create_schedule(self, id, schedule):
+            self.created.append((id, schedule))
+
+    client = Client()
+    asyncio.run(ensure_audit_schedule(client))
+    (sid, schedule), = client.created
+    cal, = schedule.spec.calendars
+    assert sid == "audit-daily"
+    assert [(r.start, r.end) for r in cal.hour] == [(22, 22)] and [(r.start, r.end) for r in cal.minute] == [(55, 55)]
+    assert cal.day_of_month and cal.month   # the defaults: every day of every month

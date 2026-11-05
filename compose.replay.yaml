@@ -1,0 +1,10 @@
+# Accelerated replay (E1-E3, Section 3.2.7): days of simulated readings are replayed in minutes, so receipt
+# times carry no meaning. The late flag (FR2.3) and the device-silence sweep, which depend on receipt time,
+# are switched off; both are evaluated on runs whose receipt times are real (E7 and the live runs).
+services:
+  ingestion-bridge:
+    environment:
+      LATE_HORIZON_H: "0"
+  detection:
+    environment:
+      SILENCE_SWEEP: "false"

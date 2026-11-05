@@ -77,8 +77,12 @@ def _short(e: ValidationError) -> str:
     return "; ".join(f"{'.'.join(map(str, err['loc'])) or 'message'}: {err['msg']}" for err in e.errors())
 
 
-def parse(topic: str, payload: bytes, received_at: datetime) -> tuple[list[Accepted], list[Rejected]]:
-    """Validate one MQTT message. Returns the readings accepted and the reasons for any rejections."""
+def parse(topic: str, payload: bytes, received_at: datetime,
+          late_horizon: timedelta | None = LATE_HORIZON) -> tuple[list[Accepted], list[Rejected]]:
+    """Validate one MQTT message. Returns the readings accepted and the reasons for any rejections.
+
+    late_horizon=None disables the late flag; only the evaluation's accelerated replay does this, because
+    replaying days of readings in minutes makes every reading look late (Section 3.2.7)."""
     text = payload.decode("utf-8", errors="replace")
     parts = topic.split("/")
     if len(parts) != 3 or parts[0] != "devices" or parts[2] != "readings":
@@ -113,6 +117,6 @@ def parse(topic: str, payload: bytes, received_at: datetime) -> tuple[list[Accep
             rejected.append(Rejected("event_time more than 5 minutes in the future", json.dumps(item),
                                      batch.device_id))
             continue
-        late = received_at - r.event_time > LATE_HORIZON
+        late = late_horizon is not None and received_at - r.event_time > late_horizon
         accepted.append(Accepted(batch.device_id, r, received_at, late))
     return accepted, rejected

@@ -93,6 +93,20 @@ def test_24_hour_delayed_batch_stored_with_event_times(mqtt_client, device):
     assert any_late is False                     # within the 72 h horizon
 
 
+def test_event_receipt_and_processing_times_recorded(mqtt_client, device):
+    """FR1.5: every reading has its event time, receipt time and processing (storage) time, in that order."""
+    sim, dev_id = device
+    readings = list(sim.readings(datetime.now(UTC) - timedelta(minutes=10), 10, 60, random.Random(4)))
+    publish_live(mqtt_client, sim, iter(readings))
+    assert wait_for(*count_readings(dev_id), 10) == 10
+    with psycopg.connect(_pg_url("owner")) as conn:
+        missing, out_of_order = conn.execute(
+            "SELECT count(*) FILTER (WHERE processed_at IS NULL), "
+            "count(*) FILTER (WHERE NOT (event_time <= received_at AND received_at <= processed_at)) "
+            "FROM reading WHERE device_id = %s", (dev_id,)).fetchone()
+    assert (missing, out_of_order) == (0, 0)
+
+
 def test_reading_beyond_72_hours_stored_and_flagged(mqtt_client, device):
     sim, dev_id = device
     old = {"seq_no": 1, "event_time": (datetime.now(UTC) - timedelta(hours=80)).isoformat(), "temp": 5.0}

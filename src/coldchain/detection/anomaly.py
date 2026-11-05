@@ -63,6 +63,11 @@ def hour_features(readings: list[Reading], hour_start: datetime, interval: timed
                   baseline_mean: float | None) -> np.ndarray | None:
     """Feature vector for one hour, or None if the hour has too few readings or no baseline."""
     hour = [r for r in readings if hour_start <= r.t < hour_start + HOUR]
+    return _features(hour, hour_start, interval, baseline_mean)
+
+
+def _features(hour: list[Reading], hour_start: datetime, interval: timedelta,
+              baseline_mean: float | None) -> np.ndarray | None:
     if len(hour) < MIN_COVERAGE * (HOUR / interval) or baseline_mean is None:
         return None
     temps = np.array([r.temp for r in hour])
@@ -99,9 +104,12 @@ def zscore(means: dict[datetime, float], hour_start: datetime) -> float | None:
 def features_by_hour(readings: list[Reading], interval: timedelta,
                      hours: list[datetime]) -> dict[datetime, np.ndarray]:
     means = hourly_means(readings, interval)
+    buckets: dict[datetime, list[Reading]] = {}   # readings grouped by hour once, not rescanned per hour
+    for r in readings:
+        buckets.setdefault(r.t.replace(minute=0, second=0, microsecond=0), []).append(r)
     out = {}
     for h in hours:
-        f = hour_features(readings, h, interval, baseline_for(means, h))
+        f = _features(buckets.get(h, []), h, interval, baseline_for(means, h))
         if f is not None:
             out[h] = f
     return out

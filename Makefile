@@ -1,9 +1,12 @@
 # Development commands. `make dev` brings everything up from scratch.
 COMPOSE = podman compose
+# Evaluation stack (Section 3.2.7): own project, volumes and anchors; SMS only to the local gateway
+EVAL = podman compose -p coldchain-eval -f compose.yaml -f compose.eval.yaml
+EVAL_NET ?= configs/sim/detection-101.toml
 
 INFRA = postgres keycloak mosquitto kafka temporal
 
-.PHONY: dev env infra build up down reset migrate seed train demo test test-unit test-resilience lint logs sim-sources calibrate
+.PHONY: eval-up eval-down eval-reset eval-replay eval-live dev env infra build up down reset migrate seed train demo test test-unit test-resilience lint logs sim-sources calibrate
 
 dev: env anchors infra migrate seed models/default.joblib up  ## start the stack, apply migrations, load seed data, start services
 
@@ -65,3 +68,23 @@ lint:
 
 logs:
 	$(COMPOSE) logs -f --tail=100
+
+eval-up: env build  ## start the evaluation stack (stop the development stack first), migrate, seed, register the Kano network
+	mkdir -p runs/eval/anchors
+	$(EVAL) up -d --wait
+	uv run alembic upgrade head
+	uv run python scripts/seed.py --no-demo
+	uv run python -m coldchain.sim register $(EVAL_NET)
+
+eval-replay:  ## switch the evaluation stack to accelerated replay (late flag and silence sweep off)
+	$(EVAL) -f compose.replay.yaml up -d --wait ingestion-bridge detection
+
+eval-live:  ## switch the evaluation stack back to real receipt times
+	$(EVAL) up -d --wait ingestion-bridge detection
+
+eval-down:  ## stop the evaluation stack, keeping its data
+	$(EVAL) down
+
+eval-reset:  ## stop the evaluation stack and delete its data and anchors
+	$(EVAL) down -v
+	rm -rf runs/eval/anchors

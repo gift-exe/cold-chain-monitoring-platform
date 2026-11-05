@@ -23,12 +23,12 @@ BATCH_WAIT_S = 0.2
 
 INSERT_READING = """
     INSERT INTO reading (device_id, seq_no, event_time, received_at, temperature, power_ok, door_open, alarm,
-                         location, battery, late_flag)
+                         location, battery, late_flag, processed_at)
     VALUES (%(device_id)s, %(seq_no)s, %(event_time)s, %(received_at)s, %(temperature)s, %(power_ok)s,
             %(door_open)s, %(alarm)s,
             CASE WHEN %(lon)s::float8 IS NULL THEN NULL
                  ELSE ST_SetSRID(ST_MakePoint(%(lon)s::float8, %(lat)s::float8), 4326)::geography END,
-            %(battery)s, %(late_flag)s)
+            %(battery)s, %(late_flag)s, clock_timestamp())   -- processing time (FR1.5): when it was stored
     ON CONFLICT DO NOTHING
 """
 INSERT_REJECTED = """

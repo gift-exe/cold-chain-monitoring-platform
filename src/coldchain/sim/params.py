@@ -150,7 +150,7 @@ DEFAULTS = {
         "connectivity_gap": {"rate": 0.0, "minutes": [60, 4320]},
         "sensor_drift": {"rate": 0.0, "minutes": [4320, 10080], "offset": [1.5, 3.0]},
     },
-    "limits": {"lower": 2.0, "upper": 8.0, "freeze": -0.5},
+    "limits": {"lower": 2.0, "upper": 8.0, "freeze": -0.5, "freeze_rule": 0.0},
     "output": {"readings": False},
 }
 
