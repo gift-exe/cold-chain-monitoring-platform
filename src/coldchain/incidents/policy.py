@@ -7,8 +7,8 @@ answer depends only on stored facts, it is the same however often it is asked, a
 step that fell due is applied in order (catch-up).
 
 Interpretations of Table 3.15 made here (prototype assumptions, to be confirmed):
-- Acknowledgement stages are measured from creation; after a recurrence reopens an incident, the owner
-  is re-notified and the stages are measured again from that time.
+- Acknowledgement stages are measured from creation. A condition that returns after resolution is a new
+  incident, not a reopening (FR5.5 dropped).
 - Resolution stages are measured from acknowledgement, or from a reviewer's reopening. A stage whose tier
   is 'next' goes to the tier above the highest tier already notified.
 - Only critical incidents become overdue. An incident is overdue when a resolution deadline falls due

@@ -2,7 +2,7 @@
 
 One process runs four loops:
 - the Temporal worker, which executes incident, handoff and audit workflows;
-- a Kafka consumer of integrity-events, which creates, updates or reopens incidents and then starts or
+- a Kafka consumer of integrity-events, which creates or updates incidents and then starts or
   signals each incident's workflow (offsets are committed only after both);
 - the outbox relay, which publishes notifications and custody-gap events written by any service;
 - a sweep that makes sure every pending handoff has its confirmation-window timer, in case the service

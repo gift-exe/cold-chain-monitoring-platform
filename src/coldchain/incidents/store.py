@@ -20,7 +20,6 @@ from coldchain.incidents.policy import TIERS, Clock, Policy, Step, above, advanc
 from coldchain.notify import codes
 
 RETROSPECTIVE_AFTER = timedelta(minutes=15)   # Section 3.4.4
-RECURRENCE_WITHIN = timedelta(minutes=60)     # FR5.5
 SAME_INCIDENT_WITHIN = timedelta(hours=24)    # a new episode this soon after the last joins the open incident
 ALARM_LINK_WITHIN = timedelta(minutes=30)     # a local alarm this close to an excursion belongs to it
 REVIEWER_ROLES = ("lga_officer", "state_officer", "national_officer")
@@ -88,7 +87,7 @@ def raise_custody_gap(conn: psycopg.Connection, consignment_id: str, start: date
 
 
 def on_event(conn: psycopg.Connection, event_id: str) -> Outcome | None:
-    """Create, update or reopen the incident for an integrity event. Idempotent: an event already
+    """Create or update the incident for an integrity event. Idempotent: an event already
     handled changes nothing unless its severity or condition has changed."""
     ev = _event(conn, event_id)
     if ev is None:
@@ -100,9 +99,6 @@ def on_event(conn: psycopg.Connection, event_id: str) -> Outcome | None:
     joined = _join_open(conn, ev)
     if joined:
         return joined
-    reopened = _recurrence(conn, ev)
-    if reopened:
-        return reopened
     return _create(conn, ev)
 
 
@@ -197,33 +193,6 @@ def _join_open(conn: psycopg.Connection, ev: dict) -> Outcome | None:
                                           "event_start": ev["event_start"], "event_end": ev["event_end"]})
     _update(conn, {**ev, "incident_id": incident_id})
     return Outcome(incident_id, True, f"incident {row[1]} updated with a new episode")
-
-
-def _recurrence(conn: psycopg.Connection, ev: dict) -> Outcome | None:
-    """FR5.5: the same condition on the same device within 60 minutes of resolution reopens the
-    resolved incident, and the owner is notified again."""
-    if not ev["device_id"]:
-        return None
-    row = conn.execute("""
-        SELECT id::text, incident_no FROM incident
-        WHERE device_id = %s AND type = %s AND state = 'resolved'
-          AND %s BETWEEN resolved_at AND resolved_at + %s
-        ORDER BY resolved_at DESC LIMIT 1 FOR UPDATE""",
-        (ev["device_id"], ev["type"], ev["event_start"], RECURRENCE_WITHIN)).fetchone()
-    if row is None:
-        return None
-    incident_id = row[0]
-    conn.execute("""
-        UPDATE incident SET state = 'open', reopened_at = now(), reopen_count = reopen_count + 1,
-               acknowledged_at = NULL, acknowledged_by = NULL, resolved_at = NULL, resolved_by = NULL,
-               ack_due_from = now(), ack_stage = -1, resolve_due_from = NULL, resolve_stage = 0,
-               condition_cleared = %s,
-               severity = CASE WHEN %s = 'critical' THEN 'critical' ELSE severity END
-        WHERE id = %s""", (ev["event_end"] is not None, ev["severity"], incident_id))
-    conn.execute("UPDATE integrity_event SET incident_id = %s WHERE id = %s", (incident_id, ev["id"]))
-    record(conn, incident_id, "reopened", {"reason": "recurrence within 60 minutes of resolution",
-                                           "integrity_event_id": ev["id"], "event_start": ev["event_start"]})
-    return Outcome(incident_id, True, f"incident {row[1]} reopened by recurrence")
 
 
 def _overlapping_incident(conn: psycopg.Connection, device_id: str, start: datetime,

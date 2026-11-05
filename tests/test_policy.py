@@ -121,14 +121,6 @@ def test_warning_goes_to_lga_after_24_hours_and_is_never_overdue():
     assert steps == [(0, "notify", "owner")]
 
 
-def test_recurrence_renotifies_owner_and_measures_again_from_reopening():
-    """A recurrence reopens an incident already escalated to the LGA: the owner is notified again, the
-    LGA stage is not repeated, and the state tier follows 60 minutes after reopening."""
-    reopened = replace(new(), state="open", current_tier="lga", ack_due_from=at(500), ack_stage=-1)
-    steps, _ = simulate(reopened, until=600)
-    assert steps == [(500, "notify", "owner"), (560, "escalate", "state")]
-
-
 def test_reviewer_reopening_restarts_resolution_limits():
     c = replace(acknowledge(new(), 10), ack_stage=0, resolve_stage=0, current_tier="lga",
                 state="acknowledged", resolve_due_from=at(1000))   # as store.reopen leaves it

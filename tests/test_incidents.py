@@ -1,4 +1,4 @@
-"""Incidents in the database: creation, ownership, actions, review, recurrence and escalation steps
+"""Incidents in the database: creation, ownership, actions, review, episodes and escalation steps
 (Sections 3.4.2 to 3.4.4, Tables 3.15 and 3.17). Each test runs in a transaction that is rolled back.
 """
 import json
@@ -229,28 +229,16 @@ def test_reviewer_reopening_restarts_resolution_clock(db):
     assert inc["resolve_due_from"] is not None and inc["resolved_at"] is None
 
 
-def test_recurrence_within_60_minutes_reopens_and_renotifies(db):
-    dev = fixed_device(db)
-    t = now(db)
-    inc_id = store.on_event(db, event(db, dev, start=t - 90 * MIN, end=t - 50 * MIN)).incident_id
-    store.apply_due(db, inc_id, incident(db, inc_id)["ack_due_from"])
-    store.resolve(db, inc_id, USERS["oic"], "door closed")
-    again = event(db, dev, start=t + 30 * MIN)          # 30 minutes after resolution
-    out = store.on_event(db, again)
-    assert out.incident_id == inc_id and out.changed
-    inc = incident(db, inc_id)
-    assert (inc["state"], inc["reopen_count"], inc["ack_stage"]) == ("open", 1, -1)
-    store.apply_due(db, inc_id, inc["ack_due_from"])
-    assert [n["kind"] for n in notices(db, inc_id)] == ["alert", "review", "alert"]
-
-
-def test_condition_after_60_minutes_is_a_new_incident(db):
+def test_condition_soon_after_resolution_is_a_new_incident(db):
+    """FR5.5 (reopen within 60 minutes of resolution) was dropped: any new episode after resolution is
+    a new incident, and the resolved one stays resolved."""
     dev = fixed_device(db)
     t = now(db)
     inc_id = store.on_event(db, event(db, dev, start=t - 90 * MIN, end=t - 50 * MIN)).incident_id
     store.resolve(db, inc_id, USERS["oic"], "door closed")
-    assert store.on_event(db, event(db, dev, start=t + 61 * MIN)).incident_id != inc_id
-
+    out = store.on_event(db, event(db, dev, start=t + 5 * MIN))
+    assert out.incident_id != inc_id and out.changed
+    assert (incident(db, inc_id)["state"], incident(db, inc_id)["reopen_count"]) == ("resolved", 0)
 
 
 def test_new_episode_while_open_updates_the_incident(db):
