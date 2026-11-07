@@ -1,0 +1,20 @@
+# Development stack with every SMS kept on this machine: the notification service sends to the local gateway
+# emulator, never to Africa's Talking or to a redirect phone, whatever .env says, and no Africa's Talking key
+# is passed to any container. For tests and demonstrations with other people (E8, E9, E12):
+#   make dev COMPOSE="podman compose -f compose.yaml -f compose.local-sms.yaml"
+x-local-sms: &local-sms
+  AT_API_KEY: local-at-key
+
+services:
+  notification-service:
+    environment:
+      <<: *local-sms
+      AT_API_URL: http://sms-gateway:8000
+      AT_USERNAME: sandbox
+      AT_SENDER_ID: ""
+      SMS_REDIRECT_TO: ""
+      SMS_TRUST_SENT: "false"
+
+  sms-gateway:
+    environment:
+      <<: *local-sms

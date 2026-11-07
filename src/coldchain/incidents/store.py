@@ -400,14 +400,15 @@ def entitled(conn: psycopg.Connection, inc: dict, user_id: str) -> bool:
 
 
 def can_view(conn: psycopg.Connection, incident_id: str, user_id: str) -> bool:
-    """Owner, copied users, anyone entitled to act, administrators, and officers whose jurisdiction covers
-    the incident. (Role-based views in full come with the dashboard, I6.)"""
+    """Owner, copied users, anyone entitled to act, and officers whose jurisdiction covers the incident
+    (Table 3.21). Administrators see no incident data by default: they manage the system, not the response
+    (E8 found that, unlike the incident list, this check still let them open any incident)."""
     inc = _get(conn, incident_id, lock=False)
     user = conn.execute("SELECT role, jurisdiction_id FROM app_user WHERE id = %s AND active", (user_id,)).fetchone()
     if user is None:
         return False
     role, jurisdiction = user
-    return (user_id in inc["cc_ids"] or role == "admin" or entitled(conn, inc, user_id)
+    return (user_id in inc["cc_ids"] or entitled(conn, inc, user_id)
             or (role in REVIEWER_ROLES and _covers(conn, jurisdiction, inc["jurisdiction_id"])))
 
 
