@@ -19,7 +19,7 @@ when the broker is back.
 
 Metrics: readings lost (expected sequence numbers missing), incidents lost or duplicated, escalations lost
 (due before the end of the test but never applied), and escalations applied more than one minute after they
-fell due. The SMS dispatch of each escalation is reported alongside. Criterion: zero lost; all escalations
+fell due. Each escalation's SMS must also be dispatched (added after the first run found four that were not). Criterion: zero lost; all escalations
 within one minute of schedule.
 """
 import json
@@ -182,8 +182,11 @@ def check(state: dict, settle_s: int = 180) -> dict:
 
         incidents, esc = {"expected": len(state["loggers"]), "found": 0, "lost": 0, "duplicated": 0}, []
         for d in state["loggers"]:
-            rows = conn.execute("SELECT id::text, mode, severity, ack_due_from FROM incident WHERE device_id = %s",
-                                (d["id"],)).fetchall()
+            # the scripted freeze; a device-silence warning is also (correctly) raised once the logger stops at the end
+            rows = conn.execute("""SELECT id::text, mode, severity, ack_due_from FROM incident
+                                   WHERE device_id = %s AND type = 'freeze'""", (d["id"],)).fetchall()
+            incidents["silence_warnings_after_end"] = incidents.get("silence_warnings_after_end", 0) + conn.execute(
+                "SELECT count(*) FROM incident WHERE device_id = %s AND type = 'device_silence'", (d["id"],)).fetchone()[0]
             incidents["found"] += len(rows) > 0
             incidents["lost"] += len(rows) == 0
             incidents["duplicated"] += max(0, len(rows) - 1)
@@ -218,5 +221,7 @@ def check(state: dict, settle_s: int = 180) -> dict:
                        "no incidents lost or duplicated": incidents["lost"] == 0 and incidents["duplicated"] == 0,
                        "no escalations lost": out["escalations"]["lost"] == 0,
                        "all escalations within 1 min": out["escalations"]["late_over_60s"] == 0,
+                       # each escalation must also reach its recipient: its SMS is dispatched (stricter than Table 3.10)
+                       "every escalation notice sent": len(sms) == len(applied),
                        "all restarts succeeded": all(r["ok"] for r in state["restarts"])}
     return out

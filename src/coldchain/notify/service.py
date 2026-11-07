@@ -22,6 +22,7 @@ from typing import Annotated
 
 import httpx
 import psycopg
+from confluent_kafka import TopicPartition
 from fastapi import FastAPI, Form, HTTPException
 
 from coldchain import kafka
@@ -76,12 +77,14 @@ def _in_transaction(fn, *args):
         return fn(conn, *args)
 
 
-async def consume(app: FastAPI) -> None:
-    consumer = kafka.consumer("notifications", [kafka.NOTIFICATIONS])
-
-    async def step(loop: Loop) -> None:
-        msgs = await asyncio.to_thread(consumer.consume, 200, 0.5)
-        touched = []
+async def expand_batch(consumer, loop: Loop, msgs: list) -> list[str]:
+    """Store the notifications requested by a batch of messages; return the incidents touched. If anything
+    fails, rewind the consumer to the start of the batch before raising, so that the retry reads the batch
+    again. Its position has already moved past the batch, so without this the next poll would skip it and the
+    next commit lose it for good (E11 found four escalation notices lost this way after a database restart).
+    Expanding a request again is harmless: notifications are unique per request and recipient."""
+    touched: list[str] = []
+    try:
         for m in msgs:
             if m.error():
                 log.error("Kafka error: %s", m.error())
@@ -92,6 +95,23 @@ async def consume(app: FastAPI) -> None:
                 with loop.connection().transaction():
                     return store.expand(loop.conn, req, now())
             touched += await asyncio.to_thread(expand)
+    except Exception:
+        first: dict[tuple[str, int], int] = {}
+        for m in msgs:
+            if not m.error():
+                first.setdefault((m.topic(), m.partition()), m.offset())
+        for (topic, partition), offset in first.items():
+            await asyncio.to_thread(consumer.seek, TopicPartition(topic, partition, offset))
+        raise
+    return touched
+
+
+async def consume(app: FastAPI) -> None:
+    consumer = kafka.consumer("notifications", [kafka.NOTIFICATIONS])
+
+    async def step(loop: Loop) -> None:
+        msgs = await asyncio.to_thread(consumer.consume, 200, 0.5)
+        touched = await expand_batch(consumer, loop, msgs)
         if msgs:
             app.state.wake.set()
             await tell(app, touched)

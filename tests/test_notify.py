@@ -283,3 +283,37 @@ def test_receiver_texted_a_confirmation_code_and_releaser_told_if_it_fails(db, g
     assert f"REC {no} " in text and f"REJ {no} " in text
     store.dispatch(db, t, gw.client)
     assert "Could not reach" in gw.to(PHONES["oic"])[0]
+
+
+def test_failed_batch_is_rewound_so_the_retry_reads_it_again():
+    """E11: after a database restart, the notification consumer's first use of its dead connection failed and
+    the batch it had just read was skipped, losing four escalation notices. It now rewinds to the batch's
+    first offset on each partition before the loop retries."""
+    import asyncio
+
+    import psycopg
+
+    from coldchain.notify.service import Loop, expand_batch
+
+    class Msg:
+        def __init__(self, partition, offset):
+            self._p, self._o = partition, offset
+        def error(self): return None
+        def topic(self): return "notifications"
+        def partition(self): return self._p
+        def offset(self): return self._o
+        def value(self): return b'{"id": "x"}'
+
+    class Consumer:
+        def __init__(self): self.seeks = []
+        def seek(self, tp): self.seeks.append((tp.topic, tp.partition, tp.offset))
+
+    class DeadLoop(Loop):
+        def connection(self):
+            raise psycopg.OperationalError("terminating connection due to unexpected postmaster exit")
+
+    consumer = Consumer()
+    msgs = [Msg(0, 7), Msg(1, 3), Msg(0, 8)]
+    with pytest.raises(psycopg.OperationalError):
+        asyncio.run(expand_batch(consumer, DeadLoop("consumer"), msgs))
+    assert sorted(consumer.seeks) == [("notifications", 0, 7), ("notifications", 1, 3)]
