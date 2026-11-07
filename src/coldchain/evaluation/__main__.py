@@ -194,6 +194,24 @@ def run_e6(args) -> None:
             print(json.dumps(r, default=str))
 
 
+def run_e10(args) -> None:
+    from coldchain.evaluation import loadtest
+    from coldchain.sim.network import build_for
+    load_cfg = ROOT / "configs" / "sim" / "load-101.toml"
+    sh("make eval-reset", attempts=2)
+    sh(f"make eval-up EVAL_NET={load_cfg}", attempts=3)
+    sh("make eval-live", attempts=3)
+    net = build_for(config_mod.load(load_cfg))
+    serials = [u.serial for u in net.units]
+    facilities = [s.id for s in net.sites if s.tier == "health_facility"]
+    random.Random(10).shuffle(facilities)
+    state = loadtest.run(serials, facilities, args.target_min, args.endurance_min)
+    (loadtest.OUT / "state.json").write_text(json.dumps(state, indent=1, default=str))
+    doc = loadtest.check(state)
+    (loadtest.OUT / "load.json").write_text(json.dumps(doc, indent=2, default=str))
+    print(json.dumps({k: v for k, v in doc.items() if k != "resources"}, indent=2, default=str))
+
+
 def run_e11(args) -> None:
     from coldchain.evaluation import resilience
     from coldchain.sim.network import build_for
@@ -235,6 +253,9 @@ def main(argv=None) -> None:
     e6 = sub.add_parser("e6", help="E6 custody correctness: handoff scenarios, readings through the complete chain")
     e6.add_argument("--seeds", default="101-110")
     e6.add_argument("--no-reset", action="store_true")
+    e10 = sub.add_parser("e10", help="E10 scalability: load network, 1,000 readings/s then a 2-hour endurance run")
+    e10.add_argument("--target-min", type=int, default=30)
+    e10.add_argument("--endurance-min", type=int, default=120)
     e11 = sub.add_parser("e11", help="E11 fault tolerance, live: services restarted during escalations and load")
     e11.add_argument("--no-reset", action="store_true")
     sub.add_parser("coverage", help="E12: run the test suite (development stack) and score tests/requirements.toml")
@@ -259,6 +280,8 @@ def main(argv=None) -> None:
         run_e4(args)
     elif args.cmd == "e6":
         run_e6(args)
+    elif args.cmd == "e10":
+        run_e10(args)
     elif args.cmd == "e11":
         run_e11(args)
     elif args.cmd == "e5":
