@@ -156,20 +156,28 @@ def _update(conn: psycopg.Connection, ev: dict) -> Outcome:
         "SELECT severity, condition_cleared, mode, acknowledged_at IS NOT NULL FROM incident WHERE id = %s FOR UPDATE",
         (ev["incident_id"],)).fetchone()
     changed = False
-    if ev["severity"] == "critical" and severity == "warning":
-        conn.execute("UPDATE incident SET severity = 'critical' WHERE id = %s", (ev["incident_id"],))
-        record(conn, ev["incident_id"], "updated", {"severity": "critical", "integrity_event_id": ev["id"]})
-        changed = True
-    if mode == "retrospective" and mode_for(ev["event_end"], ev["detected_at"]) == "operational":
-        # An episode that is still under way (or has only just ended) joins a retrospective incident: the
-        # condition can now be corrected, so the incident follows the operational policy from now on (E7,
-        # I8): the owner is alerted urgently and escalation runs on the operational clock.
-        conn.execute("""UPDATE incident SET mode = 'operational',
+    # The incident now falls under a more urgent policy: from now on its clocks run under that policy, and the
+    # owner is alerted as that policy requires (stage -1 repeats the notification step). Without this the
+    # escalation limits would be measured from the incident's creation under the old policy, so the owner would
+    # never be alerted and the first escalation would fire at once (E4 and E7 found one case each, I8).
+    restart = {"ack": acknowledged, "id": ev["incident_id"]}
+    restart_clocks = """UPDATE incident SET
                             ack_due_from = CASE WHEN %(ack)s THEN ack_due_from ELSE now() END,
                             ack_stage = CASE WHEN %(ack)s THEN ack_stage ELSE -1 END,
                             resolve_due_from = CASE WHEN %(ack)s THEN now() ELSE resolve_due_from END,
                             resolve_stage = CASE WHEN %(ack)s THEN 0 ELSE resolve_stage END
-                        WHERE id = %(id)s""", {"ack": acknowledged, "id": ev["incident_id"]})
+                        WHERE id = %(id)s"""
+    if ev["severity"] == "critical" and severity == "warning":
+        # a warning turns critical, e.g. a power cut while the temperature rises towards its limit (E4)
+        conn.execute("UPDATE incident SET severity = 'critical' WHERE id = %s", (ev["incident_id"],))
+        conn.execute(restart_clocks, restart)
+        record(conn, ev["incident_id"], "updated", {"severity": "critical", "integrity_event_id": ev["id"]})
+        changed = True
+    if mode == "retrospective" and mode_for(ev["event_end"], ev["detected_at"]) == "operational":
+        # an episode still under way joins a retrospective incident: the condition can now be corrected (E7)
+        conn.execute("UPDATE incident SET mode = 'operational' WHERE id = %s", (ev["incident_id"],))
+        if not changed:
+            conn.execute(restart_clocks, restart)
         record(conn, ev["incident_id"], "updated", {"mode": "operational", "integrity_event_id": ev["id"],
                                                     "reason": "a new episode is under way"})
         changed = True

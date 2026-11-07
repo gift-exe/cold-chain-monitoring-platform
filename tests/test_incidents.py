@@ -272,6 +272,30 @@ def test_ongoing_episode_turns_a_retrospective_incident_operational(db):
     assert incident(db, inc_id)["current_tier"] == "lga"
 
 
+def test_warning_that_turns_critical_alerts_the_owner_and_restarts_the_clock(db):
+    """E4 found that a power-loss warning raised to critical (the temperature rising) sent the owner no SMS,
+    and that its acknowledgement limits were measured from the warning's creation, so it escalated to the LGA
+    at once. It now follows the critical policy from the moment it turns critical."""
+    dev = fixed_device(db)
+    t = now(db)
+    ev = event(db, dev, type_="power_loss", severity="warning", start=t - 45 * MIN)
+    inc_id = store.on_event(db, ev).incident_id
+    store.apply_due(db, inc_id, t)
+    db.execute("UPDATE incident SET ack_due_from = %s WHERE id = %s", (t - 31 * MIN, inc_id))  # raised 31 min ago
+    db.execute("UPDATE integrity_event SET severity = 'critical' WHERE id = %s", (ev,))
+    out = store.on_event(db, ev)
+    assert out.incident_id == inc_id and out.changed
+    store.apply_due(db, inc_id, t)
+    inc = incident(db, inc_id)
+    assert (inc["severity"], inc["current_tier"]) == ("critical", "owner")
+    alert = notices(db, inc_id)[-1]
+    assert (alert["kind"], alert["recipients"], alert["urgency"]) == ("alert", [USERS["oic"]], "sms")
+    store.apply_due(db, inc_id, t + 14 * MIN)
+    assert incident(db, inc_id)["current_tier"] == "owner"
+    store.apply_due(db, inc_id, t + 16 * MIN)
+    assert incident(db, inc_id)["current_tier"] == "lga"
+
+
 def test_new_episode_a_day_after_the_last_is_a_new_incident_even_if_open(db):
     dev = fixed_device(db)
     t = now(db)
