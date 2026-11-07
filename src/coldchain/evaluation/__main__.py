@@ -212,6 +212,42 @@ def run_e10(args) -> None:
     print(json.dumps({k: v for k, v in doc.items() if k != "resources"}, indent=2, default=str))
 
 
+def run_e10_alerts() -> None:
+    """E10 part 2. The load generator and the scripted excursions run as separate processes: in the first E10
+    run they shared one, and the excursions' MQTT client was closed a second after connecting (alongside the
+    generator's 2,000 connections), so no excursion reached the prototype."""
+    from coldchain.evaluation import latency, loadtest
+    from coldchain.sim.network import build_for
+    load_cfg = ROOT / "configs" / "sim" / "load-101.toml"
+    loadtest.OUT.mkdir(parents=True, exist_ok=True)
+    sh("make eval-reset", attempts=2)
+    sh(f"make eval-up EVAL_NET={load_cfg}", attempts=3)
+    sh("make eval-live", attempts=3)
+    net = build_for(config_mod.load(load_cfg))
+    facilities = [s.id for s in net.sites if s.tier == "health_facility"]
+    random.Random(1010).shuffle(facilities)
+    minutes = 50
+    log = open(loadtest.OUT / "alerts-load.log", "w")  # noqa: SIM115 - held open for the subprocess's lifetime
+    gen = subprocess.Popen(["uv", "run", "python", "-m", "coldchain.evaluation", "e10-load", "--minutes", str(minutes)],
+                           cwd=ROOT, stdout=log, stderr=subprocess.STDOUT)
+    try:
+        time.sleep(180)                               # the load network is at peak before the first excursion
+        state = latency.run(facilities, n=100, spread_min=5, seed=1010)
+        doc = latency.check(state)
+    finally:
+        gen.wait(timeout=minutes * 60 + 600)
+        log.close()
+    with _db() as conn:                               # the load really was being stored during the measurement
+        stored, = conn.execute("""SELECT count(*) FROM reading r JOIN device d ON d.id = r.device_id
+                                  WHERE d.serial_no NOT LIKE 'E4-%%' AND r.processed_at >= %s
+                                    AND r.processed_at < %s::timestamptz + make_interval(mins => %s)""",
+                               (state["began"], state["began"], state["duration_min"])).fetchone()
+    doc["load_during_measurement"] = {"readings_stored": stored,
+                                      "rate_per_s": round(stored / (state["duration_min"] * 60), 1)}
+    (loadtest.OUT / "alerts.json").write_text(json.dumps(doc, indent=2, default=str))
+    print(json.dumps({k: v for k, v in doc.items() if not k.endswith("_rows")}, indent=2, default=str))
+
+
 def run_e11(args) -> None:
     from coldchain.evaluation import resilience
     from coldchain.sim.network import build_for
@@ -256,6 +292,10 @@ def main(argv=None) -> None:
     e10 = sub.add_parser("e10", help="E10 scalability: load network, 1,000 readings/s then a 2-hour endurance run")
     e10.add_argument("--target-min", type=int, default=30)
     e10.add_argument("--endurance-min", type=int, default=120)
+    el = sub.add_parser("e10-load", help="(internal) the E10 load generator on its own: peak load for N minutes")
+    el.add_argument("--minutes", type=int, required=True)
+    el.add_argument("--interval", type=float, default=60.0)
+    sub.add_parser("e10-alerts", help="E10 part 2: notification latency (NFR2) with the load network at peak load")
     e11 = sub.add_parser("e11", help="E11 fault tolerance, live: services restarted during escalations and load")
     e11.add_argument("--no-reset", action="store_true")
     sub.add_parser("coverage", help="E12: run the test suite (development stack) and score tests/requirements.toml")
@@ -282,6 +322,15 @@ def main(argv=None) -> None:
         run_e6(args)
     elif args.cmd == "e10":
         run_e10(args)
+    elif args.cmd == "e10-load":
+        from coldchain.evaluation import loadtest
+        from coldchain.sim.network import build_for
+        net = build_for(config_mod.load(ROOT / "configs" / "sim" / "load-101.toml"))
+        state: dict = {"devices": len(net.units)}
+        loadtest._generate([u.serial for u in net.units], [("peak", args.minutes, args.interval)], state)
+        (loadtest.OUT / "alerts-load.json").write_text(json.dumps(state, default=str))
+    elif args.cmd == "e10-alerts":
+        run_e10_alerts()
     elif args.cmd == "e11":
         run_e11(args)
     elif args.cmd == "e5":
