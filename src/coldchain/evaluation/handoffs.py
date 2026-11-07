@@ -23,7 +23,9 @@ Table 3.16, not computed by the prototype's ownership code:
   delayed            release 10, confirmed 200 (window ended 100); heat 130-175 -> releaser, receiver copied,
                      custody gap from 100 until 200; freeze 240-260 -> receiver (CR3, CR4)
 
-Metric: the proportion of incidents whose owner (and copied receiver) is the expected one; custody gaps raised
+Metric: the proportion of incidents whose owner is the expected one and whose intended receiver is copied
+exactly when Table 3.16 says so (others may be copied too: a retrospective incident's digest always goes to
+the LGA officer as well, Table 3.15); custody gaps raised
 where, and only where, expected. Criterion: 100%.
 """
 import asyncio
@@ -155,7 +157,6 @@ def check(state: dict, settle_s: int = 120) -> dict:
             for typ, first, _last, who, cc in events:
                 start = t0 + first * MIN
                 want = c["releaser"] if who == "releaser" else c["receiver"]
-                want_cc = [c["receiver"]] if cc else []
                 match = [f for f in found if f[1] == typ and abs((f[6] - start).total_seconds()) <= 15 * 60]
                 totals["incidents_expected"] += 1
                 totals["incidents_found"] += bool(match)
@@ -165,7 +166,7 @@ def check(state: dict, settle_s: int = 120) -> dict:
                 if match:
                     m = match[0]
                     used.add(m[0])
-                    r.update(incident=m[0], owner_ok=m[2] == want, cc_ok=sorted(m[3]) == sorted(want_cc),
+                    r.update(incident=m[0], owner_ok=m[2] == want, cc_ok=(c["receiver"] in m[3]) == cc, copied=len(m[3]),
                              ownership_rule=m[4], mode=m[5], start_offset_min=round((m[6] - start).total_seconds() / 60, 1))
                     totals["owner_correct"] += r["owner_ok"]
                     totals["cc_correct"] += r["cc_ok"]
