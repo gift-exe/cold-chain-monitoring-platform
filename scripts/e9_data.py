@@ -127,7 +127,7 @@ SPEED = {"NG-KN-GWL": (3, 14), "NG-KN-NAS": (6, 45), "NG-KN-DAL": (12, 150), "NG
          "NG-KD": (5, 25)}
 TYPES = [("heat_excursion", "critical", 0.32), ("power_loss", "warning", 0.25), ("device_silence", "warning", 0.2),
          ("door_open", "warning", 0.12), ("freeze", "critical", 0.11)]
-TOLERANCE = {"heat_excursion": 30, "freeze": 5, "power_loss": 10, "device_silence": 15, "door_open": 10}
+TOLERANCE = {"heat_excursion": 30, "freeze": 5, "power_loss": 10, "device_silence": 15, "door_open": 10, "anomaly": 60}
 NOTES = {
     "heat_excursion": ["Moved the vaccines to the backup ice-lined fridge; technician called about the thermostat.",
                        "Fridge door seal replaced; vial monitors checked, all usable.",
@@ -137,6 +137,7 @@ NOTES = {
     "power_loss": ["Switched to the generator until mains power returned.", "Solar panel cleaned; battery checked."],
     "device_silence": ["Logger battery replaced.", "Logger SIM topped up; readings resumed."],
     "door_open": ["Door closed; staff reminded to check it after each session.", "Door latch repaired."],
+    "anomaly": ["Technician found the thermostat sticking; replaced.", "Door seal worn; replaced, cycling back to normal."],
 }
 POLICY = {"critical": [(15, "lga"), (60, "state"), (240, "national")], "warning": [(1440, "lga")]}
 
@@ -165,7 +166,7 @@ def readings(conn, device, typ, start, end, peak):
                            VALUES (%s, %s, %s, %s, %s, %s, %s) ON CONFLICT DO NOTHING""", rows)
 
 
-def one_incident(conn, fac, typ, sev, start, state="closed", failed=False, quick=False):
+def one_incident(conn, fac, typ, sev, start, state="closed", failed=False, quick=False, explanation=None):
     jur = JUR[fac]
     state_jur = jur if "-" not in jur[3:] else jur.rsplit("-", 1)[0]
     owner = OIC.get(fac) or LGA_OFFICER.get(jur) or STATE_OFFICER[state_jur]
@@ -179,8 +180,10 @@ def one_incident(conn, fac, typ, sev, start, state="closed", failed=False, quick
     peak = {"heat_excursion": round(R.uniform(9.0, 13.5), 1), "freeze": round(R.uniform(-2.5, -0.4), 1)}.get(typ)
     device = DEVICE[fac]
     readings(conn, device, typ, start, end, peak or 5)
-    ev = conn.execute("""INSERT INTO integrity_event (device_id, type, event_start, event_end, peak_value, detected_at)
-                         VALUES (%s, %s, %s, %s, %s, %s) RETURNING id""", (device, typ, start, end, peak, detected)).fetchone()[0]
+    details = {"explanation": explanation} if explanation else {}
+    ev = conn.execute("""INSERT INTO integrity_event (device_id, type, event_start, event_end, peak_value, detected_at, details)
+                         VALUES (%s, %s, %s, %s, %s, %s, %s) RETURNING id""",
+                      (device, typ, start, end, peak, detected, Jsonb(details))).fetchone()[0]
     # how long until someone responds: by LGA, faster as the month goes on
     lo, hi = SPEED.get(jur, SPEED.get(state_jur, (5, 30)))
     progress = (NOW - start) / timedelta(days=DAYS)          # 1 at the start of the month, 0 now
@@ -242,10 +245,21 @@ def history(conn: psycopg.Connection) -> int:
         typ, sev, _ = R.choices(TYPES, [w for *_, w in TYPES])[0]
         one_incident(conn, fac, typ, sev, t, failed=R.random() < 0.03)
         n += 1
+    anomalies(conn)
     # waiting for review (T3): resolved in the last day and a half
     one_incident(conn, F + "e11", "heat_excursion", "critical", NOW - timedelta(hours=30), state="resolved", quick=True)
     one_incident(conn, GWALE_TEST, "power_loss", "warning", NOW - timedelta(hours=9), state="resolved", quick=True)
-    return n + 2
+    return n + 4
+
+
+def anomalies(conn) -> None:
+    """Two anomaly warnings (FR4), with explanations in the form detection writes them."""
+    one_incident(conn, F + "e22", "anomaly", "warning", NOW - timedelta(days=12, hours=5), explanation=(
+        "Unusual pattern: 9 cooling cycles in the hour (usually 2 to 5); temperature varied by 3.4°C within the "
+        "hour (usually 0.4 to 1.8°C)."))
+    one_incident(conn, F + "e13", "anomaly", "warning", NOW - timedelta(hours=20), state="resolved", quick=True,
+                 explanation="Unusual pattern: 2.6°C warmer than this unit's last 24 hours; average temperature 7.1°C "
+                             "(usually 3.6 to 6.2°C).")
 
 
 # Shipments --------------------------------------------------------------------------------------------

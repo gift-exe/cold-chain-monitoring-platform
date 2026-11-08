@@ -83,7 +83,9 @@ export function whatsWrong(inc, limits, now = Date.now()) {
     case "anomaly":
       return {
         headline: `${cap(s)} is behaving unusually.`,
-        detail: "Its temperature pattern differs from its normal pattern, though it may still be within limits. This can be an early sign of a fault.",
+        // the plain-language explanation detection stored with the warning (FR4.2), e.g. "Unusual pattern:
+        // 9 cooling cycles in the hour (usually 2 to 5); ..."
+        detail: `${inc.explanation ? `${inc.explanation} ` : "Its temperature pattern differs from its normal pattern. "}It may still be within limits, but this can be an early sign of a fault.`,
         advice: "Check the equipment, its thermostat and its door seal.",
       };
     default:

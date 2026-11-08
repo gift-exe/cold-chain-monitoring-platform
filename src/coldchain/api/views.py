@@ -85,7 +85,7 @@ INCIDENT_COLUMNS = """
     i.notification_failed, i.condition_cleared, i.reopen_count, i.ownership, i.created_at, i.received_at,
     i.detected_at, i.notified_at, i.acknowledged_at, i.resolved_at, i.closed_at, i.jurisdiction_id,
     e.event_start, ep.event_end, coalesce(ep.peak_value, e.peak_value) AS peak_value, e.borderline,
-    ep.episodes, d.serial_no AS device_serial, d.type AS device_type, d.equipment_type,
+    ep.episodes, e.details->>'explanation' AS explanation, d.serial_no AS device_serial, d.type AS device_type, d.equipment_type,
     f.id::text AS facility_id, f.name AS facility_name, f.ward AS facility_ward, j.name AS jurisdiction_name,
     i.consignment_id::text, c.consignment_no, c.destination, c.quantity, pr.name AS product_name, i.owner_id::text, o.full_name AS owner_name,
     ab.full_name AS acknowledged_by_name, rb.full_name AS resolved_by_name, cb.full_name AS closed_by_name

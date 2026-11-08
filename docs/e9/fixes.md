@@ -445,3 +445,12 @@ Changes made to support round 2, not in answer to logged problems; see `round2-s
   or the command's outcome. With the local SMS gateway emulator only (`SMS_EMULATOR_URL`, set by
   `compose.local-sms.yaml`), the administrator can send a message as if from a user's phone, and messages
   show their response codes, which the database stores masked. Test: `test_text_messages_sent_and_received_shown_to_administrator_only`.
+
+## Round 2 result
+
+Two peers (backgrounds in information technology) evaluated the improved dashboard on 8 November 2026,
+each on their own computer, running the prototype from source with the walkthrough data
+(`round2-setup.md`). Each worked through tasks T1–T8 independently with `evaluator-guide.md`. Neither
+reported a usability problem (reported to GA verbally; no written log). With no problem found by more than
+one evaluator, the merged mean rating of each problem is its round-1 rating. Outcome: no unresolved problem
+rated 3 or 4; E9 criterion met. Written up in Chapter 5, Section 5.2.8.
