@@ -84,6 +84,12 @@ def test_incident_detail_offers_only_permitted_actions(db):
         views.incident(db, views.viewer(db, USERS["driver"]), inc)
 
 
+def test_incident_details_say_where_it_is(db):
+    inc = views.incident(db, views.viewer(db, USERS["lga"]), new_incident(db))
+    assert inc["location"]["kind"] == "facility" and inc["location"]["lat"] is not None
+    assert inc["facility_ward"] == "Sani Mainagge"
+
+
 def test_active_list_puts_critical_first_then_oldest(db):
     t = now(db)
     warning = new_incident(db, severity="warning", start=t - 90 * MIN)

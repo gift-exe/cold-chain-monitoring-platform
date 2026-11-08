@@ -86,8 +86,8 @@ INCIDENT_COLUMNS = """
     i.detected_at, i.notified_at, i.acknowledged_at, i.resolved_at, i.closed_at, i.jurisdiction_id,
     e.event_start, ep.event_end, coalesce(ep.peak_value, e.peak_value) AS peak_value, e.borderline,
     ep.episodes, d.serial_no AS device_serial, d.type AS device_type, d.equipment_type,
-    f.id::text AS facility_id, f.name AS facility_name, j.name AS jurisdiction_name,
-    i.consignment_id::text, c.consignment_no, i.owner_id::text, o.full_name AS owner_name,
+    f.id::text AS facility_id, f.name AS facility_name, f.ward AS facility_ward, j.name AS jurisdiction_name,
+    i.consignment_id::text, c.consignment_no, c.destination, c.quantity, pr.name AS product_name, i.owner_id::text, o.full_name AS owner_name,
     ab.full_name AS acknowledged_by_name, rb.full_name AS resolved_by_name, cb.full_name AS closed_by_name
 """
 INCIDENT_FROM = """
@@ -102,6 +102,7 @@ INCIDENT_FROM = """
     LEFT JOIN facility f ON f.id = d.facility_id
     LEFT JOIN jurisdiction j ON j.id = i.jurisdiction_id
     LEFT JOIN consignment c ON c.id = i.consignment_id
+    LEFT JOIN product pr ON pr.id = c.product_id
     LEFT JOIN app_user o ON o.id = i.owner_id
     LEFT JOIN app_user ab ON ab.id = i.acknowledged_by
     LEFT JOIN app_user rb ON rb.id = i.resolved_by
@@ -143,7 +144,39 @@ def incident(conn: psycopg.Connection, v: Viewer, incident_id: str) -> dict:
     active = inc["state"] in OPEN_STATES
     inc["can_act"] = active and store.entitled(conn, raw, v.id)
     inc["can_review"] = inc["state"] == "resolved" and store.can_review(conn, incident_id, v.id)
+    inc["location"] = location(conn, inc)
     return inc
+
+
+def location(conn: psycopg.Connection, inc: dict, track_points: int = 300) -> dict | None:
+    """Where an incident is, for the map in its details (E9, P12): the facility; or, for a consignment, its
+    logger's last known position and its route since the logger was assigned. None if unknown."""
+    cur = conn.cursor(row_factory=dict_row)
+    if inc["facility_id"]:
+        return cur.execute("""SELECT 'facility' AS kind, tier, ST_Y(location::geometry) AS lat,
+                                     ST_X(location::geometry) AS lon, '[]'::json AS track
+                              FROM facility WHERE id = %s""", (inc["facility_id"],)).fetchone()
+    if not inc["consignment_id"]:
+        return None
+    a = cur.execute("""SELECT device_id, valid_from, valid_to FROM device_assignment WHERE consignment_id = %s
+                       ORDER BY valid_from DESC LIMIT 1""", (inc["consignment_id"],)).fetchone()
+    if a is None:
+        return None
+    track = conn.execute("""
+        SELECT ST_X(location::geometry), ST_Y(location::geometry), event_time FROM (
+            SELECT location, event_time FROM reading WHERE device_id = %s AND location IS NOT NULL
+              AND event_time >= %s AND (%s::timestamptz IS NULL OR event_time <= %s)
+            ORDER BY event_time DESC LIMIT %s) t ORDER BY event_time""",
+        (a["device_id"], a["valid_from"], a["valid_to"], a["valid_to"], track_points)).fetchall()
+    last = track[-1] if track else conn.execute(   # as on the map: the last known position, even if older
+        """SELECT ST_X(location::geometry), ST_Y(location::geometry), event_time FROM reading
+           WHERE device_id = %s AND location IS NOT NULL ORDER BY event_time DESC LIMIT 1""",
+        (a["device_id"],)).fetchone()
+    if last is None:
+        return None
+    lon, lat, at = last
+    return {"kind": "mobile", "lat": lat, "lon": lon, "position_time": at,
+            "track": [[x, y] for x, y, _ in track]}
 
 
 def limits(conn: psycopg.Connection, consignment_id: str | None) -> dict:

@@ -8,7 +8,6 @@ import { label, ROLES } from "./format.js";
 import { onConnection, startLive } from "./live.js";
 import Admin from "./views/Admin.jsx";
 import Consignments, { ConsignmentDetail } from "./views/Consignments.jsx";
-import IncidentDetail from "./views/IncidentDetail.jsx";
 import Incidents from "./views/Incidents.jsx";
 import MapView from "./views/MapView.jsx";
 import Performance from "./views/Performance.jsx";
@@ -75,7 +74,7 @@ export default function App() {
           <Route path="/" element={<Navigate to={`/${nav[0]}`} replace />} />
           <Route path="/map" element={<MapView me={me} />} />
           <Route path="/incidents" element={<Incidents me={me} />} />
-          <Route path="/incidents/:ref" element={<IncidentDetail me={me} />} />
+          <Route path="/incidents/:ref" element={<Incidents me={me} />} />
           <Route path="/performance" element={<Performance me={me} />} />
           <Route path="/consignments" element={<Consignments me={me} />} />
           <Route path="/consignments/:id" element={<ConsignmentDetail me={me} />} />

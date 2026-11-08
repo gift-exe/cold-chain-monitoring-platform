@@ -6,8 +6,10 @@ on an already partly improved dashboard.
 
 | Fix | Problems | Status |
 |---|---|---|
-| F01 Map view redesign and new theme | P01, P02, P03, P04, P05 | Applied; revised by F02 after GA's review |
-| F02 Calmer summary, expandable facility rows, tidier top bar, new typeface | P06, P07, P08, P09, P10, P11 | Applied; awaiting GA's review |
+| F01 Map view redesign and new theme | P01, P02, P03, P04, P05 | Accepted by GA (revised by F02); 91eddf4 |
+| F02 Calmer summary, expandable facility rows, tidier top bar, new typeface | P06, P07, P08, P09, P10, P11 | Accepted by GA; 91eddf4 |
+| F03 Incidents: list grouped by urgency, details beside the list | P12 | Applied; awaiting GA's review |
+| F04 Incident details say what is wrong in plain words | P13, P14 | Applied; awaiting GA's review |
 
 ## F01: Map view redesign and new theme
 
@@ -99,3 +101,74 @@ consignment quantities).
 
 **Checked:** dashboard, admin and simulator tests 57 passed, ruff clean; viewed as the LGA officer at 1440 × 900; clicking a
 pin expanded its row.
+
+## F03: Incidents grouped by urgency, details beside the list
+
+**Problem:** P12 (opening an incident left the list; the flat list did not show what to do first).
+
+**What changed**
+
+- **Sections by urgency.** The *Active* tab lists incidents in three sections, most urgent first:
+  *Escalated, no response yet* (red heading), *Awaiting response* (orange) and *Acknowledged, being
+  handled*; within each, critical first, then oldest. *All* groups into active, awaiting review and closed.
+  Each section shows its count. Empty states say what an empty list means ("Everything in your area is
+  within limits").
+- **Details beside the list.** Selecting an incident opens its details in a panel on the right; the list
+  narrows to compact rows (severity, type and number, place, how long ago) and stays scrollable, with the
+  selected row highlighted. A close button returns to the full list. The address is still
+  `/incidents/<number>`, so links in SMS and notifications open the incident with the list beside it. On a
+  narrow screen the details take the whole width.
+- **Detail panel order.** What the user can do comes first (*Acknowledge*, *Record action*, *Resolve*; or
+  *Close incident* and *Reopen* for a reviewer), then *What happened*, *Who is handling it*, *Readings* and
+  *Timeline*. The place now includes the ward. Keyboard focus moves to the opened incident's title.
+- With no incident open, rows show the full information (began, state, who it is with and the owner);
+  without table headings, those cells are labelled in words ("Now with LGA", "Owner: ...").
+- **Location map (added at GA's request).** A small map beside *What happened* shows where the incident
+  is: the facility's pin (clinic or cold store, in the incident's severity colour), or for a field team the
+  van at its logger's last known position with its route since setting out, and when that position was
+  reported. If the logger has never reported a position, the panel says so. A map of all incidents beside
+  the list was considered and not built: the Map page already shows it, and a third panel would crowd the
+  list and the details.
+- API: incidents carry `facility_ward`; incident details carry `location` (`views.location`), with a test.
+
+**Files:** `dashboard/src/views/Incidents.jsx`, `dashboard/src/views/IncidentDetail.jsx`,
+`dashboard/src/components/pins.js` (pins and base map shared with the map view),
+`dashboard/src/views/MapView.jsx`, `dashboard/src/App.jsx`, `dashboard/src/styles.css`,
+`src/coldchain/api/views.py`, `tests/test_dashboard_views.py`.
+
+**Checked:** dashboard and incident end-to-end tests passed; viewed as the LGA officer at 1440 × 900;
+selecting an incident opened its details beside the list; the location map checked on a facility incident
+(#1554) and a field-team incident (#1361).
+
+## F04: Incident details say what is wrong in plain words
+
+**Problems:** P13 (the details listed times, condition and logger, but never said what the problem was);
+P14 (decorative edge stripes on the new box and on the selected row).
+
+**What changed**
+
+- A box at the top of the incident details, in the incident's severity colour (grey once resolved or
+  closed), states the problem in one sentence, gives the facts behind it, and says what to do. Written for
+  each incident type from the incident's equipment, place, peak, times and the limits that applied, e.g.:
+  - *The ice-lined refrigerator at Gwale Demo PHC 2 is too warm.* It reached 11.2 °C, above the safe limit
+    of 8 °C, and has been too warm for 2 h 10 min (since 10:50). *What to do:* check the fridge and its
+    power now; if it does not cool down, move the vaccines to a working fridge or cold box.
+  - *Nobody has confirmed holding consignment 111.* 40 doses of BCG, going to Goron Dutse, has had no
+    confirmed holder for 4 days. *What to do:* find out who has the consignment and ask them to confirm
+    they received it.
+  - Freezing, power off, door open, logger silent, local alarm and unusual behaviour (anomaly) have their
+    own wording; ended events say how long they lasted and whether readings are back to normal, with the
+    follow-up check (vaccine vial monitors after heat, shake test after freezing). Retrospective incidents
+    say they were found after they had ended.
+- **No edge stripes (P14).** The box has no coloured side stripe: a round severity icon (▲ critical,
+  ◆ warning, ✓ resolved or closed) beside the sentence and a soft tinted background carry the colour. The
+  selected incident row likewise lost its side bar; it is shown by a tinted background and a green title.
+- The "ice-lined refrigerator keeps vaccines cold for some hours" hint appears only while the power has been
+  off for less than 6 hours.
+- API: incidents carry the consignment's product, destination and quantity.
+
+**Files:** `dashboard/src/summary.js`, `dashboard/src/views/IncidentDetail.jsx`, `dashboard/src/styles.css`,
+`src/coldchain/api/views.py`.
+
+**Checked:** wording printed for every incident type, ongoing and ended; viewed on incident #1554 (power
+off) as the LGA officer.
