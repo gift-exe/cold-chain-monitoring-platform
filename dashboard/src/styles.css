@@ -399,3 +399,23 @@ fieldset.field legend { font-size: 0.85rem; color: var(--muted); padding: 0; mar
 .pager { display: flex; justify-content: space-between; align-items: center; gap: 0.75rem; flex-wrap: wrap; margin: 0.5rem 0.25rem 0; font-size: 0.86rem; }
 .pager-n { color: var(--muted); }
 .btn.btn-small { padding: 0.3rem 0.75rem; font-size: 0.86rem; }
+
+/* Administration: products and escalation policy (E9, P23, P24) */
+.section-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; margin-bottom: 0.75rem; }
+.section-head .hint { margin: 0; max-width: 70ch; }
+.check-field { flex-direction: row; align-items: center; gap: 0.5rem; padding-top: 1.4rem; }
+.modal .check-field input { width: auto; }
+.ladder { padding: 1rem 0 1.1rem; border-top: 1px solid var(--grid); }
+.ladder:first-of-type { border-top: none; }
+.ladder h3 { margin: 0; font-size: 1.02rem; }
+.ladder-note { margin: 0.2rem 0 0.4rem; font-size: 0.88rem; }
+.ladder-sub { margin: 0.7rem 0 0.2rem; font-weight: 600; font-size: 0.92rem; }
+.ladder-steps { list-style: none; margin: 0.3rem 0 0; padding: 0; }
+.ladder-step { display: grid; grid-template-columns: 11rem minmax(0, 1fr) auto; gap: 1rem; align-items: center; padding: 0.45rem 0.5rem; border-radius: 10px; }
+.ladder-step:hover { background: var(--sel); }
+.ladder-when { font-weight: 650; font-variant-numeric: tabular-nums; }
+.ladder-edit { display: flex; gap: 0.5rem; }
+.ladder-edit label { display: flex; align-items: center; gap: 0.25rem; color: var(--muted); font-size: 0.86rem; }
+.ladder-edit input { width: 4.2rem; }
+@media (max-width: 700px) { .ladder-step { grid-template-columns: 1fr; gap: 0.2rem; } }
+.ladder-err { grid-column: 2 / -1; margin: 0; font-size: 0.86rem; }

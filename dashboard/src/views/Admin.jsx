@@ -4,7 +4,8 @@
 import { useState } from "react";
 
 import { api, useApi } from "../api.js";
-import { ago, label, ROLES, time } from "../format.js";
+import Dialog from "../components/Dialog.jsx";
+import { ago, duration, label, ROLES, time } from "../format.js";
 
 function Tabbed({ title, tabs }) {
   const [on, setOn] = useState(tabs[0][0]);
@@ -97,7 +98,7 @@ function Products() {
   const [msg, setMsg] = useState(null);
   const save = async () => {
     try {
-      const body = Object.fromEntries(FIELDS.map(([k]) => [k, Number(edit[k])]));
+      const body = { ...Object.fromEntries(FIELDS.map(([k]) => [k, Number(edit[k])])), freeze_sensitive: !!edit.freeze_sensitive };
       await api(`/products/${edit.id}`, { method: "PATCH", body });
       setMsg({ ok: true, text: `${edit.name} updated. Detection uses the new values from now on.` });
       setEdit(null);
@@ -106,14 +107,20 @@ function Products() {
       setMsg({ ok: false, text: e.message });
     }
   };
+  const [adding, setAdding] = useState(false);
   if (error) return <p className="error">{error.message}</p>;
   if (!data) return <p className="muted">Loading…</p>;
   return (
     <>
-      <p className="hint">Tolerances are how long a reading may stay out of limits before an incident is raised.
-        For stores, detection applies the strictest values across all products.</p>
+      <div className="section-head">
+        <p className="hint">Tolerances are how long a reading may stay out of limits before an incident is raised.
+          For stores, detection applies the strictest values across all products.</p>
+        <button className="btn primary" onClick={() => { setAdding(true); setMsg(null); }}>Add product</button>
+      </div>
+      {adding && <AddProduct onClose={() => setAdding(false)}
+                             onDone={(name) => { setAdding(false); setMsg({ ok: true, text: `${name} added. Detection uses its limits from now on.` }); reload(); }} />}
       <div className="table-wrap"><table className="table">
-        <thead><tr><th>Product</th>{FIELDS.map(([, t]) => <th key={t} className="num">{t}</th>)}<th></th></tr></thead>
+        <thead><tr><th>Product</th>{FIELDS.map(([, t]) => <th key={t} className="num">{t}</th>)}<th>Damaged by freezing</th><th></th></tr></thead>
         <tbody>
           {data.map((p) => edit?.id === p.id ? (
             <tr key={p.id} className="editing">
@@ -122,12 +129,15 @@ function Products() {
                 <td key={k}><input type="number" step={step} aria-label={`${t} for ${p.name}`} value={edit[k]}
                                    onChange={(e) => setEdit({ ...edit, [k]: e.target.value })} /></td>
               ))}
+              <td><input type="checkbox" aria-label={`${p.name} is damaged by freezing`} checked={!!edit.freeze_sensitive}
+                         onChange={(e) => setEdit({ ...edit, freeze_sensitive: e.target.checked })} /></td>
               <td><button className="btn primary" onClick={save}>Save</button> <button className="btn" onClick={() => setEdit(null)}>Cancel</button></td>
             </tr>
           ) : (
             <tr key={p.id}>
               <th scope="row">{p.name}</th>
               {FIELDS.map(([k]) => <td key={k} className="num">{Number(p[k])}</td>)}
+              <td>{p.freeze_sensitive ? "Yes" : "No"}</td>
               <td><button className="btn" onClick={() => { setEdit({ ...p }); setMsg(null); }}>Edit</button></td>
             </tr>
           ))}
@@ -372,43 +382,156 @@ function Devices() {
   );
 }
 
-const CLOCKS = { acknowledge: "Acknowledge by", resolve: "Resolve by", reminder: "Reminder every" };
-const TIER_NAMES = { owner: "Owner", lga: "LGA officer", state: "State officer", national: "National officer", next: "Next tier up" };
+// Add a product (E9, P23), with the usual 2-8 °C range filled in.
+function AddProduct({ onClose, onDone }) {
+  const [f, setF] = useState({ name: "", lower_limit: 2, upper_limit: 8, freeze_limit: 0, heat_tolerance_min: 30,
+                               freeze_tolerance_min: 5, freeze_sensitive: true });
+  const [err, setErr] = useState(null);
+  const [busy, setBusy] = useState(false);
+  const set = (k) => (e) => setF({ ...f, [k]: e.target.type === "checkbox" ? e.target.checked : e.target.value });
+  const submit = async () => {
+    setErr(null);
+    setBusy(true);
+    try {
+      const body = { ...f, name: f.name.trim(), ...Object.fromEntries(FIELDS.map(([k]) => [k, Number(f[k])])) };
+      await api("/products", { method: "POST", body });
+      onDone(body.name);
+    } catch (e) {
+      setErr(e.message);
+      setBusy(false);
+    }
+  };
+  return (
+    <Dialog title="Add product" intro="A vaccine or diluent the system monitors. Its limits apply to shipments of it, and to stores as part of the strictest values."
+            onClose={onClose} onSubmit={submit} submitLabel="Add product" busy={busy} error={err}>
+      <label className="field"><span>Name</span><input required minLength={2} maxLength={100} value={f.name} onChange={set("name")} placeholder="e.g. Rotavirus" /></label>
+      <fieldset className="field">
+        <legend>Safe temperature range</legend>
+        <div className="field-pair">
+          <label className="field"><span>Too cold below (°C)</span><input type="number" step="0.1" required value={f.lower_limit} onChange={set("lower_limit")} /></label>
+          <label className="field"><span>Too warm above (°C)</span><input type="number" step="0.1" required value={f.upper_limit} onChange={set("upper_limit")} /></label>
+        </div>
+      </fieldset>
+      <div className="field-pair">
+        <label className="field"><span>Freezing at or below (°C)</span><input type="number" step="0.1" required value={f.freeze_limit} onChange={set("freeze_limit")} /></label>
+        <label className="field check-field"><input type="checkbox" checked={f.freeze_sensitive} onChange={set("freeze_sensitive")} /> Damaged by freezing</label>
+      </div>
+      <fieldset className="field">
+        <legend>How long it may be out of range before an incident is raised</legend>
+        <div className="field-pair">
+          <label className="field"><span>Too warm for (minutes)</span><input type="number" min="0" required value={f.heat_tolerance_min} onChange={set("heat_tolerance_min")} /></label>
+          <label className="field"><span>Freezing for (minutes)</span><input type="number" min="0" required value={f.freeze_tolerance_min} onChange={set("freeze_tolerance_min")} /></label>
+        </div>
+      </fieldset>
+    </Dialog>
+  );
+}
+
+// Escalation policy (E9, P24): each kind of incident as a sequence in plain words, with each time limit
+// editable in place. The stored rows are Table 3.15; the limits of one clock are cumulative.
+const LADDERS = [
+  ["critical", "operational", "Critical incidents caught while happening",
+   "Something can still be saved, so a response is needed quickly."],
+  ["warning", "operational", "Warnings caught while happening", "Less urgent: only the LGA officer is brought in."],
+  ["critical", "retrospective", "Critical incidents found after they ended",
+   "The event is over (for example, a logger's readings arrived late), so the job is to check the vaccines; the limits are longer."],
+  ["warning", "retrospective", "Warnings found after they ended", ""],
+];
+const WHO = { owner: "the person responsible", lga: "the LGA officer", state: "the state officer",
+              national: "the national officer", next: "the next level up" };
 
 function Policy() {
   const { data, error, reload } = useApi("/escalation-policy");
-  const [edit, setEdit] = useState({});
   const [msg, setMsg] = useState(null);
   if (error) return <p className="error">{error.message}</p>;
   if (!data) return <p className="muted">Loading…</p>;
-  const save = async (p) => {
+  const save = async (p, minutes) => {
+    setMsg(null);
     try {
-      await api(`/escalation-policy/${p.id}`, { method: "PATCH", body: { delay_min: Number(edit[p.id]) } });
+      await api(`/escalation-policy/${p.id}`, { method: "PATCH", body: { delay_min: minutes } });
       setMsg({ ok: true, text: "Time limit changed. Open incidents follow it from their next step." });
-      setEdit({ ...edit, [p.id]: "" });
       reload();
+      return null;
     } catch (e) {
-      setMsg({ ok: false, text: e.message });
+      return e.message.replace(/^time limits are cumulative: /, "Not saved: ");   // shown beside the step
     }
   };
   return (
     <>
-      <p className="hint">Acknowledgement limits count from when the incident is created; resolution limits from
-        acknowledgement. Each limit must be later than the one before it.</p>
-      <div className="table-wrap"><table className="table">
-        <thead><tr><th>Incident</th><th>Step</th><th>Goes to</th><th className="num">Minutes</th><th>New value</th><th></th></tr></thead>
-        <tbody>{data.map((p) => (
-          <tr key={p.id}>
-            <th scope="row">{p.severity}, {p.mode}</th><td>{CLOCKS[p.kind]} (step {p.stage})</td><td>{TIER_NAMES[p.tier] || p.tier}</td>
-            <td className="num">{p.delay_min}</td>
-            <td><input type="number" min="0" aria-label={`New time limit for ${p.severity} ${p.mode} ${p.kind} step ${p.stage}`}
-                       value={edit[p.id] ?? ""} onChange={(e) => setEdit({ ...edit, [p.id]: e.target.value })} /></td>
-            <td><button className="btn" disabled={edit[p.id] === undefined || edit[p.id] === ""} onClick={() => save(p)}>Save</button></td>
-          </tr>
-        ))}</tbody>
-      </table></div>
+      <p className="hint">Who is told about an incident, and when, if nobody responds. Times count from when the
+        incident was raised; once someone responds, from their response. Each step must come later than the one
+        before it.</p>
       {msg && <p className={msg.ok ? "ok" : "error"} role="status">{msg.text}</p>}
+      {LADDERS.map(([sev, mode, title, note]) => {
+        const rows = data.filter((p) => p.severity === sev && p.mode === mode);
+        if (rows.length === 0) return null;
+        const ack = rows.filter((p) => p.kind === "acknowledge").sort((a, b) => a.stage - b.stage);
+        const res = rows.filter((p) => p.kind === "resolve").sort((a, b) => a.stage - b.stage);
+        const rem = rows.filter((p) => p.kind === "reminder");
+        return (
+          <section key={title} className="ladder">
+            <h3>{title}</h3>
+            {note && <p className="muted ladder-note">{note}</p>}
+            <ol className="ladder-steps">
+              {ack.map((p, k) => (
+                <Step key={p.id} p={p} save={save} fixed={p.stage === 0 && p.delay_min === 0}
+                      text={p.stage === 0 ? `${cap(WHO[p.tier])} is sent an SMS.`
+                        : `${k === 1 ? "If nobody has responded" : "Still no response"}: ${WHO[p.tier]} is told.`} />
+              ))}
+              {rem.map((p) => (
+                <Step key={p.id} p={p} save={save} every
+                      text={`If it reaches the top and is still not dealt with, ${WHO[p.tier]} is reminded.`} />
+              ))}
+            </ol>
+            {res.length > 0 && (
+              <>
+                <p className="ladder-sub">Once someone responds, it must be fixed in time:</p>
+                <ol className="ladder-steps">
+                  {res.map((p, k) => (
+                    <Step key={p.id} p={p} save={save} after
+                          text={`${k === 0 ? "If not fixed" : "Still not fixed"}: it goes to ${WHO[p.tier]}.`} />
+                  ))}
+                </ol>
+              </>
+            )}
+          </section>
+        );
+      })}
     </>
+  );
+}
+
+const cap = (t) => t.charAt(0).toUpperCase() + t.slice(1);
+
+function Step({ p, save, text, fixed = false, every = false, after = false }) {
+  const [edit, setEdit] = useState(null);
+  const [err, setErr] = useState(null);
+  const when = fixed ? "At once" : `${every ? "Every " : after ? "" : "After "}${duration(p.delay_min)}${after ? " after the response" : ""}`;
+  const start = () => setEdit({ h: Math.floor(p.delay_min / 60), m: p.delay_min % 60 });
+  const go = async () => {
+    const problem = await save(p, Number(edit.h) * 60 + Number(edit.m));
+    setErr(problem);
+    if (!problem) setEdit(null);
+  };
+  return (
+    <li className="ladder-step">
+      {edit ? (
+        <span className="ladder-edit">
+          <label><input type="number" min="0" value={edit.h} onChange={(e) => setEdit({ ...edit, h: e.target.value })} aria-label="Hours" /> h</label>
+          <label><input type="number" min="0" max="59" value={edit.m} onChange={(e) => setEdit({ ...edit, m: e.target.value })} aria-label="Minutes" /> min</label>
+        </span>
+      ) : <span className="ladder-when">{when}</span>}
+      <span>{text}</span>
+      <span className="btn-row ladder-act">
+        {fixed ? null : edit ? (
+          <>
+            <button className="btn btn-small primary" onClick={go}>Save</button>
+            <button className="btn btn-small" onClick={() => { setEdit(null); setErr(null); }}>Cancel</button>
+          </>
+        ) : <button className="btn btn-small" onClick={start} aria-label={`Change: ${when}, ${text}`}>Change</button>}
+      </span>
+      {err && <p className="error ladder-err" role="alert">{err}</p>}
+    </li>
   );
 }
 

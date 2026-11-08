@@ -9,7 +9,7 @@ import pytest
 
 from coldchain import admin, custody
 from coldchain.api import views
-from coldchain.errors import NotPermitted
+from coldchain.errors import InvalidState, NotPermitted
 from coldchain.incidents import store
 from tests.conftest import HEALTH_FACILITY, PRODUCT, USERS
 from tests.test_incidents import event, now
@@ -262,6 +262,22 @@ def test_product_limits_changed_by_national_officer_only_and_recorded(db):
     rec = db.execute("""SELECT action, before, after, hash IS NOT NULL FROM admin_action
                         WHERE target_id = %s ORDER BY id DESC LIMIT 1""", (PRODUCT,)).fetchone()
     assert rec[0] == "product_updated" and rec[2] == {"heat_tolerance_min": 45} and rec[3]
+
+
+def test_product_added_by_national_officer_only_and_recorded(db):
+    new = {"name": "Test vaccine E9", "lower_limit": 2, "upper_limit": 8, "freeze_limit": 0.5,
+           "heat_tolerance_min": 60, "freeze_tolerance_min": 10, "freeze_sensitive": False}
+    for who in ("lga", "admin"):
+        with pytest.raises(NotPermitted):
+            admin.create_product(db, USERS[who], new)
+    p = admin.create_product(db, USERS["national"], new)
+    assert next(x for x in admin.products(db) if x["id"] == p["id"])["heat_tolerance_min"] == 60
+    assert db.execute("SELECT action FROM admin_action WHERE target_id = %s", (p["id"],)).fetchone()[0] \
+        == "product_created"
+    with pytest.raises(InvalidState):                          # names are unique
+        admin.create_product(db, USERS["national"], new)
+    with pytest.raises(InvalidState):                          # upper limit above the others
+        admin.create_product(db, USERS["national"], {**new, "name": "Other", "upper_limit": 1})
 
 
 def test_phone_changes_by_administrator_only_and_recorded(db):

@@ -42,6 +42,27 @@ def products(conn: psycopg.Connection) -> list[dict]:
         f"SELECT id::text, name, {', '.join(PRODUCT_FIELDS)} FROM product ORDER BY name").fetchall()
 
 
+def _check_limits(p: dict) -> None:
+    if not p["freeze_limit"] < p["upper_limit"] or not p["lower_limit"] < p["upper_limit"]:
+        raise InvalidState("the upper limit must be above the lower and freezing limits")
+
+
+def create_product(conn: psycopg.Connection, actor: str, p: dict) -> dict:
+    """Add a product with its limits and tolerances (E9, P23). Detection applies it to consignments of the
+    product from now on, and to stores as part of the strictest values across all products."""
+    _require(conn, actor, ("national_officer",), "adding products")
+    p = {"lower_limit": 2.0, "upper_limit": 8.0, "freeze_limit": 0.0, "heat_tolerance_min": 30,
+         "freeze_tolerance_min": 5, "freeze_sensitive": True,
+         **{k: v for k, v in p.items() if v is not None}, "id": str(uuid.uuid4())}
+    p["name"] = p["name"].strip()
+    _check_limits(p)
+    _write(conn, f"""INSERT INTO product (id, name, {', '.join(PRODUCT_FIELDS)})
+                     VALUES (%(id)s, %(name)s, {', '.join(f'%({k})s' for k in PRODUCT_FIELDS)})""",
+           p, "product", f"there is already a product called {p['name']}")
+    record(conn, actor, "product_created", "product", p["id"], None, p)
+    return p
+
+
 def update_product(conn: psycopg.Connection, actor: str, product_id: str, changes: dict) -> dict:
     """Change a product's limits or tolerances. Detection uses the new values from its next evaluation."""
     _require(conn, actor, ("national_officer",), "changing product limits")
@@ -54,8 +75,7 @@ def update_product(conn: psycopg.Connection, actor: str, product_id: str, change
     if not changes:
         return before
     after = {**before, **changes}
-    if not after["freeze_limit"] < after["upper_limit"] or not after["lower_limit"] < after["upper_limit"]:
-        raise InvalidState("the upper limit must be above the lower and freezing limits")
+    _check_limits(after)
     sets = ", ".join(f"{k} = %({k})s" for k in changes)
     cur.execute(f"UPDATE product SET {sets} WHERE id = %(id)s", {**changes, "id": product_id})
     record(conn, actor, "product_updated", "product", product_id, {k: before[k] for k in changes}, changes)
@@ -168,12 +188,12 @@ def _check_user(conn: psycopg.Connection, u: dict) -> None:
         raise InvalidState("phone numbers are in international format, e.g. +2348031234567")
 
 
-def _write(conn: psycopg.Connection, sql: str, params: dict, what: str):
+def _write(conn: psycopg.Connection, sql: str, params: dict, what: str, taken: str | None = None):
     try:
         with conn.transaction():
             return conn.execute(sql, params)
     except psycopg.errors.UniqueViolation:
-        raise InvalidState(f"{what} already exists or the phone number belongs to another active user") from None
+        raise InvalidState(taken or f"{what} already exists or the phone number belongs to another active user") from None
 
 
 USER_FIELDS = ("full_name", "role", "jurisdiction_id", "facility_id", "active")

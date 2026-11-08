@@ -356,6 +356,16 @@ async def products(user: User):
     return await asyncio.to_thread(_run, lambda conn: (views.viewer(conn, user), admin.products(conn))[1])
 
 
+class NewProduct(ProductChange):
+    name: str = Field(min_length=2, max_length=100)
+
+
+@app.post("/products", status_code=201)
+async def create_product(body: NewProduct, user: User):
+    """Add a product with its limits and tolerances (national officers; recorded, FR11.2)."""
+    return await asyncio.to_thread(_run, lambda conn: admin.create_product(conn, user, body.model_dump()))
+
+
 @app.patch("/products/{pid}")
 async def update_product(pid: str, body: ProductChange, user: User):
     """Change a product's temperature limits or tolerances (national officers; recorded, FR11.2)."""

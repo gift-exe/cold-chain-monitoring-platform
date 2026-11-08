@@ -12,9 +12,10 @@ on an already partly improved dashboard.
 | F04 Incident details say what is wrong in plain words | P13, P14 | Accepted by GA; 7f0ab4c |
 | F05 Performance page: plain headline figures, trend, ranking, view by officer | P15, P16 | Accepted by GA; 7aa6e6f |
 | F06 Performance page: clearer waiting figures, time limit, comparison, rows open incidents | P17 | Accepted by GA; 7aa6e6f |
-| F07 Vaccines in transit: plain names, list and details, journey, temperature, map, dialog | P18, P19, P20, P21 | Accepted by GA |
-| F08 Vaccines in transit: hand over to health facilities, figures and breakdown by area | (GA's requests on F07) | Accepted by GA |
-| F09 Incident and shipment lists shown 15 rows at a time | P22 | Accepted by GA |
+| F07 Vaccines in transit: plain names, list and details, journey, temperature, map, dialog | P18, P19, P20, P21 | Accepted by GA; 48d01f3 |
+| F08 Vaccines in transit: hand over to health facilities, figures and breakdown by area | (GA's requests on F07) | Accepted by GA; 48d01f3 |
+| F09 Incident and shipment lists shown 15 rows at a time | P22 | Accepted by GA; 48d01f3 |
+| F10 Administration: add products; escalation policy in plain words | P23, P24 | Accepted by GA |
 
 ## F01: Map view redesign and new theme
 
@@ -373,3 +374,35 @@ breakdown by facility folded) and the state officer (figures, breakdown by LGA).
 
 **Checked:** viewed at 1440 × 900 as the state officer: shipments page 2 (16–23 of 23); incident #763 opened
 from its address, shown on page 2 of *Escalated, no response yet* with its row highlighted.
+
+## F10: Administration: add products; escalation policy in plain words
+
+**Problems:** P23 (no way to add a product), P24 (the escalation policy tab did not explain itself).
+
+**What changed**
+
+- **Add product (P23).** National officers have an *Add product* button that opens a dialog (the same
+  kind as *New shipment*): *Name*; *Safe temperature range* (*Too cold below*, *Too warm above*, filled in
+  with 2 and 8 °C); *Freezing at or below*; *Damaged by freezing*; and *How long it may be out of range
+  before an incident is raised* (*Too warm for*, *Freezing for*, in minutes). The same checks as editing
+  apply (the upper limit above the lower and freezing limits; names unique, with "There is already a
+  product called ..." if not). The addition is recorded in the audit trail (FR11.2). The products table
+  also shows, and lets the officer edit, *Damaged by freezing*, which was stored but not shown.
+- **Escalation policy as sequences (P24).** In place of the table of stored rows, each kind of incident
+  is a short sequence in plain words: *Critical incidents caught while happening* ("Something can still
+  be saved, so a response is needed quickly"), *Warnings caught while happening*, *Critical incidents
+  found after they ended* (the retrospective limits, with why they are longer) and *Warnings found after
+  they ended*. Each step says when and who: "At once: the person responsible is sent an SMS"; "After
+  15 min: if nobody has responded, the LGA officer is told"; "Every 24 h: ... the national officer is
+  reminded"; and, under "Once someone responds, it must be fixed in time", "2 h after the response: if
+  not fixed, it goes to the next level up". Times are in minutes, hours or days, and each is changed in
+  place (*Change*, hours and minutes, *Save*). A time out of order is refused with the reason beside the
+  step ("Not saved: each must be later than the one before it and earlier than the one after it").
+- API: `POST /products` (`admin.create_product`). Test: `test_product_added_by_national_officer_only_and_recorded`.
+
+**Files:** `dashboard/src/views/Admin.jsx`, `dashboard/src/components/Dialog.jsx`, `dashboard/src/styles.css`,
+`src/coldchain/admin.py`, `src/coldchain/api/app.py`, `tests/test_dashboard_views.py`.
+
+**Checked:** dashboard and admin tests 36 passed, ruff clean; viewed at 1440 × 900 as the national
+officer: the Add product dialog opened and closed; the four sequences match the stored policy (Table 3.15);
+changing the 15-minute step to 22 h 15 min was refused beside the step and the stored value stayed 15.
