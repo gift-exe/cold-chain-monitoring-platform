@@ -130,6 +130,29 @@ def set_phone(conn: psycopg.Connection, actor: str, ref: str, phone_number: str)
            {"phone_number": phone_number, "deactivated": False})
 
 
+SMS_FIELDS = """
+    SELECT 'sent' AS direction, n.id::text, coalesce(n.sent_at, n.created_at) AS at, n.phone_number AS phone,
+           u.id::text AS user_id, u.full_name, u.role, n.body AS text, n.status, n.kind, NULL AS reason,
+           i.incident_no, c.consignment_no, n.gateway_message_id
+    FROM notification n JOIN app_user u ON u.id = n.recipient_id
+    LEFT JOIN incident i ON i.id = n.incident_id LEFT JOIN consignment c ON c.id = n.consignment_id
+    WHERE n.channel = 'sms'
+    UNION ALL
+    SELECT 'received', s.id::text, s.received_at, s.from_number, u.id::text, u.full_name, u.role, s.text, s.outcome,
+           s.command, s.reason, i.incident_no, c.consignment_no, NULL
+    FROM sms_inbound s LEFT JOIN app_user u ON u.id = s.user_id
+    LEFT JOIN incident i ON i.id = s.incident_id LEFT JOIN consignment c ON c.id = s.consignment_id
+"""
+
+
+def sms_log(conn: psycopg.Connection, actor: str, limit: int = 500) -> list[dict]:
+    """Every SMS the system sent and received, newest first (E9): so that people testing the system can
+    see the messages, which in development go to the local gateway emulator rather than to phones."""
+    _require(conn, actor, ("admin",), "reading text messages")
+    return conn.cursor(row_factory=dict_row).execute(
+        f"SELECT * FROM ({SMS_FIELDS}) m ORDER BY at DESC LIMIT %s", (limit,)).fetchall()
+
+
 def system_status(conn: psycopg.Connection, actor: str) -> dict:
     """What an administrator watches (Table 3.21): are devices reporting, is anything stuck."""
     _require(conn, actor, ("admin",), "system status")

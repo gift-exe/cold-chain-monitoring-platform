@@ -16,7 +16,7 @@ on an already partly improved dashboard.
 | F08 Vaccines in transit: hand over to health facilities, figures and breakdown by area | (GA's requests on F07) | Accepted by GA; 48d01f3 |
 | F09 Incident and shipment lists shown 15 rows at a time | P22 | Accepted by GA; 48d01f3 |
 | F10 Administration: add products; escalation policy in plain words | P23, P24 | Accepted by GA; 398db70 |
-| F11 Administration: add forms in dialogs, tables shown 15 rows at a time | P25, P26 | Accepted by GA |
+| F11 Administration: add forms in dialogs, tables shown 15 rows at a time | P25, P26 | Accepted by GA; 32452cf |
 
 ## F01: Map view redesign and new theme
 
@@ -431,3 +431,17 @@ changing the 15-minute step to 22 h 15 min was refused beside the step and the s
 
 **Checked:** dashboard built; viewed at 1440 × 900 as the administrator: the Add user dialog opened and
 closed; facilities (14 rows) without page controls; devices 16–30 of 201, page 2 of 14.
+
+## Round 2 preparation (not a fix)
+
+Changes made to support round 2, not in answer to logged problems; see `round2-setup.md`.
+
+- **Walkthrough data** (`scripts/e9_data.py`, `make e9-data`): vaccines, a second state, SMS-only officers,
+  a month of incident history and shipments in every state, on the development stack.
+- **Fresh incident on demand** (`make e9-freeze`): the demo feeder makes the Gwale test facility's fridge
+  freeze for 40 minutes.
+- **Escalation times restored** (`make e9-restore-policy`) to Table 3.15 after testers shorten them.
+- **Text messages tab** (administrator): every SMS sent and received, newest first, with delivery status
+  or the command's outcome. With the local SMS gateway emulator only (`SMS_EMULATOR_URL`, set by
+  `compose.local-sms.yaml`), the administrator can send a message as if from a user's phone, and messages
+  show their response codes, which the database stores masked. Test: `test_text_messages_sent_and_received_shown_to_administrator_only`.

@@ -6,6 +6,9 @@ x-local-sms: &local-sms
   AT_API_KEY: local-at-key
 
 services:
+  api:
+    environment:
+      SMS_EMULATOR_URL: http://sms-gateway:8000   # the administrator's text messages tab can reply as a phone (E9)
   notification-service:
     environment:
       <<: *local-sms

@@ -280,6 +280,20 @@ def test_product_added_by_national_officer_only_and_recorded(db):
         admin.create_product(db, USERS["national"], {**new, "name": "Other", "upper_limit": 1})
 
 
+def test_text_messages_sent_and_received_shown_to_administrator_only(db):
+    db.execute("""INSERT INTO notification (request_id, kind, channel, recipient_id, phone_number, body, status)
+                  VALUES (gen_random_uuid(), 'alert', 'sms', %s, '+2348000000004', 'E9 test alert', 'delivered')""",
+               (USERS["oic"],))
+    db.execute("""INSERT INTO sms_inbound (gateway_id, from_number, text, user_id, command, outcome)
+                  VALUES (%s, '+2348000000004', 'ACK 1', %s, 'ACK', 'accepted')""", (uuid.uuid4().hex, USERS["oic"]))
+    with pytest.raises(NotPermitted):
+        admin.sms_log(db, USERS["lga"])
+    log = admin.sms_log(db, USERS["admin"])
+    sent = next(m for m in log if m["text"] == "E9 test alert")
+    received = next(m for m in log if m["text"] == "ACK 1")
+    assert (sent["direction"], sent["full_name"], received["direction"]) == ("sent", "Test Facility OIC", "received")
+
+
 def test_phone_changes_by_administrator_only_and_recorded(db):
     with pytest.raises(NotPermitted):
         admin.deactivate_phone(db, USERS["lga"], USERS["oic"])

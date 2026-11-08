@@ -152,7 +152,7 @@ function Fig({ value, label: l, note, tone = "" }) {
 // Who has it, in a few words: "With Musa Ali (driver)", "Handed to Musa Ali, confirm by 14:30".
 function custodyLine(c) {
   if (c.completed_at) return `Completed ${time(c.completed_at)}`;
-  if (c.state === "rejected" && c.handoff) return `Rejected by ${c.handoff.to_name}; still with ${c.handoff.from_name}`;
+  if (c.state === "rejected" && c.handoff) return `Refused by ${c.handoff.to_name}; still with ${c.handoff.from_name}`;
   if (c.state === "in_handoff" && c.handoff) {
     const late = new Date(c.handoff.window_ends_at) < Date.now();
     return `Handed to ${c.handoff.to_name}, ${late ? "not confirmed in time" : `to confirm by ${clock(c.handoff.window_ends_at)}`}`;

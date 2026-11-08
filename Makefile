@@ -6,7 +6,7 @@ EVAL_NET ?= configs/sim/detection-101.toml
 
 INFRA = postgres keycloak mosquitto kafka temporal
 
-.PHONY: eval-image eval-up eval-down eval-reset eval-replay eval-live dev env infra build up down reset migrate seed train demo test test-unit test-resilience lint logs sim-sources calibrate
+.PHONY: eval-image eval-up eval-down eval-reset eval-replay eval-live dev env infra build up down reset migrate seed train demo test test-unit test-resilience lint logs sim-sources calibrate e9-data e9-freeze e9-restore-policy
 
 dev: env anchors infra migrate seed models/default.joblib up  ## start the stack, apply migrations, load seed data, start services
 
@@ -53,6 +53,16 @@ train:  ## retrain the anomaly model
 
 demo:  ## keep the demo network reporting, with scripted incidents and an outreach trip (Ctrl-C to stop)
 	uv run python scripts/demo.py
+
+e9-data:  ## load the walkthrough data for the E9 evaluators (after `make reset` and `make dev`), then run `make demo`
+	uv run python scripts/e9_data.py
+	podman restart coldchain-incident-service-1
+
+e9-freeze:  ## make the Gwale test facility's fridge freeze for 40 minutes (needs `make demo` running): a fresh incident to watch escalate
+	mkdir -p runs && touch runs/e9-freeze
+
+e9-restore-policy:  ## put the escalation time limits back to Table 3.15 after the evaluators shortened them
+	uv run python scripts/e9_restore_policy.py
 
 test:  ## all tests (stack must be running)
 	uv run pytest

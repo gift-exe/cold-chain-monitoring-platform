@@ -46,6 +46,8 @@ class Settings(BaseSettings):
     sms_trust_sent: bool = False             # development only: a message the gateway accepts counts as delivered
                                              # (the Africa's Talking sandbox's delivery reports are unreliable)
     sms_callback_token: str = "dev-callback-token"   # shared secret in the gateway's callback URLs
+    sms_emulator_url: str | None = None      # development only: the local gateway emulator, so the administrator's
+                                             # text messages tab can send a reply as if from a user's phone (E9)
     code_secret: str = "dev-code-secret"     # HMAC key for response codes; never stored in the database
     digest_hour_utc: int = 6                 # retrospective digests at 07:00 WAT
 

@@ -16,6 +16,7 @@ from datetime import UTC, datetime, timedelta
 from functools import lru_cache
 from typing import Annotated, Literal
 
+import httpx
 import jwt
 import psycopg
 from fastapi import Depends, FastAPI, Header, HTTPException, Query, Request, WebSocket, WebSocketDisconnect
@@ -527,6 +528,46 @@ async def escalation_policy(user: User):
 @app.patch("/escalation-policy/{policy_id}")
 async def update_policy(policy_id: int, body: PolicyChange, user: User):
     return await asyncio.to_thread(_run, lambda conn: admin.update_policy(conn, user, policy_id, body.delay_min))
+
+
+@app.get("/sms")
+async def sms_log(user: User):
+    """The text messages tab (administrators): SMS sent and received, and whether replies can be simulated."""
+    rows = await asyncio.to_thread(_run, admin.sms_log, user)
+    url = get_settings().sms_emulator_url
+    if url:
+        # Test set-up only: the database keeps response codes masked ("RES 99 **** note"), but the local
+        # emulator has the text as sent, so a tester can see the code to reply with.
+        try:
+            async with httpx.AsyncClient(timeout=5) as client:
+                sent = {m["messageId"]: m["message"] for m in (await client.get(f"{url}/_sim/messages")).json()
+                        if m.get("messageId")}
+            for r in rows:
+                r["text"] = sent.get(r.pop("gateway_message_id", None), r["text"])
+        except httpx.HTTPError:
+            log.warning("SMS emulator not reachable; showing messages as stored")
+    for r in rows:
+        r.pop("gateway_message_id", None)
+    return {"messages": rows, "can_reply": bool(url)}
+
+
+class SimulatedReply(BaseModel):
+    from_number: str = Field(pattern=r"^\+?[0-9]{7,15}$")
+    text: str = Field(min_length=1, max_length=160)
+
+
+@app.post("/sms/reply")
+async def simulate_reply(body: SimulatedReply, user: User):
+    """Development only: send an SMS to the system as if from a phone, through the local gateway emulator,
+    so that SMS commands (ACK, RES, REC, REJ) can be tried without a phone."""
+    url = get_settings().sms_emulator_url
+    if not url:
+        raise HTTPException(404, "replies can only be simulated with the local SMS gateway emulator")
+    await asyncio.to_thread(_run, lambda conn: admin._require(conn, user, ("admin",), "simulating SMS replies"))
+    async with httpx.AsyncClient(timeout=15) as client:
+        r = await client.post(f"{url}/_sim/inbound", json={"sender": body.from_number, "text": body.text})
+    r.raise_for_status()
+    return {"sent": True}
 
 
 @app.get("/system/status")

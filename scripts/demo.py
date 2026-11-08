@@ -11,6 +11,11 @@ logger per minute until stopped. Relative to the start time:
 - an outreach team from the Gwale LGA store, logger DEMO-MOB-0001, travelling west with GPS positions.
 Restarting starts the scripted conditions again from the new start time.
 
+The Gwale Test Health Facility's fridge (TEST-FIX-0001, whose officer-in-charge is the test.facility account)
+reports normally until asked to freeze: `make e9-freeze` (it touches runs/e9-freeze) makes it read about
+-1.8 °C for the next 40 minutes, so a fresh critical incident appears about five minutes later and its
+escalation can be watched from the start (E9 round 2). Touching the file again starts another.
+
 Run: uv run python scripts/demo.py      (or: make demo)
 """
 import json
@@ -34,6 +39,15 @@ PRODUCT = "5c1d0a00-0000-4000-8000-000000000001"
 ROUTE = [(8.4930, 11.9870), (8.4800, 11.9800), (8.4620, 11.9740), (8.4450, 11.9690), (8.4300, 11.9610)]
 TRIP = timedelta(minutes=120)        # time to travel the route
 TRIP_START = timedelta(minutes=40)   # the team left this long before the feeder started
+FREEZE_FILE = ROOT / "runs" / "e9-freeze"
+FREEZE_FOR = timedelta(minutes=40)
+
+
+def freeze_started() -> datetime | None:
+    try:
+        return datetime.fromtimestamp(FREEZE_FILE.stat().st_mtime, UTC)
+    except FileNotFoundError:
+        return None
 
 
 def scenario(serial: str, t0: datetime):
@@ -48,6 +62,10 @@ def scenario(serial: str, t0: datetime):
             return None, False, False
         if serial == "DEMO-FIX-E13" and m >= -20:
             return None, True, True
+        if serial == "TEST-FIX-0001":
+            started = freeze_started()
+            if started and started <= t < started + FREEZE_FOR:
+                return -1.8, True, False
         return None, True, False
     return at
 
@@ -127,7 +145,8 @@ def main() -> None:
     with psycopg.connect(get_settings().db_url("app").replace("postgresql+psycopg://", "postgresql://"),
                          autocommit=True) as conn:
         fixed = [r[0] for r in conn.execute(
-            "SELECT serial_no FROM device WHERE serial_no LIKE 'DEMO-FIX-%' AND status = 'active' ORDER BY 1")]
+            """SELECT serial_no FROM device WHERE (serial_no LIKE 'DEMO-FIX-%' OR serial_no = 'TEST-FIX-0001')
+               AND status = 'active' ORDER BY 1""")]
         if not fixed:
             sys.exit("no demo loggers: run `make seed` first")
         outreach_trip(conn)

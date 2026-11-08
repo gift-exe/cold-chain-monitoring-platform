@@ -30,7 +30,7 @@ export default function Admin({ me }) {
   }
   if (me.role === "admin") {
     return <Tabbed title="Administration" tabs={[
-      ["status", "System status", SystemStatus], ["users", "Users and phone numbers", Users],
+      ["status", "System status", SystemStatus], ["sms", "Text messages", TextMessages], ["users", "Users and phone numbers", Users],
       ["jurisdictions", "Jurisdictions", Jurisdictions], ["facilities", "Facilities", Facilities],
       ["devices", "Devices", Devices]]} />;
   }
@@ -566,6 +566,95 @@ function Step({ p, save, text, fixed = false, every = false, after = false }) {
       </span>
       {err && <p className="error ladder-err" role="alert">{err}</p>}
     </li>
+  );
+}
+
+// Text messages (E9): every SMS the system sent and received, newest first, so people testing the system
+// can see them (in development they go to the local gateway emulator, not to phones). With the emulator,
+// the administrator can also send a message as if from a user's phone, to try the SMS commands.
+const SMS_STATUS = { queued: "Waiting to send", sent: "Sent", delivered: "Delivered", retrying: "Retrying",
+                     undelivered: "Not delivered", rejected: "Refused by the gateway", held: "Held for the daily summary",
+                     digested: "Sent in the daily summary" };
+const SMS_OUTCOME = { accepted: "Accepted", no_effect: "No effect", rejected: "Refused", rate_limited: "Too many messages" };
+
+function TextMessages() {
+  const { data, error, reload } = useApi("/sms", ["notification", "incident", "custody_handoff"], 10000);
+  const { data: users } = useApi("/users");
+  const [find, setFind] = useState("");
+  const [reply, setReply] = useState(null);
+  const [msg, setMsg] = useState(null);
+  const rows = (data?.messages || []).filter((m) => !find || `${m.full_name || ""} ${m.phone || ""} ${m.text}`.toLowerCase().includes(find.toLowerCase()));
+  const pg = usePage(rows, { resetKey: find });
+  if (error) return <p className="error">{error.message}</p>;
+  if (!data) return <p className="muted">Loading…</p>;
+  const phones = (users || []).filter((u) => u.phone_number && !u.phone_deactivated_at && u.active);
+  return (
+    <>
+      <TableHead button={data.can_reply ? "Send as a phone" : null} onAdd={() => { setReply({ from_number: "", text: "" }); setMsg(null); }}
+                 hint={`Every SMS the system sent and received, newest first. In this test set-up they go to a local stand-in for the SMS gateway, not to real phones.${data.can_reply ? " To try a command, send a message as if from someone's phone." : ""}`}>
+        <label className="field find"><span>Find a message</span><input value={find} onChange={(e) => setFind(e.target.value)} placeholder="Name, phone number or text" /></label>
+      </TableHead>
+      {msg && <p className={msg.ok ? "ok" : "error"} role="status">{msg.text}</p>}
+      {reply && <SendAsPhone initial={reply} phones={phones} onClose={() => setReply(null)}
+                             onDone={(text) => { setReply(null); setMsg({ ok: true, text }); setTimeout(reload, 1500); }} />}
+      {rows.length === 0 ? <p className="empty">No text messages yet.</p> : (
+        <ol className="sms-list">
+          {pg.rows.map((m) => (
+            <li key={`${m.direction}-${m.id}`} className={`sms sms-${m.direction}`}>
+              <div className="sms-meta">
+                <span className="sms-who">{m.direction === "sent" ? "To " : "From "}<strong>{m.full_name || "unknown number"}</strong>
+                  {m.role && <span className="muted"> ({label(ROLES, m.role)})</span>} <span className="muted">{m.phone}</span></span>
+                <time className="muted">{time(m.at)}</time>
+              </div>
+              <p className="sms-text">{m.text}</p>
+              <div className="sms-foot">
+                <span className={`sms-status ${["undelivered", "rejected"].includes(m.status) ? "bad" : ""}`}>
+                  {m.direction === "sent" ? SMS_STATUS[m.status] || m.status
+                    : `${SMS_OUTCOME[m.status] || m.status}${m.reason ? `: ${m.reason}` : ""}`}
+                </span>
+                {data.can_reply && m.direction === "sent" && m.phone && (
+                  <button className="btn btn-small" onClick={() => { setReply({ from_number: m.phone, text: "" }); setMsg(null); }}>Reply as this phone</button>
+                )}
+              </div>
+            </li>
+          ))}
+        </ol>
+      )}
+      <Pager pg={pg} label="Text messages" />
+    </>
+  );
+}
+
+function SendAsPhone({ initial, phones, onClose, onDone }) {
+  const [v, setV] = useState(initial);
+  const [err, setErr] = useState(null);
+  const [busy, setBusy] = useState(false);
+  const submit = async () => {
+    setErr(null);
+    setBusy(true);
+    try {
+      await api("/sms/reply", { method: "POST", body: v });
+      const who = phones.find((p) => p.phone_number === v.from_number);
+      onDone(`Sent "${v.text}" from ${who ? who.full_name : v.from_number}. The system's answer appears in the list.`);
+    } catch (e) {
+      setErr(e.message);
+      setBusy(false);
+    }
+  };
+  return (
+    <Dialog title="Send as a phone" submitLabel="Send" busy={busy} error={err} onClose={onClose} onSubmit={submit}
+            intro="The system receives this as if the person had texted it from their phone.">
+      <label className="field"><span>From</span>
+        <select required value={v.from_number} onChange={(e) => setV({ ...v, from_number: e.target.value })}>
+          <option value="">Choose a person…</option>
+          {phones.map((p) => <option key={p.id} value={p.phone_number}>{p.full_name} ({label(ROLES, p.role)}), {p.phone_number}</option>)}
+        </select></label>
+      <label className="field"><span>Message</span>
+        <input required maxLength={160} value={v.text} onChange={(e) => setV({ ...v, text: e.target.value })} placeholder="e.g. ACK 1234" />
+        <span className="hint">Commands: ACK &lt;incident&gt; to acknowledge; RES &lt;incident&gt; &lt;code&gt; &lt;what was done&gt; to resolve;
+          REC &lt;shipment&gt; &lt;code&gt; to confirm receipt; REJ &lt;shipment&gt; &lt;code&gt; &lt;reason&gt; to refuse; HELP. Codes are in the messages above.</span>
+      </label>
+    </Dialog>
   );
 }
 
