@@ -59,7 +59,8 @@ def test_jurisdictions_facilities_and_devices(db):
         admin.create_jurisdiction(db, ADMIN, {"id": "NG-ZZ1", "level": "lga", "name": "X", "parent_id": "NG"})
     f = admin.create_facility(db, ADMIN, {"name": "New PHC", "tier": "health_facility", "jurisdiction_id": code,
                                           "power_source": "solar", "lat": 12.0, "lon": 8.5})
-    admin.update_facility(db, ADMIN, f["id"], {"power_source": "grid", "lat": 12.1})
+    admin.update_facility(db, ADMIN, f["id"], {"power_source": "grid", "lat": 12.1, "ward": "Dorayi"})
+    assert db.execute("SELECT ward FROM facility WHERE id = %s", (f["id"],)).fetchone()[0] == "Dorayi"
     serial = f"ADM-{uuid.uuid4().hex[:8]}"
     d = admin.register_device(db, ADMIN, {"serial_no": serial, "type": "fixed", "equipment_type": "ice_lined_refrigerator",
                                           "facility_id": f["id"], "has_power_signal": True})

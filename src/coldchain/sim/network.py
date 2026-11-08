@@ -37,6 +37,7 @@ class Site:
     power_source: str
     grid_band: str | None
     source: str                 # where the site and its location come from
+    ward: str | None = None     # from GRID3 (an LGA store takes its host facility's ward)
 
 
 @dataclass
@@ -148,12 +149,12 @@ def build(net: dict, seed: int = 0) -> Network:
         store_id = str(uuid.uuid5(NAMESPACE, f"lga-store:{lga}"))
         sites.append(Site(store_id, f"{lga} LGA Cold Store (sim)", "lga_store", lga, f"{STATE_ID}-{codes[lga]}",
                           STATE_STORE_ID, float(host["lat"]), float(host["lon"]), "grid_generator",
-                          next(store_band), f"placed at GRID3 {host['grid3_id']} (assumption)"))
+                          next(store_band), f"placed at GRID3 {host['grid3_id']} (assumption)", host["ward"] or None))
         for r in members:
             g = r["grid3_id"]
             sites.append(Site(str(uuid.uuid5(NAMESPACE, g)), r["name"], "health_facility", lga,
                               f"{STATE_ID}-{codes[lga]}", store_id, float(r["lat"]), float(r["lon"]), power[g],
-                              band.get(g), f"GRID3 {g}"))
+                              band.get(g), f"GRID3 {g}", r["ward"] or None))
 
     units, n_by_lga = [], defaultdict(int)
     for s in sites:
@@ -188,7 +189,7 @@ def load_network(scenario: Network, fixed: int, mobile: int) -> Network:
         for s in scenario.sites:
             jur = state if s.tier == "state_store" else f"{state}-{s.jurisdiction_id.rsplit('-', 1)[-1]}"
             sites.append(Site(ids[s.id], f"{s.name} (load {r})", s.tier, s.lga, jur,
-                              ids.get(s.parent_id), s.lat, s.lon, s.power_source, s.grid_band, s.source))
+                              ids.get(s.parent_id), s.lat, s.lon, s.power_source, s.grid_band, s.source, s.ward))
             if s.tier == "lga_store":
                 stores.append(sites[-1])
         for u in fixed_units:

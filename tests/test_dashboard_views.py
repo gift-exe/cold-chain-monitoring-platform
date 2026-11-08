@@ -52,6 +52,8 @@ def test_facility_officer_sees_own_facility_only(db):
     assert other in seen(db, "lga")
     m = views.map_units(db, views.viewer(db, USERS["oic"]))
     assert [f["id"] for f in m["facilities"]] == [HEALTH_FACILITY]
+    f = m["facilities"][0]
+    assert (f["ward"], f["lga_name"], f["state_name"]) == ("Sani Mainagge", "Gwale", "Kano")
 
 
 def test_outreach_lead_sees_incidents_on_consignments_they_handled(db):
@@ -105,6 +107,26 @@ def test_facility_status_is_its_worst_unit(db):
     gwale = next(f for f in views.map_units(db, views.viewer(db, USERS["lga"]))["facilities"]
                  if f["id"] == HEALTH_FACILITY)
     assert gwale["status"] == "critical"
+
+
+def test_summary_counts_active_incidents_and_responses_in_the_area(db):
+    def counts(who):
+        return views.summary(db, views.viewer(db, USERS[who]))
+    before, before_state = counts("lga"), counts("state")
+    critical = new_incident(db)
+    new_incident(db, severity="warning")
+    new_incident(db, DALA_PHC)                                        # another LGA: state sees it, LGA not
+    store.acknowledge(db, critical, USERS["oic"])
+    resolved = new_incident(db)
+    store.resolve(db, resolved, USERS["oic"], "moved stock")
+    after = counts("lga")
+    delta = {k: after[k] - before[k] for k in ("active", "critical", "warning", "awaiting", "raised",
+                                               "responded", "resolved")}
+    assert delta == {"active": 2, "critical": 1, "warning": 1, "awaiting": 1, "raised": 3, "responded": 2,
+                     "resolved": 1}
+    assert counts("state")["active"] - before_state["active"] == 3
+    assert counts("admin")["active"] == 0
+    assert "summary" in views.map_units(db, views.viewer(db, USERS["lga"]))
 
 
 def test_response_metrics_by_facility_and_tier(db):

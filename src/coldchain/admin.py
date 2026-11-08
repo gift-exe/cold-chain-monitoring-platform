@@ -237,8 +237,8 @@ def rename_jurisdiction(conn: psycopg.Connection, actor: str, jid: str, name: st
     record(conn, actor, "jurisdiction_renamed", "jurisdiction", jid, before, {"name": name})
 
 
-FACILITY_FIELDS = ("name", "tier", "jurisdiction_id", "parent_facility_id", "power_source", "lat", "lon")
-FACILITY_SELECT = """SELECT f.id::text, f.name, f.tier, f.jurisdiction_id, f.parent_facility_id::text, f.power_source,
+FACILITY_FIELDS = ("name", "tier", "jurisdiction_id", "parent_facility_id", "power_source", "lat", "lon", "ward")
+FACILITY_SELECT = """SELECT f.id::text, f.name, f.tier, f.jurisdiction_id, f.parent_facility_id::text, f.power_source, f.ward,
                             ST_Y(f.location::geometry) AS lat, ST_X(f.location::geometry) AS lon FROM facility f"""
 
 
@@ -259,11 +259,11 @@ def _check_facility(conn: psycopg.Connection, f: dict) -> None:
 
 def create_facility(conn: psycopg.Connection, actor: str, f: dict) -> dict:
     _require(conn, actor, ("admin",), "managing facilities")
-    f = {"parent_facility_id": None, **f, "id": str(uuid.uuid4())}
+    f = {"parent_facility_id": None, "ward": None, **f, "id": str(uuid.uuid4())}
     _check_facility(conn, f)
-    conn.execute("""INSERT INTO facility (id, name, tier, jurisdiction_id, parent_facility_id, location, power_source)
+    conn.execute("""INSERT INTO facility (id, name, tier, jurisdiction_id, parent_facility_id, location, power_source, ward)
                     VALUES (%(id)s, %(name)s, %(tier)s, %(jurisdiction_id)s, %(parent_facility_id)s,
-                            ST_SetSRID(ST_MakePoint(%(lon)s, %(lat)s), 4326)::geography, %(power_source)s)""", f)
+                            ST_SetSRID(ST_MakePoint(%(lon)s, %(lat)s), 4326)::geography, %(power_source)s, %(ward)s)""", f)
     record(conn, actor, "facility_created", "facility", f["id"], None, f)
     return f
 
@@ -279,7 +279,7 @@ def update_facility(conn: psycopg.Connection, actor: str, fid: str, changes: dic
     after = {**before, **changes}
     _check_facility(conn, after)
     conn.execute("""UPDATE facility SET name = %(name)s, tier = %(tier)s, jurisdiction_id = %(jurisdiction_id)s,
-                        parent_facility_id = %(parent_facility_id)s, power_source = %(power_source)s,
+                        parent_facility_id = %(parent_facility_id)s, power_source = %(power_source)s, ward = %(ward)s,
                         location = ST_SetSRID(ST_MakePoint(%(lon)s, %(lat)s), 4326)::geography
                     WHERE id = %(id)s""", after)
     record(conn, actor, "facility_updated", "facility", fid, {k: before[k] for k in changes}, changes)

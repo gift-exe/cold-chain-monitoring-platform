@@ -211,9 +211,12 @@ def map_units(conn: psycopg.Connection, v: Viewer, track_points: int = 300) -> d
     cur = conn.cursor(row_factory=dict_row)
     facilities = cur.execute(f"""
         {AREA}
-        SELECT f.id::text, f.name, f.tier, f.power_source, f.jurisdiction_id, j.name AS jurisdiction_name,
+        SELECT f.id::text, f.name, f.tier, f.power_source, f.ward, f.jurisdiction_id, j.name AS jurisdiction_name,
+               CASE WHEN j.level = 'lga' THEN j.name END AS lga_name,
+               CASE WHEN j.level = 'lga' THEN p.name WHEN j.level = 'state' THEN j.name END AS state_name,
                ST_Y(f.location::geometry) AS lat, ST_X(f.location::geometry) AS lon
         FROM facility f JOIN jurisdiction j ON j.id = f.jurisdiction_id
+        LEFT JOIN jurisdiction p ON p.id = j.parent_id
         WHERE {_facility_scope(v)} ORDER BY f.name""", v.params).fetchall()
     units = cur.execute(f"""
         {AREA}
@@ -271,7 +274,27 @@ def map_units(conn: psycopg.Connection, v: Viewer, track_points: int = 300) -> d
     for f in facilities:
         f["units"] = by_facility.get(f["id"], [])
         f["status"] = min((u["status"] for u in f["units"]), key=rank.index, default="no_data")
-    return {"facilities": facilities, "mobile": mobile}
+    return {"facilities": facilities, "mobile": mobile, "summary": summary(conn, v)}
+
+
+def summary(conn: psycopg.Connection, v: Viewer, days: int = 7) -> dict:
+    """The incident situation in the viewer's area, for the summary cards above the map: what is active
+    now (by severity, and whether anyone has responded), and how many of the incidents raised in the
+    last `days` days were responded to (acknowledged, or resolved) and resolved."""
+    responded = "(i.acknowledged_at IS NOT NULL OR i.resolved_at IS NOT NULL)"
+    recent = "i.created_at >= now() - make_interval(days => %(days)s)"
+    return conn.cursor(row_factory=dict_row).execute(f"""
+        {AREA}
+        SELECT count(*) FILTER (WHERE i.state = ANY(%(open)s)) AS active,
+               count(*) FILTER (WHERE i.state = ANY(%(open)s) AND i.severity = 'critical') AS critical,
+               count(*) FILTER (WHERE i.state = ANY(%(open)s) AND i.severity = 'warning') AS warning,
+               count(*) FILTER (WHERE i.state = ANY(%(open)s) AND NOT {responded}) AS awaiting,
+               count(*) FILTER (WHERE {recent}) AS raised,
+               count(*) FILTER (WHERE {recent} AND {responded}) AS responded,
+               count(*) FILTER (WHERE {recent} AND i.resolved_at IS NOT NULL) AS resolved,
+               %(days)s AS days
+        FROM incident i LEFT JOIN device d ON d.id = i.device_id
+        WHERE {_incident_scope(v)}""", {**v.params, "open": list(OPEN_STATES), "days": days}).fetchone()
 
 
 # Performance -----------------------------------------------------------------------------------------

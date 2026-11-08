@@ -25,6 +25,8 @@ export function sections(role) {
   return s;
 }
 
+const initials = (name) => name.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0].toUpperCase()).join("");
+
 const TITLES = { map: "Map", incidents: "Incidents", performance: "Performance", consignments: "Consignments",
                  admin: "Administration" };
 
@@ -53,15 +55,19 @@ export default function App() {
           ))}
         </nav>
         <div className="topbar-right">
-          <span className={`live ${live ? "on" : "off"}`} title={live ? "Live updates connected" : "Live updates disconnected; refreshing every minute"}>
-            <span aria-hidden="true">{live ? "●" : "○"}</span> {live ? "Live" : "Offline"}
+          <span className={`live ${live ? "on" : "off"}`}
+                title={live ? "Updates arrive as they happen" : "Live updates disconnected; refreshing every minute"}>
+            <span className="live-dot" aria-hidden="true" /> {live ? "Live" : "Reconnecting"}
           </span>
           <Notifications unread={me.unread} />
           <div className="user">
-            <div className="user-name">{me.full_name}</div>
-            <div className="user-role">{label(ROLES, me.role)}{where ? ` · ${where}` : ""}</div>
+            <span className="avatar" aria-hidden="true">{initials(me.full_name)}</span>
+            <span className="user-text">
+              <span className="user-name">{me.full_name}</span>
+              <span className="user-role">{label(ROLES, me.role)}{where ? `, ${where}` : ""}</span>
+            </span>
+            <button className="signout" onClick={logout}>Sign out</button>
           </div>
-          <button className="btn-quiet" onClick={logout}>Sign out</button>
         </div>
       </header>
       <main className="content">

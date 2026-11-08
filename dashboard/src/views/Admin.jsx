@@ -217,7 +217,7 @@ function Users() {
       <h2>Add a user</h2>
       <Form button="Add user" onDone={reload}
             fields={[["username", "Username"], ["full_name", "Full name"], ["role", "Role", "text", roles],
-                     ["jurisdiction_id", "Jurisdiction", "text", lists.jurisdictions],
+                     ["jurisdiction_id", "Jurisdiction", "text", lists.jurisdictions], ["ward", "Ward (optional)"],
                      ["facility_id", "Facility (officers-in-charge, outreach teams)", "text", lists.facilities],
                      ["phone_number", "Phone number (+234…)"]]}
             submit={async (v) => { await api("/users", { method: "POST", body: v }); return `${v.full_name} added.`; }} />
@@ -271,10 +271,10 @@ function Facilities() {
   const [edit, setEdit] = useState(null);
   const [msg, setMsg] = useState(null);
   const [filter, setFilter] = useState("");
-  const rows = lists.raw.facilities.filter((f) => !filter || `${f.name} ${f.jurisdiction_id}`.toLowerCase().includes(filter.toLowerCase()));
+  const rows = lists.raw.facilities.filter((f) => !filter || `${f.name} ${f.ward || ""} ${f.jurisdiction_id}`.toLowerCase().includes(filter.toLowerCase()));
   const save = async () => {
     try {
-      await api(`/facilities/${edit.id}`, { method: "PATCH", body: { name: edit.name, power_source: edit.power_source, lat: Number(edit.lat), lon: Number(edit.lon) } });
+      await api(`/facilities/${edit.id}`, { method: "PATCH", body: { name: edit.name, power_source: edit.power_source, ward: edit.ward || undefined, lat: Number(edit.lat), lon: Number(edit.lon) } });
       setMsg({ ok: true, text: `${edit.name} updated.` });
       setEdit(null);
       lists.reload();
@@ -284,13 +284,15 @@ function Facilities() {
   };
   return (
     <>
-      <label className="field"><span>Find a facility</span><input value={filter} onChange={(e) => setFilter(e.target.value)} placeholder="Name or LGA code" /></label>
+      <label className="field"><span>Find a facility</span><input value={filter} onChange={(e) => setFilter(e.target.value)} placeholder="Name, ward or LGA code" /></label>
       <div className="table-wrap"><table className="table">
-        <thead><tr><th>Name</th><th>Type</th><th>Jurisdiction</th><th>Power</th><th className="num">Latitude</th><th className="num">Longitude</th><th></th></tr></thead>
+        <thead><tr><th>Name</th><th>Type</th><th>Ward</th><th>Jurisdiction</th><th>Power</th><th className="num">Latitude</th><th className="num">Longitude</th><th></th></tr></thead>
         <tbody>{rows.slice(0, 100).map((f) => edit?.id === f.id ? (
           <tr key={f.id} className="editing">
             <td><input aria-label="Name" value={edit.name} onChange={(e) => setEdit({ ...edit, name: e.target.value })} /></td>
-            <td>{label(Object.fromEntries(TIERS), f.tier)}</td><td>{f.jurisdiction_id}</td>
+            <td>{label(Object.fromEntries(TIERS), f.tier)}</td>
+            <td><input aria-label="Ward" value={edit.ward || ""} onChange={(e) => setEdit({ ...edit, ward: e.target.value })} /></td>
+            <td>{f.jurisdiction_id}</td>
             <td><select aria-label="Power source" value={edit.power_source} onChange={(e) => setEdit({ ...edit, power_source: e.target.value })}>
               {POWER.map(([p, t]) => <option key={p} value={p}>{t}</option>)}</select></td>
             <td><input aria-label="Latitude" type="number" step="any" value={edit.lat} onChange={(e) => setEdit({ ...edit, lat: e.target.value })} /></td>
@@ -298,7 +300,7 @@ function Facilities() {
             <td className="btn-row"><button className="btn primary" onClick={save}>Save</button><button className="btn" onClick={() => setEdit(null)}>Cancel</button></td>
           </tr>
         ) : (
-          <tr key={f.id}><th scope="row">{f.name}</th><td>{label(Object.fromEntries(TIERS), f.tier)}</td><td>{f.jurisdiction_id}</td>
+          <tr key={f.id}><th scope="row">{f.name}</th><td>{label(Object.fromEntries(TIERS), f.tier)}</td><td>{f.ward || "—"}</td><td>{f.jurisdiction_id}</td>
             <td>{label(Object.fromEntries(POWER), f.power_source)}</td><td className="num">{f.lat.toFixed(4)}</td><td className="num">{f.lon.toFixed(4)}</td>
             <td><button className="btn" onClick={() => { setEdit({ ...f }); setMsg(null); }}>Edit</button></td></tr>
         ))}</tbody>
@@ -307,10 +309,10 @@ function Facilities() {
       {msg && <p className={msg.ok ? "ok" : "error"} role="status">{msg.text}</p>}
       <h2>Add a facility</h2>
       <Form button="Add facility" onDone={lists.reload}
-            fields={[["name", "Name"], ["tier", "Type", "text", TIERS], ["jurisdiction_id", "Jurisdiction", "text", lists.jurisdictions],
+            fields={[["name", "Name"], ["tier", "Type", "text", TIERS], ["jurisdiction_id", "Jurisdiction", "text", lists.jurisdictions], ["ward", "Ward (optional)"],
                      ["parent_facility_id", "Supplied by", "text", lists.facilities], ["power_source", "Power source", "text", POWER],
                      ["lat", "Latitude", "number"], ["lon", "Longitude", "number"]]}
-            submit={async (v) => { await api("/facilities", { method: "POST", body: { ...v, lat: Number(v.lat), lon: Number(v.lon) } }); return `${v.name} added.`; }} />
+            submit={async (v) => { await api("/facilities", { method: "POST", body: { ...v, ward: v.ward || null, lat: Number(v.lat), lon: Number(v.lon) } }); return `${v.name} added.`; }} />
     </>
   );
 }

@@ -17,7 +17,8 @@ export default function Incidents() {
   const [params, setParams] = useSearchParams();
   const state = params.get("state") || "active";
   const facility = params.get("facility");
-  const q = new URLSearchParams({ state, ...(facility ? { facility } : {}) });
+  const severity = params.get("severity");
+  const q = new URLSearchParams({ state, ...(facility ? { facility } : {}), ...(severity ? { severity } : {}) });
   const { data, error } = useApi(`/incidents?${q}`, ["incident"]);
   const navigate = useNavigate();
 
@@ -42,6 +43,11 @@ export default function Incidents() {
       {facility && (
         <p className="filter-note">
           Showing one facility. <button className="link" onClick={() => set("facility", null)}>Show all</button>
+        </p>
+      )}
+      {severity && (
+        <p className="filter-note">
+          Showing {severity} incidents only. <button className="link" onClick={() => set("severity", null)}>Show all</button>
         </p>
       )}
       {error && <p className="error">Could not load incidents: {error.message}</p>}

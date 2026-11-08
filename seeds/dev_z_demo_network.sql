@@ -46,3 +46,22 @@ INSERT INTO device (serial_no, facility_id, type, equipment_type, has_door_senso
     ('DEMO-MOB-0001', NULL, 'mobile', 'vaccine_carrier', false, false),
     ('DEMO-MOB-0002', NULL, 'mobile', 'cold_box', false, false)
 ON CONFLICT (serial_no) DO NOTHING;
+
+-- Wards (E9, P07): the real GRID3 ward of the nearest GRID3 facility in the same LGA (state store: nearest
+-- in Kano metropolis). The facilities are invented; the wards are real.
+UPDATE facility f SET ward = w.ward FROM (VALUES
+    ('8a3c1f52-2b7e-4c1d-9d6a-0f4e5b6c7d10', 'Chedi'),
+    ('8a3c1f52-2b7e-4c1d-9d6a-0f4e5b6c7d11', 'Sani Mainagge'),
+    ('8a3c1f52-2b7e-4c1d-9d6a-0f4e5b6c7d01', 'Sani Mainagge'),
+    ('8a3c1f52-2b7e-4c1d-9d6a-0f4e5b6c7e01', 'Yalwa Dala'),
+    ('8a3c1f52-2b7e-4c1d-9d6a-0f4e5b6c7e02', 'Giginyu'),
+    ('8a3c1f52-2b7e-4c1d-9d6a-0f4e5b6c7e11', 'Kabuga'),
+    ('8a3c1f52-2b7e-4c1d-9d6a-0f4e5b6c7e12', 'Dorayi'),
+    ('8a3c1f52-2b7e-4c1d-9d6a-0f4e5b6c7e13', 'Dorayi'),
+    ('8a3c1f52-2b7e-4c1d-9d6a-0f4e5b6c7e21', 'Kofar Ruwa'),
+    ('8a3c1f52-2b7e-4c1d-9d6a-0f4e5b6c7e22', 'Gwammaja'),
+    ('8a3c1f52-2b7e-4c1d-9d6a-0f4e5b6c7e23', 'Yalwa Dala'),
+    ('8a3c1f52-2b7e-4c1d-9d6a-0f4e5b6c7e31', 'Giginyu'),
+    ('8a3c1f52-2b7e-4c1d-9d6a-0f4e5b6c7e32', 'Hotoro South'),
+    ('8a3c1f52-2b7e-4c1d-9d6a-0f4e5b6c7e33', 'Giginyu')
+) AS w (id, ward) WHERE f.id = w.id::uuid;

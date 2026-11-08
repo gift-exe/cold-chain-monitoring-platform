@@ -397,6 +397,7 @@ class NewFacility(BaseModel):
     power_source: str
     lat: float
     lon: float
+    ward: str | None = Field(None, max_length=100)
 
 
 class FacilityChange(BaseModel):
@@ -407,6 +408,7 @@ class FacilityChange(BaseModel):
     power_source: str | None = None
     lat: float | None = None
     lon: float | None = None
+    ward: str | None = Field(None, max_length=100)
 
 
 class NewDevice(BaseModel):

@@ -32,10 +32,10 @@ def register(conn: psycopg.Connection, net: Network) -> dict:
         # parents first: state stores, then LGA stores, then facilities
         order = {"state_store": 0, "lga_store": 1, "health_facility": 2}
         cur.executemany("""
-            INSERT INTO facility (id, name, tier, jurisdiction_id, parent_facility_id, location, power_source)
-            VALUES (%s, %s, %s, %s, %s, ST_SetSRID(ST_MakePoint(%s, %s), 4326)::geography, %s)
-            ON CONFLICT (id) DO NOTHING""",
-            [(s.id, s.name, s.tier, s.jurisdiction_id, s.parent_id, s.lon, s.lat, s.power_source)
+            INSERT INTO facility (id, name, tier, jurisdiction_id, parent_facility_id, location, power_source, ward)
+            VALUES (%s, %s, %s, %s, %s, ST_SetSRID(ST_MakePoint(%s, %s), 4326)::geography, %s, %s)
+            ON CONFLICT (id) DO UPDATE SET ward = EXCLUDED.ward""",
+            [(s.id, s.name, s.tier, s.jurisdiction_id, s.parent_id, s.lon, s.lat, s.power_source, s.ward)
              for s in sorted(net.sites, key=lambda s: order[s.tier])])
         cur.executemany("""
             INSERT INTO device (serial_no, facility_id, type, equipment_type, has_door_sensor, has_power_signal,
