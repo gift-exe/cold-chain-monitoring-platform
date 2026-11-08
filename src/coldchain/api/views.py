@@ -111,17 +111,23 @@ INCIDENT_FROM = """
 
 
 def incidents(conn: psycopg.Connection, v: Viewer, state: str = "active", severity: str | None = None,
-              facility_id: str | None = None, limit: int = 200) -> list[dict]:
-    """Active incidents by severity, then oldest first (the ones waiting longest); others newest first."""
+              facility_id: str | None = None, limit: int = 200, area: str | None = None,
+              owner: str | None = None) -> list[dict]:
+    """Active incidents by severity, then oldest first (the ones waiting longest); others newest first.
+    Optionally only one facility, one area (an LGA, or a state with its LGAs) or one owner, as opened
+    from the performance page; these narrow the viewer's scope, never widen it."""
     order = ("(i.severity = 'critical') DESC, i.created_at" if state == "active" else "i.created_at DESC")
     params = {**v.params, "states": list(INCIDENT_STATES[state]), "severity": severity, "fac": facility_id,
-              "limit": limit}
+              "limit": limit, "area_id": area, "owner": owner}
     return conn.cursor(row_factory=dict_row).execute(f"""
         {AREA}
         SELECT {INCIDENT_COLUMNS} {INCIDENT_FROM}
         WHERE {_incident_scope(v)} AND i.state = ANY(%(states)s)
           AND (%(severity)s::text IS NULL OR i.severity = %(severity)s)
           AND (%(fac)s::uuid IS NULL OR d.facility_id = %(fac)s::uuid)
+          AND (%(area_id)s::text IS NULL OR i.jurisdiction_id = %(area_id)s
+               OR i.jurisdiction_id IN (SELECT id FROM jurisdiction WHERE parent_id = %(area_id)s))
+          AND (%(owner)s::uuid IS NULL OR i.owner_id = %(owner)s::uuid)
         ORDER BY {order} LIMIT %(limit)s""", params).fetchall()
 
 
@@ -337,45 +343,105 @@ GROUP_KEYS = {
     "tier": ("coalesce(ack.details->>'tier_at_acknowledgement', i.current_tier)",
              "coalesce(ack.details->>'tier_at_acknowledgement', i.current_tier)"),
     "facility": ("coalesce(f.id::text, 'transit')", "coalesce(f.name, 'In transit (consignments)')"),
-    "lga": ("j.id", "j.name"),
+    "lga": ("j.id", ("CASE j.level WHEN 'lga' THEN j.name WHEN 'state' THEN j.name || ' State (state-level stores)'"
+            " ELSE j.name || ' (national stores)' END")),
     "state": ("CASE WHEN j.level = 'lga' THEN j.parent_id ELSE j.id END",
               "CASE WHEN j.level = 'lga' THEN pj.name ELSE j.name END"),
+    # officer: the incident's owner, the person responsible when it was created (E9, P16). Not whoever
+    # acknowledged it: an officer who steps in after an escalation would otherwise carry the owner's delay.
+    "officer": ("i.owner_id::text", "o.full_name"),
 }
+# Who may compare officers: supervisors only, so a facility officer is not shown colleagues' figures.
+OFFICER_GROUP_ROLES = OFFICERS
+
+PERF_METRICS = """
+    count(*) AS incidents,
+    count(*) FILTER (WHERE i.severity = 'critical') AS critical,
+    count(i.acknowledged_at) AS acknowledged,
+    round(avg(extract(epoch FROM i.acknowledged_at - i.created_at)) / 60, 1) AS mtta_min,
+    count(i.resolved_at) AS resolved,
+    round(avg(extract(epoch FROM i.resolved_at - i.created_at)) / 60, 1) AS mttr_min,
+    count(*) FILTER (WHERE ack.details->>'tier_at_acknowledgement' = 'owner') AS before_escalation,
+    count(*) FILTER (WHERE i.state = ANY(%(open)s)) AS open,
+    count(*) FILTER (WHERE i.acknowledged_at IS NULL AND i.state = ANY(%(open)s)) AS unacknowledged,
+    round(max(extract(epoch FROM now() - i.created_at))
+          FILTER (WHERE i.acknowledged_at IS NULL AND i.state = ANY(%(open)s)) / 60, 1) AS longest_wait_min,
+    count(*) FILTER (WHERE i.notification_failed) AS notification_failed
+"""
+PERF_FROM = """
+    FROM incident i
+    LEFT JOIN device d ON d.id = i.device_id
+    LEFT JOIN facility f ON f.id = d.facility_id
+    JOIN jurisdiction j ON j.id = i.jurisdiction_id
+    LEFT JOIN jurisdiction pj ON pj.id = j.parent_id
+    JOIN app_user o ON o.id = i.owner_id
+    LEFT JOIN LATERAL (SELECT details FROM incident_action a WHERE a.incident_id = i.id
+                       AND a.action = 'acknowledged' ORDER BY a.id LIMIT 1) ack ON true
+"""
+
+
+def _bucket(since: datetime, until: datetime) -> str:
+    """Trend buckets: days for a week or two, weeks up to about four months, then months."""
+    days = (until - since).days
+    return "day" if days <= 14 else "week" if days <= 120 else "month"
 
 
 def performance(conn: psycopg.Connection, v: Viewer, since: datetime, until: datetime, group: str,
                 mode: str = "operational") -> dict:
     """Response metrics (FR10.3): mean time to acknowledge and to resolve, measured from incident creation
-    as the escalation time limits are (Table 3.15), by tier, facility, LGA or state. The means cover only
-    incidents that were acknowledged (resolved), so open unacknowledged incidents are counted separately,
-    with the longest wait, or a group that ignores its incidents would look best."""
+    as the escalation time limits are (Table 3.15), by tier, facility, LGA, state or responsible officer.
+    The means cover only incidents that were acknowledged (resolved), so open unacknowledged incidents are
+    counted separately, with the longest wait, or a group that ignores its incidents would look best.
+    `before_escalation` counts incidents acknowledged while still with their owner. Also returns the
+    figures for the whole area (`overall`) and over time (`trend`, by day, week or month), so the
+    page can show whether response is getting better (E9, P15)."""
+    if group == "officer" and v.role not in OFFICER_GROUP_ROLES:
+        raise NotPermitted("only supervisors can compare officers")
     key, label = GROUP_KEYS[group]
-    params = {**v.params, "since": since, "until": until, "mode": mode}
-    rows = conn.cursor(row_factory=dict_row).execute(f"""
+    params = {**v.params, "since": since, "until": until, "mode": mode, "open": list(OPEN_STATES),
+              "bucket": _bucket(since, until)}
+    where = f"""WHERE {_incident_scope(v)} AND i.created_at >= %(since)s AND i.created_at < %(until)s
+                  AND (%(mode)s = 'all' OR i.mode = %(mode)s)"""
+    extra = (""", o.role AS role,
+               array_agg(DISTINCT coalesce(f.name, 'Consignments in transit')) AS covers""" if group == "officer" else "")
+    cur = conn.cursor(row_factory=dict_row)
+    rows = cur.execute(f"""
         {AREA}
-        SELECT {key} AS key, {label} AS label, count(*) AS incidents,
-               count(*) FILTER (WHERE i.severity = 'critical') AS critical,
-               count(i.acknowledged_at) AS acknowledged,
-               round(avg(extract(epoch FROM i.acknowledged_at - i.created_at)) / 60, 1) AS mtta_min,
-               count(i.resolved_at) AS resolved,
-               round(avg(extract(epoch FROM i.resolved_at - i.created_at)) / 60, 1) AS mttr_min,
-               count(*) FILTER (WHERE i.state = ANY(%(open)s)) AS open,
-               count(*) FILTER (WHERE i.acknowledged_at IS NULL AND i.state = ANY(%(open)s)) AS unacknowledged,
-               round(max(extract(epoch FROM now() - i.created_at))
-                     FILTER (WHERE i.acknowledged_at IS NULL AND i.state = ANY(%(open)s)) / 60, 1) AS longest_wait_min,
-               count(*) FILTER (WHERE i.notification_failed) AS notification_failed
-        FROM incident i
-        LEFT JOIN device d ON d.id = i.device_id
-        LEFT JOIN facility f ON f.id = d.facility_id
-        JOIN jurisdiction j ON j.id = i.jurisdiction_id
-        LEFT JOIN jurisdiction pj ON pj.id = j.parent_id
-        LEFT JOIN LATERAL (SELECT details FROM incident_action a WHERE a.incident_id = i.id
-                           AND a.action = 'acknowledged' ORDER BY a.id LIMIT 1) ack ON true
-        WHERE {_incident_scope(v)} AND i.created_at >= %(since)s AND i.created_at < %(until)s
-          AND (%(mode)s = 'all' OR i.mode = %(mode)s)
-        GROUP BY 1, 2 ORDER BY mtta_min DESC NULLS LAST, label""",
-        {**params, "open": list(OPEN_STATES)}).fetchall()
-    return {"since": since, "until": until, "group": group, "mode": mode, "rows": rows}
+        SELECT {key} AS key, {label} AS label, {PERF_METRICS} {extra}
+        {PERF_FROM} {where}
+        GROUP BY 1, 2{", o.role" if group == "officer" else ""} ORDER BY mtta_min DESC NULLS LAST, label""",
+        params).fetchall()
+    overall = cur.execute(f"{AREA} SELECT {PERF_METRICS} {PERF_FROM} {where}", params).fetchone()
+    sev_avg = lambda col, sev: (f"round(avg(extract(epoch FROM i.{col} - i.created_at)) "
+                                f"FILTER (WHERE i.severity = '{sev}') / 60, 1)")
+    trend = cur.execute(f"""
+        {AREA}, b AS (
+            SELECT date_trunc(%(bucket)s, i.created_at) AS start,
+                   count(*) AS incidents,
+                   count(*) FILTER (WHERE i.severity = 'critical') AS critical,
+                   round(avg(extract(epoch FROM i.acknowledged_at - i.created_at)) / 60, 1) AS mtta_min,
+                   round(avg(extract(epoch FROM i.resolved_at - i.created_at)) / 60, 1) AS mttr_min,
+                   {sev_avg("acknowledged_at", "critical")} AS mtta_critical,
+                   {sev_avg("resolved_at", "critical")} AS mttr_critical,
+                   {sev_avg("acknowledged_at", "warning")} AS mtta_warning,
+                   {sev_avg("resolved_at", "warning")} AS mttr_warning
+            {PERF_FROM} {where} GROUP BY 1)
+        SELECT s.start, coalesce(b.incidents, 0) AS incidents, coalesce(b.critical, 0) AS critical,
+               b.mtta_min, b.mttr_min, b.mtta_critical, b.mttr_critical, b.mtta_warning, b.mttr_warning
+        FROM generate_series(date_trunc(%(bucket)s, %(since)s::timestamptz),
+                             date_trunc(%(bucket)s, %(until)s::timestamptz),
+                             ('1 ' || %(bucket)s)::interval) AS s(start)
+        LEFT JOIN b ON b.start = s.start ORDER BY s.start""", params).fetchall()
+    # The same figures for the period before, so the page can say whether things got better or worse.
+    previous = cur.execute(f"{AREA} SELECT {PERF_METRICS} {PERF_FROM} {where}",
+                           {**params, "since": since - (until - since), "until": since}).fetchone()
+    # The time allowed to acknowledge before an incident moves up from its owner (Table 3.15), by severity.
+    limits = dict(conn.execute("""
+        SELECT severity, delay_min FROM escalation_policy
+        WHERE kind = 'acknowledge' AND stage = 1 AND mode = %s""",
+        ("retrospective" if mode == "retrospective" else "operational",)).fetchall())
+    return {"since": since, "until": until, "group": group, "mode": mode, "bucket": params["bucket"],
+            "overall": overall, "previous": previous, "limits": limits, "trend": trend, "rows": rows}
 
 
 # Consignments ----------------------------------------------------------------------------------------

@@ -149,10 +149,10 @@ async def reopen(request: Request, ref: str, body: Reason, user: User):
 @app.get("/incidents")
 async def list_incidents(user: User, state: Literal["active", "review", "closed", "all"] = "active",
                          severity: Literal["critical", "warning"] | None = None, facility: str | None = None,
-                         limit: int = 200):
+                         area: str | None = None, owner: str | None = None, limit: int = 200):
     """The incidents the user may see (Table 3.21): active ones by severity and age."""
     return await asyncio.to_thread(_run, lambda conn: views.incidents(
-        conn, views.viewer(conn, user), state, severity, facility, min(limit, 500)))
+        conn, views.viewer(conn, user), state, severity, facility, min(limit, 500), area, owner))
 
 
 @app.get("/incidents/{ref}")
@@ -183,9 +183,9 @@ async def map_units(user: User):
 
 
 @app.get("/performance")
-async def performance(user: User, group: Literal["tier", "facility", "lga", "state"] = "facility",
+async def performance(user: User, group: Literal["tier", "facility", "lga", "state", "officer"] = "facility",
                       days: Annotated[int, Query(gt=0, le=366)] = 30, mode: Literal["operational", "retrospective", "all"] = "operational"):
-    """Mean time to acknowledge and to resolve (FR10.3) over the last `days` days."""
+    """Mean time to acknowledge and to resolve (FR10.3) over the last `days` days, overall, over time and by group."""
     until = now()
     return await asyncio.to_thread(_run, lambda conn: views.performance(
         conn, views.viewer(conn, user), until - timedelta(days=days), until, group, mode))

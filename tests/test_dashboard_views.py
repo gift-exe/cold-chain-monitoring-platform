@@ -151,6 +151,44 @@ def test_response_metrics_by_facility_and_tier(db):
     assert "owner" in by_tier
 
 
+def test_response_metrics_overall_trend_and_by_responsible_officer(db):
+    t = now(db)
+    a = new_incident(db)
+    new_incident(db)
+    db.execute("UPDATE incident SET created_at = %s WHERE id = %s", (t - 30 * MIN, a))
+    store.acknowledge(db, a, USERS["oic"])                     # acknowledged by its owner, before escalation
+    v = views.viewer(db, USERS["lga"])
+    since, until = t - timedelta(days=30), t + MIN
+    p = views.performance(db, v, since, until, "officer")
+    owner = db.execute("SELECT owner_id::text FROM incident WHERE id = %s", (a,)).fetchone()[0]
+    row = next(r for r in p["rows"] if r["key"] == owner)
+    assert row["incidents"] >= 2 and row["before_escalation"] >= 1 and row["covers"]
+    assert p["overall"]["incidents"] >= 2 and p["overall"]["acknowledged"] >= 1
+    assert p["bucket"] == "week" and len(p["trend"]) >= 4
+    assert sum(w["incidents"] for w in p["trend"]) == p["overall"]["incidents"]
+    assert p["trend"][-1]["incidents"] >= 2
+    with pytest.raises(NotPermitted):                          # officers compared by supervisors only
+        views.performance(db, views.viewer(db, USERS["oic"]), since, until, "officer")
+    assert views.performance(db, v, t - timedelta(days=7), until, "facility")["bucket"] == "day"
+    assert p["limits"] == {"critical": 15, "warning": 1440}   # Table 3.15: owner's time before escalation
+    assert p["previous"]["incidents"] >= 0
+    assert p["trend"][-1]["critical"] >= 2 and "mtta_critical" in p["trend"][-1]
+
+
+def test_incident_list_narrowed_to_an_area_or_owner(db):
+    gwale, dala = new_incident(db), new_incident(db, DALA_PHC)
+    state = views.viewer(db, USERS["state"])
+    ids = lambda **kw: {i["id"] for i in views.incidents(db, state, **kw)}
+    gwale_lga = db.execute("SELECT jurisdiction_id FROM incident WHERE id = %s", (gwale,)).fetchone()[0]
+    assert gwale in ids(area=gwale_lga) and dala not in ids(area=gwale_lga)
+    kano = db.execute("SELECT parent_id FROM jurisdiction WHERE id = %s", (gwale_lga,)).fetchone()[0]
+    assert {gwale, dala} <= ids(area=kano)                     # a state includes its LGAs
+    owner = db.execute("SELECT owner_id::text FROM incident WHERE id = %s", (gwale,)).fetchone()[0]
+    assert gwale in ids(owner=owner) and dala not in ids(owner=owner)
+    lga = views.viewer(db, USERS["lga"])                       # narrows the scope, never widens it
+    assert dala not in {i["id"] for i in views.incidents(db, lga, area=kano)}
+
+
 def test_product_limits_changed_by_national_officer_only_and_recorded(db):
     with pytest.raises(NotPermitted):
         admin.update_product(db, USERS["lga"], PRODUCT, {"heat_tolerance_min": 45})

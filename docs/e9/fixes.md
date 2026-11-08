@@ -8,8 +8,10 @@ on an already partly improved dashboard.
 |---|---|---|
 | F01 Map view redesign and new theme | P01, P02, P03, P04, P05 | Accepted by GA (revised by F02); 91eddf4 |
 | F02 Calmer summary, expandable facility rows, tidier top bar, new typeface | P06, P07, P08, P09, P10, P11 | Accepted by GA; 91eddf4 |
-| F03 Incidents: list grouped by urgency, details beside the list | P12 | Applied; awaiting GA's review |
-| F04 Incident details say what is wrong in plain words | P13, P14 | Applied; awaiting GA's review |
+| F03 Incidents: list grouped by urgency, details beside the list | P12 | Accepted by GA; 7f0ab4c |
+| F04 Incident details say what is wrong in plain words | P13, P14 | Accepted by GA; 7f0ab4c |
+| F05 Performance page: plain headline figures, trend, ranking, view by officer | P15, P16 | Accepted by GA |
+| F06 Performance page: clearer waiting figures, time limit, comparison, rows open incidents | P17 | Awaiting GA's review |
 
 ## F01: Map view redesign and new theme
 
@@ -172,3 +174,88 @@ P14 (decorative edge stripes on the new box and on the selected row).
 
 **Checked:** wording printed for every incident type, ongoing and ended; viewed on incident #1554 (power
 off) as the LGA officer.
+
+## F05: Performance page: plain headline figures, trend, ranking, view by officer
+
+**Problems:** P15 (one dense table with MTTA/MTTR jargon and no overview or charts); P16 (figures only by
+place or tier, not by the people responsible).
+
+**What changed**
+
+- **Headline figures.** One strip, in the same style as the map summary, for the user's area and period:
+  *incidents raised* (with how many critical), *average time to respond* and *average time to resolve*
+  (each with "from alert to acknowledgement (MTTA)" / "(MTTR)" in small print, so the terms are explained
+  where they appear and the long explanatory paragraph could go), *responded to before escalation* (the
+  share acknowledged by the person responsible before the incident moved up a level) and *still waiting
+  for a response* (with the longest wait, in orange when above zero).
+- **Trend chart.** Average time to respond (solid green) and to resolve (dashed violet) for incidents
+  raised each day (7-day period), week (30 and 90 days) or month (12 months), so a supervisor can see
+  whether response is improving. Days with no incidents are gaps, not joined; hovering shows the incident
+  count and both averages. The two colours pass the colour-blindness check, and the line style tells them
+  apart without colour.
+- **Ranking, slowest first.** Horizontal bars by LGA, facility, responsible officer or level, switchable
+  between time to respond and time to resolve; each row says how many were acknowledged (resolved) and
+  how many are waiting. A group that has not acknowledged any incident has no average, which would have
+  ranked it best: such groups go to the top, marked *No response yet*. T5 is answered by reading the top
+  of the list (state officer, by LGA). Incidents held at state or national level read "Kano State
+  (state-level stores)" rather than appearing as if Kano were an LGA.
+- **Responsible officer (P16).** A new grouping by the incident's owner: the person responsible when the
+  incident was created, with their role and the facilities they cover. Grouped by owner, not by whoever
+  acknowledged, so an officer who steps in after an escalation is not charged with the owner's delay.
+  Offered to LGA, state and national officers only (the API refuses it for others), so a facility officer
+  does not see colleagues' figures.
+- **Full table kept, folded away.** *All figures by ...* opens the table, with plain column names and
+  "none acknowledged" in place of a dash.
+- **Controls.** Period as pill buttons (7 days by default, matching the map summary's "last 7 days");
+  the incident mode in plain words: *Caught while happening*, *Found after they ended*, *All incidents*.
+  "Tier at acknowledgement" renamed *Level that responded*.
+- API: `GET /performance` returns `overall`, `trend` and `bucket`, each group's `before_escalation`, and
+  accepts `group=officer` (with `role` and `covers`). Test:
+  `test_response_metrics_overall_trend_and_by_responsible_officer`.
+
+**Report impact:** FR10.3 asks for figures by tier and facility; those remain, and the officer view goes
+beyond the requirement. Chapter 4 should mention the officer grouping and why it uses the owner.
+
+**Files:** `dashboard/src/views/Performance.jsx`, `dashboard/src/styles.css`, `src/coldchain/api/views.py`,
+`src/coldchain/api/app.py`, `tests/test_dashboard_views.py`.
+
+**Checked:** dashboard view tests 13 passed, ruff clean; viewed at 1440 × 900 as the LGA officer (by
+facility and by responsible officer) and as the state officer (by LGA, T5: Dala, Nassarawa and the state
+stores have not responded; Gwale is the slowest of those that have, 17 min).
+
+## F06: Performance page: clearer waiting figures, time limit, comparison, rows open incidents
+
+**Problem:** P17 (the full table's *Waiting for a response* cell, "18, longest 4 days", packed two
+figures together without saying what either was). The other changes were suggested by the facilitator
+and accepted by GA while discussing P17.
+
+**What changed**
+
+- **Waiting figures split (P17).** The table has two columns, *Not yet acknowledged* (18) and *Oldest
+  waiting* (4 days). The ranking rows and the headline say it in words: "20 not yet acknowledged, the
+  oldest waiting 4 days"; "the oldest has waited 4 days".
+- **Time allowed, on the trend chart.** Critical and warning incidents have very different limits
+  before they move up from the person responsible (15 min and 24 h, Table 3.15), so one limit line over a
+  mixed average would mislead. The chart now shows one severity at a time (*Critical*, the default,
+  *Warning* or *All*) with that severity's limit as a dotted line, and a sentence under it: "A critical
+  incident not acknowledged within 15 min moves up to the LGA officer. Points above the dotted line mean
+  responses were too slow on average." *All* has no line and says why. The limits are read from the
+  escalation policy, so they follow any change an administrator makes.
+- **Compared with the period before.** Under each headline figure: "5 min faster than the previous
+  7 days" (green when better, orange when worse), "12 more than the previous 7 days", "None in the
+  previous 7 days" or "No figures for the previous 7 days".
+- **Ranking rows open their incidents.** Selecting a row (an LGA, state, facility or officer) opens the
+  incidents list filtered to it, e.g. "Showing Dala only", with *Show all* to return. Levels and
+  consignments in transit are not one place or person, so their rows are not links.
+- API: `GET /performance` returns `previous` (the same figures for the period before), `limits` (time
+  allowed to acknowledge, by severity) and per-severity averages in `trend`; `GET /incidents` accepts
+  `area` (an LGA, or a state with its LGAs) and `owner`, which narrow the user's scope and never widen it.
+  Tests: `test_response_metrics_overall_trend_and_by_responsible_officer` (extended),
+  `test_incident_list_narrowed_to_an_area_or_owner`.
+
+**Files:** `dashboard/src/views/Performance.jsx`, `dashboard/src/views/Incidents.jsx`,
+`dashboard/src/styles.css`, `src/coldchain/api/views.py`, `src/coldchain/api/app.py`,
+`tests/test_dashboard_views.py`.
+
+**Checked:** dashboard and admin tests 32 passed, ruff clean; viewed at 1440 × 900 as the state officer:
+critical and warning trend with their limits; selecting Dala opened its 20 waiting incidents.

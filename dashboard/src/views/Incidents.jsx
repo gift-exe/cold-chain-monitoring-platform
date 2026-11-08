@@ -41,7 +41,11 @@ export default function Incidents() {
   const state = params.get("state") || "active";
   const facility = params.get("facility");
   const severity = params.get("severity");
-  const q = new URLSearchParams({ state, ...(facility ? { facility } : {}), ...(severity ? { severity } : {}) });
+  const area = params.get("area");
+  const owner = params.get("owner");
+  const name = params.get("name");   // what an area, owner or facility filter is called, from the performance page
+  const q = new URLSearchParams({ state, ...(facility ? { facility } : {}), ...(severity ? { severity } : {}),
+                                  ...(area ? { area } : {}), ...(owner ? { owner } : {}) });
   const { data, error } = useApi(`/incidents?${q}`, ["incident"]);
   const navigate = useNavigate();
   const qs = params.toString() ? `?${params}` : "";
@@ -71,10 +75,12 @@ export default function Incidents() {
             ))}
           </div>
         </div>
-        {(facility || severity) && (
+        {(facility || severity || area || owner) && (
           <p className="filter-note">
-            {facility && "Showing one facility. "}{severity && `Showing ${severity} incidents only. `}
-            <button className="link" onClick={() => set({ facility: null, severity: null })}>
+            {(facility || area || owner) && (name ? `Showing ${owner ? "incidents owned by " : ""}${name} only. `
+                                                   : facility ? "Showing one facility. " : "Showing part of your area. ")}
+            {severity && `Showing ${severity} incidents only. `}
+            <button className="link" onClick={() => set({ facility: null, severity: null, area: null, owner: null, name: null })}>
               Show all
             </button>
           </p>
