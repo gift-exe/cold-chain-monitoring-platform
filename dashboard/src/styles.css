@@ -419,3 +419,6 @@ fieldset.field legend { font-size: 0.85rem; color: var(--muted); padding: 0; mar
 .ladder-edit input { width: 4.2rem; }
 @media (max-width: 700px) { .ladder-step { grid-template-columns: 1fr; gap: 0.2rem; } }
 .ladder-err { grid-column: 2 / -1; margin: 0; font-size: 0.86rem; }
+.section-head-main { flex: 1; min-width: 0; }
+.section-head .find { margin: 0.5rem 0 0; max-width: 360px; }
+.check-field.inline { flex-direction: row; align-items: center; gap: 0.5rem; padding-top: 0; }

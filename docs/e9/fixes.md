@@ -15,7 +15,8 @@ on an already partly improved dashboard.
 | F07 Vaccines in transit: plain names, list and details, journey, temperature, map, dialog | P18, P19, P20, P21 | Accepted by GA; 48d01f3 |
 | F08 Vaccines in transit: hand over to health facilities, figures and breakdown by area | (GA's requests on F07) | Accepted by GA; 48d01f3 |
 | F09 Incident and shipment lists shown 15 rows at a time | P22 | Accepted by GA; 48d01f3 |
-| F10 Administration: add products; escalation policy in plain words | P23, P24 | Accepted by GA |
+| F10 Administration: add products; escalation policy in plain words | P23, P24 | Accepted by GA; 398db70 |
+| F11 Administration: add forms in dialogs, tables shown 15 rows at a time | P25, P26 | Accepted by GA |
 
 ## F01: Map view redesign and new theme
 
@@ -406,3 +407,27 @@ from its address, shown on page 2 of *Escalated, no response yet* with its row h
 **Checked:** dashboard and admin tests 36 passed, ruff clean; viewed at 1440 × 900 as the national
 officer: the Add product dialog opened and closed; the four sequences match the stored policy (Table 3.15);
 changing the 15-minute step to 22 h 15 min was refused beside the step and the stored value stayed 15.
+
+## F11: Administration: add forms in dialogs, tables shown 15 rows at a time
+
+**Problems:** P25 (add forms open on the page, unlike the dialogs elsewhere), P26 (long tables).
+
+**What changed**
+
+- **Dialogs (P25).** On the administrator's tabs, adding opens a dialog from a button at the top right of
+  the table, as *New shipment* and *Add product* do: *Add user*, *Add state or LGA*, *Add facility*,
+  *Register device* (with a line saying what fixed and mobile loggers are). The forms' fields are
+  unchanged, except that the user form lost a *Ward* field the API ignored. Select boxes say "Choose…".
+  After saving, the dialog closes and the table shows the result ("Test Driver added."); an error keeps
+  the dialog open with the reason.
+- **Pages of 15 (P26).** Every administration table (products, users, jurisdictions, facilities, devices)
+  shows 15 rows at a time with the same controls as the incidents and shipments lists; a search goes back
+  to the first page. The facilities and devices tables previously showed only the first 100 rows ("narrow
+  the search to see others"); all rows are now reachable. Users gained a search box (name, username,
+  phone number or place), like facilities and devices.
+- One shared page component for lists and tables.
+
+**Files:** `dashboard/src/views/Admin.jsx`, `dashboard/src/components/PagedList.jsx`, `dashboard/src/styles.css`.
+
+**Checked:** dashboard built; viewed at 1440 × 900 as the administrator: the Add user dialog opened and
+closed; facilities (14 rows) without page controls; devices 16–30 of 201, page 2 of 14.

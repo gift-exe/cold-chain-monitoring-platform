@@ -5,6 +5,7 @@ import { useState } from "react";
 
 import { api, useApi } from "../api.js";
 import Dialog from "../components/Dialog.jsx";
+import { Pager, usePage } from "../components/PagedList.jsx";
 import { ago, duration, label, ROLES, time } from "../format.js";
 
 function Tabbed({ title, tabs }) {
@@ -36,40 +37,50 @@ export default function Admin({ me }) {
   return <div className="page"><p className="muted">Administration is for national officers and administrators.</p></div>;
 }
 
-// A small form whose fields are [key, label, type, options]; options are [value, text] pairs for a select.
-function Form({ fields, initial = {}, submit, button, onDone }) {
+// An "add" form in a dialog (E9, P25). Fields are [key, label, type, options]; options are [value, text]
+// pairs for a select. `submit` returns the message to show once it has worked.
+function AddDialog({ title, intro, fields, initial = {}, submit, button, onClose, onDone }) {
   const [v, setV] = useState(initial);
-  const [msg, setMsg] = useState(null);
-  const go = async (e) => {
-    e.preventDefault();
+  const [err, setErr] = useState(null);
+  const [busy, setBusy] = useState(false);
+  const go = async () => {
+    setErr(null);
+    setBusy(true);
     try {
-      const text = await submit(v);
-      setMsg({ ok: true, text });
-      setV(initial);
-      onDone?.();
-    } catch (err) {
-      setMsg({ ok: false, text: err.message });
+      onDone(await submit(v));
+    } catch (e) {
+      setErr(e.message);
+      setBusy(false);
     }
   };
   return (
-    <form className="form" onSubmit={go}>
+    <Dialog title={title} intro={intro} onClose={onClose} onSubmit={go} submitLabel={button} busy={busy} error={err}>
       {fields.map(([k, t, type = "text", options]) => (
-        <label key={k} className="field"><span>{t}</span>
+        <label key={k} className={`field ${type === "checkbox" ? "check-field inline" : ""}`}>
+          {type === "checkbox" ? null : <span>{t}</span>}
           {options ? (
             <select value={v[k] ?? ""} onChange={(e) => setV({ ...v, [k]: e.target.value || null })}>
-              <option value="">—</option>
+              <option value="">Choose…</option>
               {options.map(([o, ot]) => <option key={o} value={o}>{ot}</option>)}
             </select>
           ) : type === "checkbox" ? (
-            <input type="checkbox" checked={!!v[k]} onChange={(e) => setV({ ...v, [k]: e.target.checked })} />
+            <><input type="checkbox" checked={!!v[k]} onChange={(e) => setV({ ...v, [k]: e.target.checked })} /> {t}</>
           ) : (
             <input type={type} step="any" value={v[k] ?? ""} onChange={(e) => setV({ ...v, [k]: e.target.value })} />
           )}
         </label>
       ))}
-      <button className="btn primary" type="submit">{button}</button>
-      {msg && <p className={msg.ok ? "ok" : "error"} role="status">{msg.text}</p>}
-    </form>
+    </Dialog>
+  );
+}
+
+// The line above a table: what it is, and the button that adds to it.
+function TableHead({ hint, button, onAdd, children }) {
+  return (
+    <div className="section-head">
+      <div className="section-head-main">{hint && <p className="hint">{hint}</p>}{children}</div>
+      {button && <button className="btn primary" onClick={onAdd}>{button}</button>}
+    </div>
   );
 }
 
@@ -108,6 +119,7 @@ function Products() {
     }
   };
   const [adding, setAdding] = useState(false);
+  const pg = usePage(data || []);
   if (error) return <p className="error">{error.message}</p>;
   if (!data) return <p className="muted">Loading…</p>;
   return (
@@ -122,7 +134,7 @@ function Products() {
       <div className="table-wrap"><table className="table">
         <thead><tr><th>Product</th>{FIELDS.map(([, t]) => <th key={t} className="num">{t}</th>)}<th>Damaged by freezing</th><th></th></tr></thead>
         <tbody>
-          {data.map((p) => edit?.id === p.id ? (
+          {pg.rows.map((p) => edit?.id === p.id ? (
             <tr key={p.id} className="editing">
               <th scope="row">{p.name}</th>
               {FIELDS.map(([k, t, step]) => (
@@ -143,6 +155,7 @@ function Products() {
           ))}
         </tbody>
       </table></div>
+      <Pager pg={pg} label="Products" />
       {msg && <p className={msg.ok ? "ok" : "error"} role="status">{msg.text}</p>}
     </>
   );
@@ -154,7 +167,11 @@ function Users() {
   const [msg, setMsg] = useState(null);
   const [numbers, setNumbers] = useState({});
   const [edit, setEdit] = useState(null);
+  const [adding, setAdding] = useState(false);
+  const [find, setFind] = useState("");
   const roles = Object.entries(ROLES);
+  const shown = (data || []).filter((u) => !find || `${u.full_name} ${u.username} ${u.phone_number || ""} ${u.facility_name || ""} ${u.jurisdiction_name || ""}`.toLowerCase().includes(find.toLowerCase()));
+  const pg = usePage(shown, { resetKey: find });
   const run = async (u, path, method, body, text) => {
     if (path === "deactivate" && !window.confirm(`Deactivate ${u.full_name}'s number ${u.phone_number}? Every SMS command from it will be refused.`)) return;
     try {
@@ -181,12 +198,22 @@ function Users() {
   if (!data) return <p className="muted">Loading…</p>;
   return (
     <>
-      <p className="hint">A user's role and area decide what they see and which incidents reach them. Dashboard
-        sign-in accounts are created in the identity server; people who only use SMS need none.</p>
+      <TableHead button="Add user" onAdd={() => { setAdding(true); setMsg(null); }}
+                 hint="A user's role and area decide what they see and which incidents reach them. Dashboard sign-in accounts are created in the identity server; people who only use SMS need none.">
+        <label className="field find"><span>Find a user</span><input value={find} onChange={(e) => setFind(e.target.value)} placeholder="Name, username, phone number or place" /></label>
+      </TableHead>
+      {msg && <p className={msg.ok ? "ok" : "error"} role="status">{msg.text}</p>}
+      {adding && <AddDialog title="Add user" button="Add user" onClose={() => setAdding(false)}
+                            onDone={(text) => { setAdding(false); setMsg({ ok: true, text }); reload(); }}
+                            fields={[["username", "Username"], ["full_name", "Full name"], ["role", "Role", "text", roles],
+                                     ["jurisdiction_id", "Jurisdiction", "text", lists.jurisdictions],
+                                     ["facility_id", "Facility (officers-in-charge, outreach teams)", "text", lists.facilities],
+                                     ["phone_number", "Phone number (+234…)"]]}
+                            submit={async (v) => { await api("/users", { method: "POST", body: v }); return `${v.full_name} added.`; }} />}
       <div className="table-wrap"><table className="table">
         <thead><tr><th>Name</th><th>Role</th><th>Area</th><th>Phone</th><th>New number</th><th></th></tr></thead>
         <tbody>
-          {data.map((u) => edit?.id === u.id ? (
+          {pg.rows.map((u) => edit?.id === u.id ? (
             <tr key={u.id} className="editing">
               <th scope="row">{u.full_name}<div className="muted">{u.username}</div></th>
               <td><select aria-label="Role" value={edit.role} onChange={(e) => setEdit({ ...edit, role: e.target.value })}>
@@ -223,14 +250,7 @@ function Users() {
           ))}
         </tbody>
       </table></div>
-      {msg && <p className={msg.ok ? "ok" : "error"} role="status">{msg.text}</p>}
-      <h2>Add a user</h2>
-      <Form button="Add user" onDone={reload}
-            fields={[["username", "Username"], ["full_name", "Full name"], ["role", "Role", "text", roles],
-                     ["jurisdiction_id", "Jurisdiction", "text", lists.jurisdictions], ["ward", "Ward (optional)"],
-                     ["facility_id", "Facility (officers-in-charge, outreach teams)", "text", lists.facilities],
-                     ["phone_number", "Phone number (+234…)"]]}
-            submit={async (v) => { await api("/users", { method: "POST", body: v }); return `${v.full_name} added.`; }} />
+      <Pager pg={pg} label="Users" />
     </>
   );
 }
@@ -239,6 +259,8 @@ function Jurisdictions() {
   const { data, error, reload } = useApi("/jurisdictions");
   const [names, setNames] = useState({});
   const [msg, setMsg] = useState(null);
+  const [adding, setAdding] = useState(false);
+  const pg = usePage(data || []);
   if (error) return <p className="error">{error.message}</p>;
   if (!data) return <p className="muted">Loading…</p>;
   const rename = async (j) => {
@@ -254,20 +276,23 @@ function Jurisdictions() {
   const parents = data.filter((j) => j.level !== "lga").map((j) => [j.id, `${j.name} (${j.id})`]);
   return (
     <>
+      <TableHead button="Add state or LGA" onAdd={() => { setAdding(true); setMsg(null); }}
+                 hint="States and LGAs decide which officers see which facilities and incidents." />
+      {msg && <p className={msg.ok ? "ok" : "error"} role="status">{msg.text}</p>}
+      {adding && <AddDialog title="Add a state or LGA" button="Add" onClose={() => setAdding(false)}
+                            onDone={(text) => { setAdding(false); setMsg({ ok: true, text }); reload(); }}
+                            fields={[["level", "Level", "text", [["state", "State"], ["lga", "LGA"]]], ["parent_id", "Within", "text", parents],
+                                     ["id", "Code (the parent's code plus a suffix, e.g. NG-KN-ABC)"], ["name", "Name"]]}
+                            submit={async (v) => { await api("/jurisdictions", { method: "POST", body: v }); return `${v.name} added.`; }} />}
       <div className="table-wrap"><table className="table">
         <thead><tr><th>Code</th><th>Name</th><th>Level</th><th>Within</th><th>New name</th><th></th></tr></thead>
-        <tbody>{data.map((j) => (
+        <tbody>{pg.rows.map((j) => (
           <tr key={j.id}><th scope="row">{j.id}</th><td>{j.name}</td><td>{j.level === "lga" ? "LGA" : j.level}</td><td>{j.parent_id || "—"}</td>
             <td><input aria-label={`New name for ${j.id}`} value={names[j.id] || ""} onChange={(e) => setNames({ ...names, [j.id]: e.target.value })} /></td>
             <td><button className="btn" disabled={!names[j.id]} onClick={() => rename(j)}>Rename</button></td></tr>
         ))}</tbody>
       </table></div>
-      {msg && <p className={msg.ok ? "ok" : "error"} role="status">{msg.text}</p>}
-      <h2>Add a state or LGA</h2>
-      <Form button="Add jurisdiction" onDone={reload}
-            fields={[["level", "Level", "text", [["state", "State"], ["lga", "LGA"]]], ["parent_id", "Within", "text", parents],
-                     ["id", "Code (the parent's code plus a suffix, e.g. NG-KN-ABC)"], ["name", "Name"]]}
-            submit={async (v) => { await api("/jurisdictions", { method: "POST", body: v }); return `${v.name} added.`; }} />
+      <Pager pg={pg} label="Jurisdictions" />
     </>
   );
 }
@@ -281,7 +306,9 @@ function Facilities() {
   const [edit, setEdit] = useState(null);
   const [msg, setMsg] = useState(null);
   const [filter, setFilter] = useState("");
+  const [adding, setAdding] = useState(false);
   const rows = lists.raw.facilities.filter((f) => !filter || `${f.name} ${f.ward || ""} ${f.jurisdiction_id}`.toLowerCase().includes(filter.toLowerCase()));
+  const pg = usePage(rows, { resetKey: filter });
   const save = async () => {
     try {
       await api(`/facilities/${edit.id}`, { method: "PATCH", body: { name: edit.name, power_source: edit.power_source, ward: edit.ward || undefined, lat: Number(edit.lat), lon: Number(edit.lon) } });
@@ -294,10 +321,19 @@ function Facilities() {
   };
   return (
     <>
-      <label className="field"><span>Find a facility</span><input value={filter} onChange={(e) => setFilter(e.target.value)} placeholder="Name, ward or LGA code" /></label>
+      <TableHead button="Add facility" onAdd={() => { setAdding(true); setMsg(null); }}>
+        <label className="field find"><span>Find a facility</span><input value={filter} onChange={(e) => setFilter(e.target.value)} placeholder="Name, ward or LGA code" /></label>
+      </TableHead>
+      {msg && <p className={msg.ok ? "ok" : "error"} role="status">{msg.text}</p>}
+      {adding && <AddDialog title="Add facility" button="Add facility" onClose={() => setAdding(false)}
+                            onDone={(text) => { setAdding(false); setMsg({ ok: true, text }); lists.reload(); }}
+                            fields={[["name", "Name"], ["tier", "Type", "text", TIERS], ["jurisdiction_id", "Jurisdiction", "text", lists.jurisdictions], ["ward", "Ward (optional)"],
+                                     ["parent_facility_id", "Supplied by", "text", lists.facilities], ["power_source", "Power source", "text", POWER],
+                                     ["lat", "Latitude", "number"], ["lon", "Longitude", "number"]]}
+                            submit={async (v) => { await api("/facilities", { method: "POST", body: { ...v, ward: v.ward || null, lat: Number(v.lat), lon: Number(v.lon) } }); return `${v.name} added.`; }} />}
       <div className="table-wrap"><table className="table">
         <thead><tr><th>Name</th><th>Type</th><th>Ward</th><th>Jurisdiction</th><th>Power</th><th className="num">Latitude</th><th className="num">Longitude</th><th></th></tr></thead>
-        <tbody>{rows.slice(0, 100).map((f) => edit?.id === f.id ? (
+        <tbody>{pg.rows.map((f) => edit?.id === f.id ? (
           <tr key={f.id} className="editing">
             <td><input aria-label="Name" value={edit.name} onChange={(e) => setEdit({ ...edit, name: e.target.value })} /></td>
             <td>{label(Object.fromEntries(TIERS), f.tier)}</td>
@@ -315,14 +351,7 @@ function Facilities() {
             <td><button className="btn" onClick={() => { setEdit({ ...f }); setMsg(null); }}>Edit</button></td></tr>
         ))}</tbody>
       </table></div>
-      {rows.length > 100 && <p className="muted">Showing 100 of {rows.length}; narrow the search to see others.</p>}
-      {msg && <p className={msg.ok ? "ok" : "error"} role="status">{msg.text}</p>}
-      <h2>Add a facility</h2>
-      <Form button="Add facility" onDone={lists.reload}
-            fields={[["name", "Name"], ["tier", "Type", "text", TIERS], ["jurisdiction_id", "Jurisdiction", "text", lists.jurisdictions], ["ward", "Ward (optional)"],
-                     ["parent_facility_id", "Supplied by", "text", lists.facilities], ["power_source", "Power source", "text", POWER],
-                     ["lat", "Latitude", "number"], ["lon", "Longitude", "number"]]}
-            submit={async (v) => { await api("/facilities", { method: "POST", body: { ...v, ward: v.ward || null, lat: Number(v.lat), lon: Number(v.lon) } }); return `${v.name} added.`; }} />
+      <Pager pg={pg} label="Facilities" />
     </>
   );
 }
@@ -333,6 +362,9 @@ function Devices() {
   const [msg, setMsg] = useState(null);
   const [filter, setFilter] = useState("");
   const [moves, setMoves] = useState({});
+  const [adding, setAdding] = useState(false);
+  const rows = (data || []).filter((d) => !filter || d.serial_no.toLowerCase().includes(filter.toLowerCase()));
+  const pg = usePage(rows, { resetKey: filter });
   if (error) return <p className="error">{error.message}</p>;
   if (!data) return <p className="muted">Loading…</p>;
   const facilityName = Object.fromEntries(lists.facilities);
@@ -346,13 +378,24 @@ function Devices() {
       setMsg({ ok: false, text: e.message });
     }
   };
-  const rows = data.filter((d) => !filter || d.serial_no.toLowerCase().includes(filter.toLowerCase()));
   return (
     <>
-      <label className="field"><span>Find a device</span><input value={filter} onChange={(e) => setFilter(e.target.value)} placeholder="Serial number" /></label>
+      <TableHead button="Register device" onAdd={() => { setAdding(true); setMsg(null); }}>
+        <label className="field find"><span>Find a device</span><input value={filter} onChange={(e) => setFilter(e.target.value)} placeholder="Serial number" /></label>
+      </TableHead>
+      {msg && <p className={msg.ok ? "ok" : "error"} role="status">{msg.text}</p>}
+      {adding && <AddDialog title="Register a device" button="Register device" initial={{ type: "fixed", reporting_interval_s: 60 }}
+                            intro="A temperature logger. A fixed one belongs to a facility; a mobile one travels with shipments."
+                            onClose={() => setAdding(false)} onDone={(text) => { setAdding(false); setMsg({ ok: true, text }); reload(); }}
+                            fields={[["serial_no", "Serial number"], ["type", "Type", "text", [["fixed", "Fixed (in a facility)"], ["mobile", "Mobile (travels with shipments)"]]],
+                                     ["equipment_type", "Equipment", "text", [["ice_lined_refrigerator", "Ice-lined refrigerator"], ["solar_direct_drive", "Solar direct-drive refrigerator"],
+                                                                                ["walk_in_cold_room", "Walk-in cold room"], ["vaccine_carrier", "Vaccine carrier"], ["cold_box", "Cold box"]]],
+                                     ["facility_id", "Facility (fixed loggers)", "text", lists.facilities], ["has_door_sensor", "Has a door sensor", "checkbox"],
+                                     ["has_power_signal", "Reports mains power", "checkbox"], ["reporting_interval_s", "Reporting interval (seconds)", "number"]]}
+                            submit={async (v) => { await api("/devices", { method: "POST", body: { ...v, reporting_interval_s: Number(v.reporting_interval_s) } }); return `${v.serial_no} registered.`; }} />}
       <div className="table-wrap"><table className="table">
         <thead><tr><th>Serial</th><th>Type</th><th>Facility</th><th>Sensors</th><th className="num">Interval (s)</th><th>Status</th><th>Move to</th><th></th></tr></thead>
-        <tbody>{rows.slice(0, 100).map((d) => (
+        <tbody>{pg.rows.map((d) => (
           <tr key={d.id}>
             <th scope="row">{d.serial_no}</th><td>{d.type} · {d.equipment_type}</td><td>{facilityName[d.facility_id] || "—"}</td>
             <td>{[d.has_door_sensor && "door", d.has_power_signal && "power"].filter(Boolean).join(", ") || "temperature only"}</td>
@@ -368,16 +411,7 @@ function Devices() {
           </tr>
         ))}</tbody>
       </table></div>
-      {rows.length > 100 && <p className="muted">Showing 100 of {rows.length}; narrow the search to see others.</p>}
-      {msg && <p className={msg.ok ? "ok" : "error"} role="status">{msg.text}</p>}
-      <h2>Register a device</h2>
-      <Form button="Register device" onDone={reload} initial={{ type: "fixed", reporting_interval_s: 60 }}
-            fields={[["serial_no", "Serial number"], ["type", "Type", "text", [["fixed", "Fixed (in a facility)"], ["mobile", "Mobile (travels with shipments)"]]],
-                     ["equipment_type", "Equipment", "text", [["ice_lined_refrigerator", "Ice-lined refrigerator"], ["solar_direct_drive", "Solar direct-drive refrigerator"],
-                                                                ["walk_in_cold_room", "Walk-in cold room"], ["vaccine_carrier", "Vaccine carrier"], ["cold_box", "Cold box"]]],
-                     ["facility_id", "Facility", "text", lists.facilities], ["has_door_sensor", "Door sensor", "checkbox"],
-                     ["has_power_signal", "Power signal", "checkbox"], ["reporting_interval_s", "Reporting interval (seconds)", "number"]]}
-            submit={async (v) => { await api("/devices", { method: "POST", body: { ...v, reporting_interval_s: Number(v.reporting_interval_s) } }); return `${v.serial_no} registered.`; }} />
+      <Pager pg={pg} label="Devices" />
     </>
   );
 }
