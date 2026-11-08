@@ -278,7 +278,7 @@ function Timeline({ inc }) {
 }
 
 // Where the incident is: the facility, or a field team's last known position and its route (E9, P12)
-function MiniMap({ inc }) {
+export function MiniMap({ inc }) {
   const box = useRef(null);
   const loc = inc.location;
   const key = loc ? `${loc.lat},${loc.lon},${loc.track.length}` : "";
@@ -290,7 +290,7 @@ function MiniMap({ inc }) {
     const kind = loc.kind === "mobile" ? "mobile" : loc.tier === "health_facility" ? "facility" : "store";
     const el = document.createElement("div");
     el.className = "pin";
-    el.innerHTML = pinSvg(inc.severity === "critical" ? "critical" : "warning", kind, 40);
+    el.innerHTML = pinSvg(inc.pin_status || (inc.severity === "critical" ? "critical" : "warning"), kind, 40);
     new maplibregl.Marker({ element: el, anchor: "bottom" }).setLngLat([loc.lon, loc.lat]).addTo(map);
     if (loc.track.length > 1) {
       map.on("load", () => {

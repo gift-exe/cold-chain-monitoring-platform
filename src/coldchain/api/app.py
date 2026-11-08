@@ -263,6 +263,12 @@ async def complete(cid: str, user: User):
     return {"consignment_id": cid, "state": "completed"}
 
 
+@app.get("/consignments/summary")
+async def shipment_summary(user: User):
+    """Figures for the top of the Vaccines in transit page, with a breakdown by area for supervisors."""
+    return await asyncio.to_thread(_run, lambda conn: views.shipment_summary(conn, views.viewer(conn, user)))
+
+
 @app.get("/consignments")
 async def list_consignments(user: User, completed: bool = False):
     return await asyncio.to_thread(_run, lambda conn: views.consignments(conn, views.viewer(conn, user), completed))

@@ -20,8 +20,8 @@ TYPES = {"heat_excursion": "HEAT", "freeze": "FREEZE", "power_loss": "POWER OFF"
 EQUIPMENT = {"ice_lined_refrigerator": "ILR", "solar_direct_drive": "SDD fridge", "vaccine_carrier": "carrier",
              "cold_box": "cold box", "freezer": "freezer", "walk_in_cold_room": "cold room"}
 
-HELP = ("Commands: ACK <incident>; RES <incident> <code> <note>; REC <consignment> <code>; "
-        "REJ <consignment> <code> <reason>. Closing is on the dashboard.")
+HELP = ("Commands: ACK <incident>; RES <incident> <code> <note>; REC <shipment> <code>; "
+        "REJ <shipment> <code> <reason>. Closing is on the dashboard.")
 
 
 class TooLong(ValueError):
@@ -99,7 +99,7 @@ def place(facility: str | None, equipment: str | None, consignment_no: int | Non
         eq = EQUIPMENT.get(equipment or "", (equipment or "").replace("_", " "))
         return f"{facility} {eq}".strip()
     if consignment_no is not None:
-        return f"consignment {consignment_no}" + (f" to {destination}" if destination else "")
+        return f"shipment {consignment_no}" + (f" to {destination}" if destination else "")
     return "unknown location"
 
 
@@ -162,7 +162,7 @@ def digest(day: datetime, numbers: list[int]) -> str:
 # Custody and administration -------------------------------------------------------------------------------
 
 def handoff(consignment_no: int, releaser: str, quantity: int, product: str, code: str) -> str:
-    return fit(lambda releaser, product: f"Consignment {consignment_no} from {releaser}: {quantity} {product}. "
+    return fit(lambda releaser, product: f"Shipment {consignment_no} from {releaser}: {quantity} {product}. "
                                          f"On arrival reply REC {consignment_no} {code}. If unfit: "
                                          f"REJ {consignment_no} {code} reason",
                {"releaser": releaser, "product": product})

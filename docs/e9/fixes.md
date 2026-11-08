@@ -10,8 +10,11 @@ on an already partly improved dashboard.
 | F02 Calmer summary, expandable facility rows, tidier top bar, new typeface | P06, P07, P08, P09, P10, P11 | Accepted by GA; 91eddf4 |
 | F03 Incidents: list grouped by urgency, details beside the list | P12 | Accepted by GA; 7f0ab4c |
 | F04 Incident details say what is wrong in plain words | P13, P14 | Accepted by GA; 7f0ab4c |
-| F05 Performance page: plain headline figures, trend, ranking, view by officer | P15, P16 | Accepted by GA |
-| F06 Performance page: clearer waiting figures, time limit, comparison, rows open incidents | P17 | Awaiting GA's review |
+| F05 Performance page: plain headline figures, trend, ranking, view by officer | P15, P16 | Accepted by GA; 7aa6e6f |
+| F06 Performance page: clearer waiting figures, time limit, comparison, rows open incidents | P17 | Accepted by GA; 7aa6e6f |
+| F07 Vaccines in transit: plain names, list and details, journey, temperature, map, dialog | P18, P19, P20, P21 | Accepted by GA |
+| F08 Vaccines in transit: hand over to health facilities, figures and breakdown by area | (GA's requests on F07) | Accepted by GA |
+| F09 Incident and shipment lists shown 15 rows at a time | P22 | Accepted by GA |
 
 ## F01: Map view redesign and new theme
 
@@ -259,3 +262,114 @@ and accepted by GA while discussing P17.
 
 **Checked:** dashboard and admin tests 32 passed, ruff clean; viewed at 1440 × 900 as the state officer:
 critical and warning trend with their limits; selecting Dala opened its 20 waiting incidents.
+
+## F07: Vaccines in transit: plain names, list and details, journey, temperature, map, dialog
+
+**Problems:** P18 ("consignment" is jargon), P19 (separate detail page; flat list that does not show what
+needs doing), P20 (details show little), P21 (inline creation form; travel time in minutes).
+
+**What changed**
+
+- **Names (P18).** The page is *Vaccines in transit* (GA's choice), with a line under the title: "Vaccines
+  on the move: who has them, where they are going, and how cold they are." Each consignment is a
+  *shipment* ("Shipment 110: 120 doses of Pentavalent"); "batch" was avoided because on vaccines it means
+  the manufacturer's lot. The word is the same everywhere a user meets it: the SMS sent to a receiver
+  ("Shipment 110 from ...: reply REC 110 ..."), the SMS replies ("OK shipment 110 received"), the help
+  text, incident summaries ("Nobody has confirmed holding shipment 111"), the map and the performance page.
+  "Release" became *hand over* and "reject" *refuse*. The code, API and database keep "consignment", the
+  term used in the report (Section 3.4.3).
+- **List and details (P19).** As on the incidents page: shipments grouped by what needs doing (*Needs you*:
+  handed to you to confirm, or refused and back with you; *Handed over, not yet confirmed*, with the
+  confirmation deadline; *With you*; *With others*), with *In transit* and *Completed* tabs. Each row: the
+  logger's status symbol, doses and vaccine, from and to, who has it, the latest temperature and how old
+  it is, and tags (*Confirm receipt*, *Not confirmed*, incidents). Selecting one opens its details beside
+  the list; the address is still `/consignments/<id>`.
+- **Details (P20).** A plain-words box at the top in the status colour: who has it and since when (or who
+  it was handed to, by when they must confirm, and who stays responsible until then; or that it was
+  refused), the latest temperature against the vaccine's safe range (or the range over a completed trip),
+  and open incidents. Then *What you can do* (hand over, with a note that the receiver gets an SMS code
+  and the sender stays responsible until they confirm; confirm, refuse, withdraw, mark completed),
+  *Where it is* (facts and a map of the last position and route, the incident map component), *Temperature
+  since it set out* (chart with the too-warm and too-cold lines), *Journey* (each handover in words: "Test
+  Facility OIC handed it to Test Outreach Lead (outreach team lead)") and *Incidents* (linked). T6 is
+  answered in the details: the map caption gives when and where the logger last reported.
+- **Dialog (P21).** *New shipment* opens a dialog over the page (keyboard focus stays in it; Escape or
+  clicking outside closes it): *Leaving from*, *Vaccine*, *Number of doses*, *Going to*, *Expected travel
+  time* in hours and minutes (with the 30-minute confirmation margin explained) and *Temperature logger*
+  ("the device packed with the vaccines that reports their temperature and position").
+- API: shipments carry the logger's latest temperature, status (as on the map), open incidents and
+  severity, the holder's role and since when; details carry the location, readings over the trip and
+  incidents. A completed shipment keeps its logger, readings and route.
+
+**Not done (then done in F08):** the dashboard offered only outreach team leads and drivers as receivers,
+so a health facility's officer could not receive a shipment on screen, although the custody rules allow it.
+
+**Report impact:** say that the interface calls consignments "shipments" and the page "Vaccines in
+transit", and that SMS wording changed to match (Section 3.4.6 SMS examples).
+
+**Files:** `dashboard/src/views/Consignments.jsx`, `dashboard/src/views/IncidentDetail.jsx` (map
+shared), `dashboard/src/App.jsx`, `dashboard/src/summary.js`, `dashboard/src/format.js`,
+`dashboard/src/views/MapView.jsx`, `dashboard/src/views/Performance.jsx`, `dashboard/src/views/Admin.jsx`,
+`dashboard/src/styles.css`, `src/coldchain/api/views.py`, `src/coldchain/notify/templates.py`,
+`src/coldchain/notify/commands.py`, `tests/test_dashboard_views.py`, `tests/test_notify_e2e.py`.
+
+**Checked:** dashboard, custody, SMS command, template, notification and admin tests and the SMS
+end-to-end test (local SMS emulator) 100 passed, ruff clean; viewed at 1440 × 900 as the LGA officer:
+shipment 111 (handed over, not confirmed in time), 347 (completed, refused then withdrawn) and 110 (with
+the outreach lead: map with route, four days of temperature); the new shipment dialog opened and closed.
+
+## F08: Vaccines in transit: hand over to health facilities, figures and breakdown by area
+
+**Requests:** made by GA while reviewing F07, not separate problems: (1) a shipment must be able to go from
+a cold store to a health facility and then to an outreach team; (2) the page needs its own figures, with a
+breakdown by LGA for state officers and by state for national officers.
+
+**What changed**
+
+- **Hand over to health facilities.** The *Hand over to* list now offers health facility officers as well
+  as outreach team leads and drivers, in two groups: *Health facilities* (listed by facility, e.g. "Gwale
+  Test Health Facility: Test Facility OIC") and *Outreach teams and drivers*. A shipment stays one record
+  however many times it changes hands: store -> facility (the officer confirms) -> outreach team (the team
+  lead confirms), each handover a step in its journey. The custody rules already allowed facility officers
+  to hold shipments (Section 3.4.3); only the dashboard's list left them out.
+- **Figures above the list.** For the user's area: *in transit* (with how many completed in the last
+  7 days), *waiting for you to confirm* (for roles that can hold shipments), *handed over, awaiting
+  confirmation* (with how many were refused), *not confirmed in time* (red when above zero), *with open
+  incidents* and *logger not reporting* ("temperature not being watched"). Hidden while a shipment's
+  details are open, so the list keeps its width.
+- **Breakdown by area.** A table of the same figures by where the shipments left from (LGA officer, folded
+  by default), by LGA (state officer) or by state (national officer), with problem counts in colour and the
+  areas with problems first.
+- **State and national officers see the page.** It was hidden from them; they now have it for the
+  overview. A national officer cannot hold shipments, so *New shipment* is not shown to them.
+- API: `GET /consignments/summary` (`views.shipment_summary`); receivers include facility officers with
+  their facility. Tests: `test_shipment_goes_store_to_facility_to_outreach_team_in_one_record`,
+  `test_shipment_figures_and_breakdown_by_area`.
+
+**Report impact:** Table 3.21 (views by role) should show the shipments page for state and national
+officers (view only for national).
+
+**Files:** `dashboard/src/views/Consignments.jsx`, `dashboard/src/App.jsx`, `dashboard/src/styles.css`,
+`src/coldchain/api/views.py`, `src/coldchain/api/app.py`, `tests/test_dashboard_views.py`.
+
+**Checked:** dashboard view tests 17 passed, ruff clean; viewed at 1440 × 900 as the LGA officer (figures,
+breakdown by facility folded) and the state officer (figures, breakdown by LGA).
+
+## F09: Incident and shipment lists shown 15 rows at a time
+
+**Problem:** P22 (long lists in one scroll).
+
+**What changed**
+
+- Each section of the incidents list and the shipments list shows 15 rows at a time, with "16–23 of 23",
+  *Previous*, *Next* and "Page 2 of 2" under it; sections with 15 or fewer rows have no controls. Sections
+  page separately, so the most urgent section stays at the top.
+- If the open incident or shipment is on a later page (for example, opened from an SMS link), that page is
+  shown with the row highlighted. If the list gets shorter, the page moves back.
+- One shared component for both pages.
+
+**Files:** `dashboard/src/components/PagedList.jsx`, `dashboard/src/views/Incidents.jsx`,
+`dashboard/src/views/Consignments.jsx`, `dashboard/src/styles.css`.
+
+**Checked:** viewed at 1440 × 900 as the state officer: shipments page 2 (16–23 of 23); incident #763 opened
+from its address, shown on page 2 of *Escalated, no response yet* with its row highlighted.

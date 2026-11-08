@@ -110,7 +110,7 @@ def test_consignment_confirmed_by_sms(cleanup, gateway, token):  # noqa: F811
         (msg,) = texts(gateway, PHONE["outreach"], since, "On arrival reply REC")
         cno, code = re.search(r"REC (\d+) (\w+)\.", msg).groups()
         reply(gateway, PHONE["outreach"], f"REC {cno} {code}")
-        assert texts(gateway, PHONE["outreach"], since, f"OK consignment {cno} received")
+        assert texts(gateway, PHONE["outreach"], since, f"OK shipment {cno} received")
         state = api.get(f"/consignments/{cid}/custody", headers=token("test.facility")).json()
         assert (state["state"], state["holder"]) == ("held", USERS["outreach"])
         assert api.post(f"/consignments/{cid}/complete", headers=token("test.outreach")).status_code == 200

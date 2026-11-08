@@ -69,6 +69,69 @@ def test_outreach_lead_sees_incidents_on_consignments_they_handled(db):
     mine = {c["id"]: c for c in views.consignments(db, views.viewer(db, USERS["outreach"]))}
     assert mine[cid]["can_complete"] and mine[cid]["holder_id"] == USERS["outreach"]
     assert cid not in {c["id"] for c in views.consignments(db, views.viewer(db, USERS["driver"]))}
+    assert (mine[cid]["open_incidents"], mine[cid]["severity"], mine[cid]["status"]) == (1, "critical", None)
+    assert mine[cid]["holder_role"] == "outreach_lead" and mine[cid]["held_since"] is not None
+    detail = views.consignment(db, views.viewer(db, USERS["outreach"]), cid)
+    assert [i["type"] for i in detail["incidents"]] == ["heat_excursion"]
+    assert detail["location"] is None and detail["readings"] == []          # no logger with it
+
+
+def test_shipment_goes_store_to_facility_to_outreach_team_in_one_record(db):
+    t = now(db) - 30 * MIN
+    lga = views.viewer(db, USERS["lga"])
+    assert {"facility_oic", "outreach_lead"} <= {r["role"] for r in views.receivers(db, lga)}
+    oic = next(r for r in views.receivers(db, lga) if r["id"] == USERS["oic"])
+    assert oic["facility_name"]                                # chosen by facility, not just by name
+    cid = custody.create(db, USERS["lga"], PRODUCT, 40, HEALTH_FACILITY, "Outreach", 60, None, t)
+    custody.release(db, USERS["lga"], cid, USERS["oic"], t)                 # store -> health facility
+    custody.confirm(db, USERS["oic"], cid, t + MIN)
+    custody.release(db, USERS["oic"], cid, USERS["outreach"], t + 2 * MIN)  # facility -> outreach team
+    custody.confirm(db, USERS["outreach"], cid, t + 3 * MIN)
+    d = views.consignment(db, views.viewer(db, USERS["outreach"]), cid)
+    assert [e["type"] for e in d["events"]] == ["create", "release", "confirm", "release", "confirm"]
+    assert d["holder_id"] == USERS["outreach"]
+    assert cid in {c["id"] for c in views.consignments(db, views.viewer(db, USERS["oic"]))}
+
+
+def test_shipment_figures_and_breakdown_by_area(db):
+    t = now(db)
+    def figures(who):
+        return views.shipment_summary(db, views.viewer(db, USERS[who]))
+    before, before_state = figures("lga")["overall"], figures("state")["overall"]
+    a = custody.create(db, USERS["lga"], PRODUCT, 40, HEALTH_FACILITY, "Outreach", 60, None, t)
+    custody.release(db, USERS["lga"], a, USERS["oic"], t - 120 * MIN)       # deadline long past
+    b = custody.create(db, USERS["lga"], PRODUCT, 40, HEALTH_FACILITY, "Outreach", 60, None, t)
+    custody.release(db, USERS["lga"], b, USERS["outreach"], t)
+    after = figures("lga")["overall"]
+    delta = {k: after[k] - before[k] for k in ("in_transit", "awaiting", "overdue")}
+    assert delta == {"in_transit": 2, "awaiting": 2, "overdue": 1}
+    assert figures("oic")["overall"]["for_you"] >= 1 and figures("oic")["group"] is None
+    state = figures("state")
+    assert state["group"] == "lga" and state["overall"]["in_transit"] - before_state["in_transit"] == 2
+    gwale = next(r for r in state["rows"] if r["label"] == "Gwale")
+    assert gwale["awaiting"] >= 2
+    assert figures("national")["group"] == "state" and figures("lga")["group"] == "facility"
+
+
+def test_shipment_details_show_its_temperature_and_where_it_is(db):
+    t = now(db) - 20 * MIN
+    dev = db.execute("""INSERT INTO device (serial_no, type, equipment_type, reporting_interval_s)
+                        VALUES (%s, 'mobile', 'vaccine_carrier', 60) RETURNING id::text""",
+                     (f"DASH-M-{uuid.uuid4().hex[:8]}",)).fetchone()[0]
+    serial = db.execute("SELECT serial_no FROM device WHERE id = %s", (dev,)).fetchone()[0]
+    cid = custody.create(db, USERS["lga"], PRODUCT, 40, HEALTH_FACILITY, "Outreach", 60, dev, t)
+    for k in range(5):
+        db.execute("""INSERT INTO reading (device_id, seq_no, event_time, received_at, temperature, location)
+                      VALUES (%s, %s, %s, %s, %s, ST_MakePoint(8.5 + %s * 0.001, 12.0)::geography)""",
+                   (dev, k, t + k * MIN, t + k * MIN, 5 + k * 0.5, k))
+    db.execute("""INSERT INTO device_status (device_id, last_event_time, last_received_at)
+                  VALUES (%s, now(), now())""", (dev,))
+    lga = views.viewer(db, USERS["lga"])
+    row = next(c for c in views.consignments(db, lga) if c["id"] == cid)
+    assert row["logger"] == serial and float(row["temperature"]) == 7.0 and row["status"] == "ok"
+    d = views.consignment(db, lga, cid)
+    assert d["location"]["kind"] == "mobile" and len(d["location"]["track"]) == 5
+    assert len(d["readings"]) == 5 and float(d["readings"][-1]["temp"]) == 7.0
 
 
 def test_incident_detail_offers_only_permitted_actions(db):

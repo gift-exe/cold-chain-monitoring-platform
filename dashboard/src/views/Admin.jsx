@@ -362,7 +362,7 @@ function Devices() {
       {msg && <p className={msg.ok ? "ok" : "error"} role="status">{msg.text}</p>}
       <h2>Register a device</h2>
       <Form button="Register device" onDone={reload} initial={{ type: "fixed", reporting_interval_s: 60 }}
-            fields={[["serial_no", "Serial number"], ["type", "Type", "text", [["fixed", "Fixed (in a facility)"], ["mobile", "Mobile (travels with consignments)"]]],
+            fields={[["serial_no", "Serial number"], ["type", "Type", "text", [["fixed", "Fixed (in a facility)"], ["mobile", "Mobile (travels with shipments)"]]],
                      ["equipment_type", "Equipment", "text", [["ice_lined_refrigerator", "Ice-lined refrigerator"], ["solar_direct_drive", "Solar direct-drive refrigerator"],
                                                                 ["walk_in_cold_room", "Walk-in cold room"], ["vaccine_carrier", "Vaccine carrier"], ["cold_box", "Cold box"]]],
                      ["facility_id", "Facility", "text", lists.facilities], ["has_door_sensor", "Door sensor", "checkbox"],

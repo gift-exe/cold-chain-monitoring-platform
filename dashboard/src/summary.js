@@ -10,13 +10,13 @@ const EQUIPMENT = {
 const cap = (t) => t.charAt(0).toUpperCase() + t.slice(1);
 const deg = (v) => `${(Number.isInteger(Number(v)) ? String(Number(v)) : Number(v).toFixed(1)).replace("-", "−")} °C`;
 
-// "the ice-lined refrigerator at Gwale PHC 2", "the vaccine carrier with consignment 110 (BCG, to Kofar Waika)"
+// "the ice-lined refrigerator at Gwale PHC 2", "the vaccine carrier with shipment 110 (BCG, to Kofar Waika)"
 function subject(inc) {
   const eq = EQUIPMENT[inc.equipment_type] || (inc.consignment_no ? "vaccine carrier" : "equipment");
   if (inc.facility_name) return `the ${eq} at ${inc.facility_name}`;
   if (inc.consignment_no) {
     const what = [inc.product_name, inc.destination && `to ${inc.destination}`].filter(Boolean).join(", ");
-    return `the ${eq} with consignment ${inc.consignment_no}${what ? ` (${what})` : ""}`;
+    return `the ${eq} with shipment ${inc.consignment_no}${what ? ` (${what})` : ""}`;
   }
   return `the ${eq} in ${inc.jurisdiction_name}`;
 }
@@ -70,9 +70,9 @@ export function whatsWrong(inc, limits, now = Date.now()) {
       };
     case "custody_gap":
       return {
-        headline: `Nobody has confirmed holding consignment ${inc.consignment_no}.`,
-        detail: `${[inc.quantity && `${inc.quantity} doses of`, inc.product_name].filter(Boolean).join(" ") || "The consignment"}${inc.destination ? `, going to ${inc.destination},` : ""} ${on ? `has had no confirmed holder for ${dur} (${since}).` : `had no confirmed holder for ${dur}, ${until}.`}`,
-        advice: on ? "Find out who has the consignment and ask them to confirm they received it." : "Record who held the consignment during the gap.",
+        headline: `Nobody has confirmed holding shipment ${inc.consignment_no}.`,
+        detail: `${[inc.quantity && `${inc.quantity} doses of`, inc.product_name].filter(Boolean).join(" ") || "The shipment"}${inc.destination ? `, going to ${inc.destination},` : ""} ${on ? `has had no confirmed holder for ${dur} (${since}).` : `had no confirmed holder for ${dur}, ${until}.`}`,
+        advice: on ? "Find out who has the shipment and ask them to confirm they received it." : "Record who held the shipment during the gap.",
       };
     case "local_alarm":
       return {

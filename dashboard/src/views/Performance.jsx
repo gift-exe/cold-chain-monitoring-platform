@@ -224,13 +224,13 @@ function name(r, group) {
 }
 
 function covers(list) {
-  const places = (list || []).filter((p) => p !== "Consignments in transit");
-  if (places.length === 0) return "Consignments in transit";
+  const places = (list || []).filter((p) => p !== "Shipments in transit");
+  if (places.length === 0) return "Shipments in transit";
   return places.length <= 2 ? places.join(" and ") : `${places.slice(0, 2).join(", ")} and ${places.length - 2} more`;
 }
 
 // The incidents list for one row of the ranking (E9): its active incidents, with the row's name shown
-// as the filter. None for a level or for consignments in transit, which are not one place or person.
+// as the filter. None for a level or for shipments in transit, which are not one place or person.
 function incidentsLink(r, group) {
   const by = { lga: "area", state: "area", facility: "facility", officer: "owner" }[group];
   if (!by || r.key === "transit") return null;

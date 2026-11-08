@@ -339,7 +339,7 @@ function TeamRow({ m, incidents, open, onToggle }) {
         <Status status={m.status} compact />
         <span className="place-main">
           <span className="place-name">Field team: {m.holder_name || "unassigned"}</span>
-          <span className="place-where">Consignment {m.consignment_no} to {m.destination}</span>
+          <span className="place-where">Shipment {m.consignment_no} to {m.destination}</span>
         </span>
         <IncidentTag incidents={incidents} status={m.status} />
       </button>

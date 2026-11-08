@@ -35,8 +35,8 @@ PATTERNS = {
     "REJ": re.compile(rf"^REJ\s+{NUMBER}\s+{CODE}(?:\s+(.*))?$", re.IGNORECASE | re.DOTALL),
     "HELP": re.compile(r"^HELP\s*$", re.IGNORECASE),
 }
-USAGE = {"ACK": "ACK <incident>", "RES": "RES <incident> <code> <note>", "REC": "REC <consignment> <code>",
-         "REJ": "REJ <consignment> <code> <reason>"}
+USAGE = {"ACK": "ACK <incident>", "RES": "RES <incident> <code> <note>", "REC": "REC <shipment> <code>",
+         "REJ": "REJ <shipment> <code> <reason>"}
 
 
 class Rejected(Exception):
@@ -195,19 +195,19 @@ def _handoff(conn, user_id, number: str, code: str, now, result: Result) -> str:
         LEFT JOIN custody_handoff h ON h.consignment_id = c.id AND h.state = 'pending'
         WHERE c.consignment_no = %s""", (int(number),)).fetchone()
     if row is None:
-        raise Rejected(f"No consignment {number}. Check the number in your SMS.")
+        raise Rejected(f"No shipment {number}. Check the number in your SMS.")
     result.links["consignment_id"], handoff_id, receiver = row
     if handoff_id is None:
         result.reason = "no handoff awaiting confirmation"
-        raise Rejected(f"Consignment {number} is not awaiting confirmation.")
+        raise Rejected(f"Shipment {number} is not awaiting confirmation.")
     if receiver != user_id:
-        raise NotPermitted(f"consignment {number} was not released to you")
+        raise NotPermitted(f"shipment {number} was not released to you")
     problem = codes.check(conn, user_id, code, now, handoff_id=handoff_id)
     if problem:
         result.reason = problem
         if problem == codes.WRONG:
             result.wrong_code_for = {"handoff_id": handoff_id}
-        raise Rejected(f"Not accepted: {problem} for consignment {number}. Use the code in your latest SMS.")
+        raise Rejected(f"Not accepted: {problem} for shipment {number}. Use the code in your latest SMS.")
     result.handoff_id = handoff_id
     return result.links["consignment_id"]
 
@@ -217,7 +217,7 @@ def _rec(conn, user_id, args, now, result: Result) -> None:
     cid = _handoff(conn, user_id, number, code, now, result)
     custody.confirm(conn, user_id, cid, now)
     result.changed, result.outcome = True, "accepted"
-    result.reply = f"OK consignment {number} received. It is now in your custody."
+    result.reply = f"OK shipment {number} received. It is now in your custody."
 
 
 def _rej(conn, user_id, args, now, result: Result) -> None:
@@ -228,5 +228,5 @@ def _rej(conn, user_id, args, now, result: Result) -> None:
     cid = _handoff(conn, user_id, number, code, now, result)
     custody.reject(conn, user_id, cid, reason.strip(), now)
     result.changed, result.outcome = True, "accepted"
-    result.reply = f"Consignment {number} rejected. It stays with the sender, who has been told."
+    result.reply = f"Shipment {number} rejected. It stays with the sender, who has been told."
 

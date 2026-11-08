@@ -342,7 +342,7 @@ GROUP_KEYS = {
     # tier: the tier the incident had reached when it was acknowledged (or has reached, if not yet)
     "tier": ("coalesce(ack.details->>'tier_at_acknowledgement', i.current_tier)",
              "coalesce(ack.details->>'tier_at_acknowledgement', i.current_tier)"),
-    "facility": ("coalesce(f.id::text, 'transit')", "coalesce(f.name, 'In transit (consignments)')"),
+    "facility": ("coalesce(f.id::text, 'transit')", "coalesce(f.name, 'In transit (shipments)')"),
     "lga": ("j.id", ("CASE j.level WHEN 'lga' THEN j.name WHEN 'state' THEN j.name || ' State (state-level stores)'"
             " ELSE j.name || ' (national stores)' END")),
     "state": ("CASE WHEN j.level = 'lga' THEN j.parent_id ELSE j.id END",
@@ -403,7 +403,7 @@ def performance(conn: psycopg.Connection, v: Viewer, since: datetime, until: dat
     where = f"""WHERE {_incident_scope(v)} AND i.created_at >= %(since)s AND i.created_at < %(until)s
                   AND (%(mode)s = 'all' OR i.mode = %(mode)s)"""
     extra = (""", o.role AS role,
-               array_agg(DISTINCT coalesce(f.name, 'Consignments in transit')) AS covers""" if group == "officer" else "")
+               array_agg(DISTINCT coalesce(f.name, 'Shipments in transit')) AS covers""" if group == "officer" else "")
     cur = conn.cursor(row_factory=dict_row)
     rows = cur.execute(f"""
         {AREA}
@@ -447,18 +447,88 @@ def performance(conn: psycopg.Connection, v: Viewer, since: datetime, until: dat
 # Consignments ----------------------------------------------------------------------------------------
 
 def consignments(conn: psycopg.Connection, v: Viewer, include_completed: bool = False) -> list[dict]:
+    """Consignments ("shipments" on the dashboard) the viewer may see, with custody, the logger's latest
+    temperature and whether it is still reporting, and open incidents (E9, P19)."""
     rows = conn.cursor(row_factory=dict_row).execute(f"""
         {AREA}
         SELECT c.id::text, c.consignment_no, p.name AS product_name, c.quantity, f.name AS origin_name,
-               c.destination, c.expected_transit_min, c.created_at, c.completed_at, dv.serial_no AS logger
+               c.destination, c.expected_transit_min, c.created_at, c.completed_at, dv.serial_no AS logger,
+               p.lower_limit, p.upper_limit, p.freeze_limit,
+               s.last_received_at, r.temperature, r.event_time AS reading_time,
+               s.last_received_at < now() - make_interval(secs => {STALE_INTERVALS} * dv.reporting_interval_s)
+                   AS stale,
+               (SELECT CASE WHEN bool_or(i.severity = 'critical') THEN 'critical' ELSE max(i.severity) END
+                FROM incident i WHERE i.consignment_id = c.id AND i.state = ANY(%(open)s)) AS severity,
+               (SELECT count(*) FROM incident i WHERE i.consignment_id = c.id AND i.state = ANY(%(open)s))
+                   AS open_incidents
         FROM consignment c JOIN facility f ON f.id = c.origin_facility_id JOIN product p ON p.id = c.product_id
-        LEFT JOIN device_assignment da ON da.consignment_id = c.id AND da.valid_to IS NULL
+        LEFT JOIN LATERAL (SELECT device_id, valid_to FROM device_assignment x WHERE x.consignment_id = c.id
+                           ORDER BY x.valid_from DESC LIMIT 1) da ON true   -- a completed one keeps its logger
         LEFT JOIN device dv ON dv.id = da.device_id
+        LEFT JOIN device_status s ON s.device_id = dv.id
+        LEFT JOIN LATERAL (SELECT temperature, event_time FROM reading WHERE device_id = dv.id
+                             AND (da.valid_to IS NULL OR event_time <= da.valid_to)
+                           ORDER BY event_time DESC LIMIT 1) r ON true
         WHERE {_consignment_scope(v)} AND (%(all)s OR c.completed_at IS NULL)
-        ORDER BY c.created_at DESC LIMIT 200""", {**v.params, "all": include_completed}).fetchall()
+        ORDER BY c.created_at DESC LIMIT 200""",
+        {**v.params, "all": include_completed, "open": list(OPEN_STATES)}).fetchall()
     for c in rows:
         c.update(_custody(conn, v, c["id"]))
+        c["status"] = (None if c["logger"] is None or c["completed_at"]
+                       else _status(c["severity"], c["last_received_at"], bool(c["stale"])))
     return rows
+
+
+# Breakdown of shipments for supervisors: an LGA officer by where they left from, a state officer by LGA,
+# a national officer by state (E9, F08).
+SHIPMENT_GROUPS = {
+    "lga_officer": ("facility", "f.id::text", "f.name"),
+    "state_officer": ("lga", "j.id", "CASE j.level WHEN 'lga' THEN j.name ELSE j.name || ' State (state stores)' END"),
+    "national_officer": ("state", "CASE WHEN j.level = 'lga' THEN j.parent_id ELSE j.id END",
+                         ("CASE WHEN j.level = 'lga' THEN pj.name WHEN j.level = 'state' THEN j.name"
+                         " ELSE j.name || ' (national stores)' END")),
+}
+SHIPMENT_METRICS = f"""
+    count(*) FILTER (WHERE c.completed_at IS NULL) AS in_transit,
+    count(*) FILTER (WHERE h.state = 'pending') AS awaiting,
+    count(*) FILTER (WHERE h.state = 'pending' AND h.window_ends_at < now()) AS overdue,
+    count(*) FILTER (WHERE h.state = 'rejected') AS refused,
+    count(*) FILTER (WHERE c.completed_at IS NULL AND EXISTS (
+        SELECT 1 FROM incident i WHERE i.consignment_id = c.id AND i.state = ANY(%(open)s))) AS with_incidents,
+    count(*) FILTER (WHERE c.completed_at IS NULL AND da.device_id IS NOT NULL AND (s.last_received_at IS NULL
+        OR s.last_received_at < now() - make_interval(secs => {STALE_INTERVALS} * dv.reporting_interval_s)))
+        AS silent,
+    count(*) FILTER (WHERE c.completed_at >= now() - make_interval(days => %(days)s)) AS completed
+"""
+SHIPMENT_FROM = """
+    FROM consignment c JOIN facility f ON f.id = c.origin_facility_id
+    JOIN jurisdiction j ON j.id = f.jurisdiction_id LEFT JOIN jurisdiction pj ON pj.id = j.parent_id
+    LEFT JOIN custody_handoff h ON h.consignment_id = c.id AND h.state IN ('pending', 'rejected')
+    LEFT JOIN device_assignment da ON da.consignment_id = c.id AND da.valid_to IS NULL
+    LEFT JOIN device dv ON dv.id = da.device_id
+    LEFT JOIN device_status s ON s.device_id = dv.id
+"""
+
+
+def shipment_summary(conn: psycopg.Connection, v: Viewer, days: int = 7) -> dict:
+    """Figures for the top of the Vaccines in transit page, for the shipments the viewer may see: how many
+    are in transit, handed over and awaiting confirmation (and how many past their deadline), refused,
+    with open incidents, with a logger that has stopped reporting, and completed in the last `days` days;
+    how many are waiting for the viewer to confirm; and for supervisors, the same by area."""
+    params = {**v.params, "open": list(OPEN_STATES), "days": days}
+    where = f"WHERE {_consignment_scope(v)} AND (c.completed_at IS NULL OR c.completed_at >= now() - make_interval(days => %(days)s))"
+    cur = conn.cursor(row_factory=dict_row)
+    overall = cur.execute(f"""{AREA} SELECT {SHIPMENT_METRICS},
+        count(*) FILTER (WHERE h.state = 'pending' AND h.to_user = %(user)s) AS for_you
+        {SHIPMENT_FROM} {where}""", params).fetchone()
+    group = SHIPMENT_GROUPS.get(v.role)
+    rows = []
+    if group:
+        _, key, label = group
+        rows = cur.execute(f"""{AREA} SELECT {key} AS key, {label} AS label, {SHIPMENT_METRICS}
+            {SHIPMENT_FROM} {where} GROUP BY 1, 2
+            ORDER BY overdue DESC, refused DESC, with_incidents DESC, in_transit DESC, label""", params).fetchall()
+    return {"days": days, "overall": overall, "group": group[0] if group else None, "rows": rows}
 
 
 def _custody(conn: psycopg.Connection, v: Viewer, consignment_id: str) -> dict:
@@ -467,11 +537,14 @@ def _custody(conn: psycopg.Connection, v: Viewer, consignment_id: str) -> dict:
     holder = custody.holder(conn, consignment_id)
     h = conn.cursor(row_factory=dict_row).execute("""
         SELECT h.id::text, h.state, h.released_at, h.window_ends_at, h.from_user::text, h.to_user::text,
-               fu.full_name AS from_name, tu.full_name AS to_name
+               fu.full_name AS from_name, tu.full_name AS to_name, tu.role AS to_role
         FROM custody_handoff h JOIN app_user fu ON fu.id = h.from_user JOIN app_user tu ON tu.id = h.to_user
         WHERE h.consignment_id = %s AND h.state IN ('pending', 'rejected')""", (consignment_id,)).fetchone()
-    name = conn.execute("SELECT full_name FROM app_user WHERE id = %s", (holder,)).fetchone() if holder else None
-    return {"state": st, "holder_id": holder, "holder_name": name[0] if name else None, "handoff": h,
+    name = conn.execute("SELECT full_name, role FROM app_user WHERE id = %s", (holder,)).fetchone() if holder else None
+    held = conn.execute("""SELECT valid_from FROM custody_interval WHERE consignment_id = %s AND valid_to IS NULL""",
+                        (consignment_id,)).fetchone()
+    return {"state": st, "holder_id": holder, "holder_name": name[0] if name else None,
+            "holder_role": name[1] if name else None, "held_since": held[0] if held else None, "handoff": h,
             "can_release": st == "held" and holder == v.id,
             "can_complete": st == "held" and holder == v.id,
             "can_confirm": st == "in_handoff" and h is not None and h["to_user"] == v.id,
@@ -488,24 +561,52 @@ def consignment(conn: psycopg.Connection, v: Viewer, consignment_id: str) -> dic
     c = visible[0]
     c["events"] = conn.cursor(row_factory=dict_row).execute("""
         SELECT e.seq, e.type, e.occurred_at, e.details->>'reason' AS reason, a.full_name AS actor_name,
-               fu.full_name AS from_name,
-               tu.full_name AS to_name
+               fu.full_name AS from_name, tu.full_name AS to_name, tu.role AS to_role, a.role AS actor_role
         FROM custody_event e LEFT JOIN app_user a ON a.id = e.actor_id
         LEFT JOIN app_user fu ON fu.id = e.from_user LEFT JOIN app_user tu ON tu.id = e.to_user
         WHERE e.consignment_id = %s ORDER BY e.seq""", (consignment_id,)).fetchall()
+    # What someone checking on the vaccines wants to know (E9, P20): where they are, how cold they have
+    # been, and anything that went wrong.
+    c["location"] = location(conn, {"facility_id": None, "consignment_id": consignment_id})
+    c["readings"] = consignment_readings(conn, consignment_id)
+    c["incidents"] = conn.cursor(row_factory=dict_row).execute("""
+        SELECT i.incident_no, i.type, i.severity, i.state, i.created_at, i.acknowledged_at
+        FROM incident i WHERE i.consignment_id = %s ORDER BY i.created_at DESC""", (consignment_id,)).fetchall()
     return c
 
 
+def consignment_readings(conn: psycopg.Connection, consignment_id: str, points: int = 400) -> list[dict]:
+    """The temperature of a consignment's logger while it was assigned, averaged into at most `points`
+    buckets."""
+    a = conn.execute("""SELECT device_id, valid_from, coalesce(valid_to, now()) FROM device_assignment
+                        WHERE consignment_id = %s ORDER BY valid_from DESC LIMIT 1""", (consignment_id,)).fetchone()
+    if a is None:
+        return []
+    device, start, end = a
+    bucket = max(60, int((end - start).total_seconds() / points))
+    return conn.cursor(row_factory=dict_row).execute("""
+        SELECT time_bucket(make_interval(secs => %s), event_time) AS t, round(avg(temperature), 2) AS temp
+        FROM reading WHERE device_id = %s AND event_time BETWEEN %s AND %s AND temperature IS NOT NULL
+        GROUP BY 1 ORDER BY 1""", (bucket, device, start, end)).fetchall()
+
+
+RECEIVER_ROLES = (*CARRIERS, "facility_oic")
+
+
 def receivers(conn: psycopg.Connection, v: Viewer) -> list[dict]:
-    """People a consignment can be released to: outreach leads and drivers in the viewer's state."""
+    """People a consignment can be released to in the viewer's state: outreach leads and drivers, and
+    health facility officers (E9, F08), so a shipment can go store -> facility -> outreach team, one
+    handover at a time. Each comes with their facility, if any, so the right one can be chosen."""
     return conn.cursor(row_factory=dict_row).execute("""
         WITH RECURSIVE up AS (SELECT id, parent_id, level FROM jurisdiction WHERE id = %s
                               UNION ALL SELECT j.id, j.parent_id, j.level FROM jurisdiction j JOIN up ON j.id = up.parent_id),
              state AS (SELECT id FROM up WHERE level IN ('state', 'nation') ORDER BY level = 'nation' LIMIT 1),
              area AS (SELECT id FROM state UNION ALL SELECT j.id FROM jurisdiction j JOIN area a ON j.parent_id = a.id)
-        SELECT u.id::text, u.username, u.full_name, u.role FROM app_user u
+        SELECT u.id::text, u.username, u.full_name, u.role, f.name AS facility_name FROM app_user u
+        LEFT JOIN facility f ON f.id = u.facility_id
         WHERE u.active AND u.role = ANY(%s) AND u.jurisdiction_id IN (SELECT id FROM area) AND u.id <> %s
-        ORDER BY u.full_name""", (v.jurisdiction_id, list(CARRIERS), v.id)).fetchall()
+        ORDER BY u.role = 'facility_oic', f.name NULLS FIRST, u.full_name""",
+        (v.jurisdiction_id, list(RECEIVER_ROLES), v.id)).fetchall()
 
 
 def loggers(conn: psycopg.Connection) -> list[dict]:

@@ -7,7 +7,7 @@ import Notifications from "./components/Notifications.jsx";
 import { label, ROLES } from "./format.js";
 import { onConnection, startLive } from "./live.js";
 import Admin from "./views/Admin.jsx";
-import Consignments, { ConsignmentDetail } from "./views/Consignments.jsx";
+import Consignments from "./views/Consignments.jsx";
 import Incidents from "./views/Incidents.jsx";
 import MapView from "./views/MapView.jsx";
 import Performance from "./views/Performance.jsx";
@@ -19,14 +19,14 @@ export function sections(role) {
   if (role === "admin") return ["admin"];          // system status is on the administration page
   const s = ["map", "incidents"];
   if (role !== "outreach_lead" && role !== "driver") s.push("performance");
-  if (role !== "state_officer" && role !== "national_officer") s.push("consignments");
+  s.push("consignments");                         // state and national officers too, for the overview (E9)
   if (role === "national_officer") s.push("admin");
   return s;
 }
 
 const initials = (name) => name.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0].toUpperCase()).join("");
 
-const TITLES = { map: "Map", incidents: "Incidents", performance: "Performance", consignments: "Consignments",
+const TITLES = { map: "Map", incidents: "Incidents", performance: "Performance", consignments: "Vaccines in transit",
                  admin: "Administration" };
 
 export default function App() {
@@ -77,7 +77,7 @@ export default function App() {
           <Route path="/incidents/:ref" element={<Incidents me={me} />} />
           <Route path="/performance" element={<Performance me={me} />} />
           <Route path="/consignments" element={<Consignments me={me} />} />
-          <Route path="/consignments/:id" element={<ConsignmentDetail me={me} />} />
+          <Route path="/consignments/:id" element={<Consignments me={me} />} />
           <Route path="/admin" element={<Admin me={me} />} />
           <Route path="*" element={<p>Page not found.</p>} />
         </Routes>

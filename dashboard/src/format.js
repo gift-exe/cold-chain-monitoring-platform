@@ -50,7 +50,7 @@ export const label = (map, key) => map[key] || (key ? key.replaceAll("_", " ") :
 
 export function place(i) {
   if (i.facility_name) return i.facility_name;
-  if (i.consignment_no) return `Consignment ${i.consignment_no}`;
+  if (i.consignment_no) return `Shipment ${i.consignment_no}`;
   return i.jurisdiction_name || "—";
 }
 

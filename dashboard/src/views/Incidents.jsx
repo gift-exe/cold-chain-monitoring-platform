@@ -9,6 +9,7 @@ import { useApi } from "../api.js";
 import { Flag, Status } from "../components/Status.jsx";
 import { ago, label, place, STATES, TIERS, time, TYPES } from "../format.js";
 import IncidentDetail from "./IncidentDetail.jsx";
+import PagedList from "../components/PagedList.jsx";
 
 const TABS = [
   ["active", "Active"],
@@ -91,9 +92,8 @@ export default function Incidents() {
         {groups.filter(([, , list]) => list.length > 0).map(([key, title, list]) => (
           <section key={key} className={`inc-group inc-group-${key}`}>
             <h2 className="inc-group-h">{title} <span className="count">{list.length}</span></h2>
-            <ul className="inc-rows">
-              {list.map((i) => <Row key={i.id} i={i} selected={String(i.incident_no) === ref} onOpen={() => open(i.incident_no)} />)}
-            </ul>
+            <PagedList items={list} label={title} getKey={(i) => String(i.incident_no)} selectedKey={ref}
+                       render={(i) => <Row key={i.id} i={i} selected={String(i.incident_no) === ref} onOpen={() => open(i.incident_no)} />} />
           </section>
         ))}
       </div>
