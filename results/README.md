@@ -13,7 +13,7 @@ Table A.2, maps each test to its script, configuration, seeds, command and the f
 | `e6/` | E6 custody correctness |
 | `e7/` | E7 offline recovery |
 | `e8/` | E8 access-control matrix |
-| `e10/` | E10 scalability (`load.json`) and notification latency under load (`alerts.json`) |
+| `e10/` | E10 scalability (`load.json`), notification latency under load (`alerts.json`), and the target phase repeated at 1,100 readings/s on 9 Nov 2026 (`load-1100.json`) |
 | `e11/`, `e11-run1/` | E11 fault tolerance: second run (after the fix) and first run (defect found) |
 | `e12/` | E12 functional coverage: `junit.xml` (the test run), `coverage.json` (as scored at the time, FR5.5 excluded), `coverage-revised-fr5.5.json` (the same run rescored with FR5.5 as revised) |
 | `*.log` | Console logs of the runs |

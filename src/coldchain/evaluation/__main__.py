@@ -205,10 +205,10 @@ def run_e10(args) -> None:
     serials = [u.serial for u in net.units]
     facilities = [s.id for s in net.sites if s.tier == "health_facility"]
     random.Random(10).shuffle(facilities)
-    state = loadtest.run(serials, facilities, args.target_min, args.endurance_min)
-    (loadtest.OUT / "state.json").write_text(json.dumps(state, indent=1, default=str))
+    state = loadtest.run(serials, facilities, args.target_min, args.endurance_min, args.target_rate, not args.no_alerts)
+    (loadtest.OUT / f"state{args.tag}.json").write_text(json.dumps(state, indent=1, default=str))
     doc = loadtest.check(state)
-    (loadtest.OUT / "load.json").write_text(json.dumps(doc, indent=2, default=str))
+    (loadtest.OUT / f"load{args.tag}.json").write_text(json.dumps(doc, indent=2, default=str))
     print(json.dumps({k: v for k, v in doc.items() if k != "resources"}, indent=2, default=str))
 
 
@@ -292,6 +292,9 @@ def main(argv=None) -> None:
     e10 = sub.add_parser("e10", help="E10 scalability: load network, 1,000 readings/s then a 2-hour endurance run")
     e10.add_argument("--target-min", type=int, default=30)
     e10.add_argument("--endurance-min", type=int, default=120)
+    e10.add_argument("--target-rate", type=float, default=1000.0, help="offered readings/s in the target phase")
+    e10.add_argument("--no-alerts", action="store_true", help="skip the scripted excursions (throughput only)")
+    e10.add_argument("--tag", default="", help="suffix for the result files, e.g. -1100 (keeps earlier results)")
     el = sub.add_parser("e10-load", help="(internal) the E10 load generator on its own: peak load for N minutes")
     el.add_argument("--minutes", type=int, required=True)
     el.add_argument("--interval", type=float, default=60.0)

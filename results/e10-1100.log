@@ -1,0 +1,46 @@
+$ make eval-reset
+$ make eval-up EVAL_NET=/Users/giftabumere/Documents/Miva/coldchain/configs/sim/load-101.toml
+$ make eval-live
+E10 target: 19500 devices every 17.7 s = 1100 readings/s for 30 min
+  target: 5 min, 330000 sent
+  target: 10 min, 660000 sent
+  target: 15 min, 990000 sent
+  target: 20 min, 1320000 sent
+  target: 25 min, 1650000 sent
+  target: 30 min, 1980000 sent
+{
+  "devices": 19500,
+  "phases": [
+    {
+      "name": "target",
+      "began": "2026-11-09T08:43:16.530202+00:00",
+      "minutes": 30,
+      "interval_s": 17.727272727272727,
+      "offered_rate": 1100.0,
+      "ended": "2026-11-09T09:13:16.601044+00:00",
+      "sent": 1980000,
+      "received": 1979721,
+      "stored_in_phase": 1979490,
+      "stored_rate_mean": 1099.7,
+      "stored_rate_p5_per_s": 1011,
+      "receipt_to_storage_s": {
+        "median": 0.146,
+        "p95": 0.242,
+        "max": "1.079"
+      }
+    }
+  ],
+  "unacked": 0,
+  "readings": {
+    "sent": 1980000,
+    "stored": 1980000,
+    "lost": 0,
+    "duplicates": 0
+  },
+  "criteria": {
+    "1,000 readings/s stored for 30 min": true,
+    "stored rate at or above 1,000 readings/s (no tolerance)": true,
+    "no readings lost": true
+  }
+}
+exit=0

@@ -81,18 +81,22 @@ def _generate(serials: list[str], phases: list[tuple[str, int, float]], state: d
     state["unacked"] = sink.stats["unacked"]
 
 
-def run(serials: list[str], facilities: list[str], target_min: int = 30, endurance_min: int = 120) -> dict:
+def run(serials: list[str], facilities: list[str], target_min: int = 30, endurance_min: int = 120,
+        target_rate: float = 1000.0, alerts: bool = True) -> dict:
     from coldchain.evaluation import latency
     OUT.mkdir(parents=True, exist_ok=True)
     state: dict = {"devices": len(serials)}
     stop, stats = threading.Event(), []
     threading.Thread(target=_stats, args=(stop, stats), daemon=True).start()
-    phases = [("target", target_min, len(serials) / 1000.0), ("endurance", endurance_min, 60.0)]
+    phases = [("target", target_min, len(serials) / target_rate)]
+    if endurance_min:
+        phases.append(("endurance", endurance_min, 60.0))
     gen = threading.Thread(target=_generate, args=(serials, phases, state))
     gen.start()
-    time.sleep(target_min * 60 + 60)                  # the scripted excursions run during the endurance phase
-    spread = max(10, endurance_min - 40)
-    state["latency"] = latency.run(facilities, n=100, spread_min=spread, seed=1010)
+    if alerts:
+        time.sleep(target_min * 60 + 60)              # the scripted excursions run during the endurance phase
+        spread = max(10, endurance_min - 40)
+        state["latency"] = latency.run(facilities, n=100, spread_min=spread, seed=1010)
     gen.join()
     stop.set()
     state["resources"] = stats
@@ -136,13 +140,16 @@ def check(state: dict, settle_s: int = 180) -> dict:
             ph["stored_rate_p5_per_s"] = rates[len(rates) // 20] if rates else 0
             ph["receipt_to_storage_s"] = {"median": round(lat[0] or 0, 3), "p95": round(lat[1] or 0, 3),
                                           "max": round(lat[2] or 0, 3)}
-    out["notification"] = latency.check(state["latency"], settle_s=0)
-    out["notification"] = {k: v for k, v in out["notification"].items() if not k.endswith("_rows")}
+    if "latency" in state:
+        out["notification"] = latency.check(state["latency"], settle_s=0)
+        out["notification"] = {k: v for k, v in out["notification"].items() if not k.endswith("_rows")}
     out["resources"] = state["resources"]
     target = next(p for p in out["phases"] if p["name"] == "target")
     out["criteria"] = {
         "1,000 readings/s stored for 30 min": target["stored_rate_mean"] >= 990 and target["minutes"] >= 30,
+        "stored rate at or above 1,000 readings/s (no tolerance)": target["stored_rate_mean"] >= 1000,
         "no readings lost": out["readings"]["lost"] == 0,
-        "NFR2 met during endurance (p95 <= 30 s)": out["notification"]["criteria"]["p95 <= 30 s"],
+        **({"NFR2 met during endurance (p95 <= 30 s)": out["notification"]["criteria"]["p95 <= 30 s"]}
+           if "notification" in out else {}),
     }
     return out

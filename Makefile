@@ -84,8 +84,9 @@ eval-image: build  ## pin the current code as the image under evaluation
 
 eval-up: env  ## start the evaluation stack on the pinned image (stop the development stack first), migrate, seed, register the Kano network
 	mkdir -p runs/eval/anchors
-	$(EVAL) up -d --wait
+	$(EVAL) up -d --wait $(INFRA)   # the schema must exist before the services start (they read it on start-up)
 	uv run alembic upgrade head
+	$(EVAL) up -d --wait
 	uv run python scripts/seed.py --no-demo
 	uv run python -m coldchain.sim register $(EVAL_NET)
 
