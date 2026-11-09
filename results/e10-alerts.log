@@ -1,0 +1,119 @@
+$ make eval-reset
+$ make eval-up EVAL_NET=/Users/giftabumere/Documents/Miva/coldchain/configs/sim/load-101.toml
+$ make eval-live
+E4: 100 loggers, 39 minutes from 2026-11-07T13:36:00+00:00
+  minute 0/39
+  minute 5/39
+  minute 10/39
+  minute 15/39
+  minute 20/39
+  minute 25/39
+  minute 30/39
+  minute 35/39
+{
+  "began": "2026-11-07T13:36:00+00:00",
+  "duration_min": 39,
+  "loggers": 100,
+  "scripted_incidents_expected": 100,
+  "missing_dispatch": [],
+  "sms_bodies_checked": 100,
+  "sms_bodies_over_limit": [],
+  "longest_sms": 138,
+  "scripted": {
+    "receipt_to_dispatch": {
+      "n": 100,
+      "median": 1.356,
+      "p95": 2.018,
+      "max": 2.02,
+      "min": 0.994
+    },
+    "receipt_to_detection": {
+      "n": 100,
+      "median": 0.344,
+      "p95": 0.444,
+      "max": 0.453,
+      "min": 0.143
+    },
+    "detection_to_incident": {
+      "n": 100,
+      "median": 0.304,
+      "p95": 0.813,
+      "max": 0.836,
+      "min": 0.064
+    },
+    "incident_to_dispatch": {
+      "n": 100,
+      "median": 0.689,
+      "p95": 1.163,
+      "max": 1.196,
+      "min": 0.425
+    },
+    "dispatch_to_delivery": {
+      "n": 100,
+      "median": 0.264,
+      "p95": 0.346,
+      "max": 0.346,
+      "min": 0.209
+    },
+    "event_to_receipt": {
+      "n": 100,
+      "median": 0.095,
+      "p95": 0.101,
+      "max": 0.104,
+      "min": 0.09
+    },
+    "by_type": {
+      "freeze": {
+        "n": 50,
+        "median": 1.297,
+        "p95": 2.016,
+        "max": 2.02,
+        "min": 0.994
+      },
+      "heat_excursion": {
+        "n": 50,
+        "median": 1.414,
+        "p95": 2.019,
+        "max": 2.019,
+        "min": 1.106
+      }
+    }
+  },
+  "background": {
+    "receipt_to_dispatch": {
+      "n": 0
+    },
+    "receipt_to_detection": {
+      "n": 0
+    },
+    "detection_to_incident": {
+      "n": 0
+    },
+    "incident_to_dispatch": {
+      "n": 0
+    },
+    "dispatch_to_delivery": {
+      "n": 0
+    },
+    "event_to_receipt": {
+      "n": 0
+    },
+    "by_type": {}
+  },
+  "all": {
+    "n": 100,
+    "median": 1.356,
+    "p95": 2.018,
+    "max": 2.02,
+    "min": 0.994
+  },
+  "criteria": {
+    "p95 <= 30 s": true,
+    "every scripted incident alerted": true,
+    "all SMS <= 160": true
+  },
+  "load_during_measurement": {
+    "readings_stored": 760540,
+    "rate_per_s": 325.0
+  }
+}

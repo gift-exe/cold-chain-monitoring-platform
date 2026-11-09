@@ -1,0 +1,1036 @@
+{
+  "began": "2026-11-07T09:10:00+00:00",
+  "ended": "2026-11-07T10:29:25.174167+00:00",
+  "restarts": [
+    {
+      "minute": 5,
+      "service": "detection",
+      "restarted_at": "2026-11-07T09:15:00.004929+00:00",
+      "seconds": 0.3,
+      "ok": true,
+      "error": null
+    },
+    {
+      "minute": 8,
+      "service": "ingestion-bridge",
+      "restarted_at": "2026-11-07T09:18:00.008775+00:00",
+      "seconds": 0.3,
+      "ok": true,
+      "error": null
+    },
+    {
+      "minute": 11,
+      "service": "storage-writer",
+      "restarted_at": "2026-11-07T09:21:00.001941+00:00",
+      "seconds": 0.3,
+      "ok": true,
+      "error": null
+    },
+    {
+      "minute": 14,
+      "service": "mosquitto",
+      "restarted_at": "2026-11-07T09:24:00.000703+00:00",
+      "seconds": 0.3,
+      "ok": true,
+      "error": null
+    },
+    {
+      "minute": 23,
+      "service": "incident-service",
+      "restarted_at": "2026-11-07T09:33:00.000719+00:00",
+      "seconds": 0.3,
+      "ok": true,
+      "error": null
+    },
+    {
+      "minute": 25,
+      "service": "temporal",
+      "restarted_at": "2026-11-07T09:35:00.000102+00:00",
+      "seconds": 0.3,
+      "ok": true,
+      "error": null
+    },
+    {
+      "minute": 27,
+      "service": "notification-service",
+      "restarted_at": "2026-11-07T09:37:00.002863+00:00",
+      "seconds": 0.3,
+      "ok": true,
+      "error": null
+    },
+    {
+      "minute": 36,
+      "service": "kafka",
+      "restarted_at": "2026-11-07T09:46:00.001482+00:00",
+      "seconds": 0.4,
+      "ok": true,
+      "error": null
+    },
+    {
+      "minute": 46,
+      "service": "postgres",
+      "restarted_at": "2026-11-07T09:56:00.003650+00:00",
+      "seconds": 0.3,
+      "ok": true,
+      "error": null
+    },
+    {
+      "minute": 56,
+      "service": "api",
+      "restarted_at": "2026-11-07T10:06:00.005324+00:00",
+      "seconds": 0.3,
+      "ok": true,
+      "error": null
+    },
+    {
+      "minute": 68,
+      "service": "incident-service",
+      "restarted_at": "2026-11-07T10:18:00.003888+00:00",
+      "seconds": 0.3,
+      "ok": true,
+      "error": null
+    },
+    {
+      "minute": 70,
+      "service": "temporal",
+      "restarted_at": "2026-11-07T10:20:00.001569+00:00",
+      "seconds": 0.3,
+      "ok": true,
+      "error": null
+    },
+    {
+      "minute": 72,
+      "service": "notification-service",
+      "restarted_at": "2026-11-07T10:22:00.005533+00:00",
+      "seconds": 0.3,
+      "ok": true,
+      "error": null
+    }
+  ],
+  "publish_retries": {
+    "loggers": 0,
+    "load": 0
+  },
+  "readings": {
+    "sent": 358200,
+    "stored": 358200,
+    "lost": 0,
+    "duplicates": 0
+  },
+  "incidents": {
+    "expected": 40,
+    "found": 40,
+    "lost": 0,
+    "duplicated": 0,
+    "silence_warnings_after_end": 40
+  },
+  "escalations": {
+    "due": 80,
+    "applied": 80,
+    "lost": 0,
+    "late_over_60s": 0,
+    "delay_s": {
+      "median": 0.0,
+      "max": 0.8
+    },
+    "sms_after_due_s": {
+      "median": 0.9,
+      "max": 44.2,
+      "n": 80
+    },
+    "by_tier": {
+      "lga": 40,
+      "state": 40
+    }
+  },
+  "escalation_rows": [
+    {
+      "incident": "67bfbfba-8275-44f8-8e3e-bfd45158cd73",
+      "tier": "lga",
+      "mode": "operational",
+      "severity": "critical",
+      "due": "2026-11-07T09:34:00.825698+00:00",
+      "recorded_due": "2026-11-07T09:34:00.825698+00:00",
+      "applied": "2026-11-07T09:34:00.855191+00:00",
+      "delay_s": 0.0,
+      "sms_dispatched_s": 0.6
+    },
+    {
+      "incident": "67bfbfba-8275-44f8-8e3e-bfd45158cd73",
+      "tier": "state",
+      "mode": "operational",
+      "severity": "critical",
+      "due": "2026-11-07T10:19:00.825698+00:00",
+      "recorded_due": "2026-11-07T10:19:00.825698+00:00",
+      "applied": "2026-11-07T10:19:00.848017+00:00",
+      "delay_s": 0.0,
+      "sms_dispatched_s": 0.3
+    },
+    {
+      "incident": "bcb3bc69-29b5-4e6e-94b5-b658ce6607a3",
+      "tier": "lga",
+      "mode": "operational",
+      "severity": "critical",
+      "due": "2026-11-07T09:35:00.513511+00:00",
+      "recorded_due": "2026-11-07T09:35:00.513511+00:00",
+      "applied": "2026-11-07T09:35:00.651431+00:00",
+      "delay_s": 0.1,
+      "sms_dispatched_s": 0.7
+    },
+    {
+      "incident": "bcb3bc69-29b5-4e6e-94b5-b658ce6607a3",
+      "tier": "state",
+      "mode": "operational",
+      "severity": "critical",
+      "due": "2026-11-07T10:20:00.513511+00:00",
+      "recorded_due": "2026-11-07T10:20:00.513511+00:00",
+      "applied": "2026-11-07T10:20:00.537260+00:00",
+      "delay_s": 0.0,
+      "sms_dispatched_s": 0.9
+    },
+    {
+      "incident": "677d97a5-4fc1-46e0-a0b0-339c4608c1fa",
+      "tier": "lga",
+      "mode": "operational",
+      "severity": "critical",
+      "due": "2026-11-07T09:34:00.829523+00:00",
+      "recorded_due": "2026-11-07T09:34:00.829523+00:00",
+      "applied": "2026-11-07T09:34:00.865090+00:00",
+      "delay_s": 0.0,
+      "sms_dispatched_s": 1.1
+    },
+    {
+      "incident": "677d97a5-4fc1-46e0-a0b0-339c4608c1fa",
+      "tier": "state",
+      "mode": "operational",
+      "severity": "critical",
+      "due": "2026-11-07T10:19:00.829523+00:00",
+      "recorded_due": "2026-11-07T10:19:00.829523+00:00",
+      "applied": "2026-11-07T10:19:00.849955+00:00",
+      "delay_s": 0.0,
+      "sms_dispatched_s": 0.3
+    },
+    {
+      "incident": "6a47fc66-9815-4955-94cc-914bd918c106",
+      "tier": "lga",
+      "mode": "operational",
+      "severity": "critical",
+      "due": "2026-11-07T09:33:00.601604+00:00",
+      "recorded_due": "2026-11-07T09:33:00.601604+00:00",
+      "applied": "2026-11-07T09:33:01.044017+00:00",
+      "delay_s": 0.4,
+      "sms_dispatched_s": 1.1
+    },
+    {
+      "incident": "6a47fc66-9815-4955-94cc-914bd918c106",
+      "tier": "state",
+      "mode": "operational",
+      "severity": "critical",
+      "due": "2026-11-07T10:18:00.601604+00:00",
+      "recorded_due": "2026-11-07T10:18:00.601604+00:00",
+      "applied": "2026-11-07T10:18:01.390770+00:00",
+      "delay_s": 0.8,
+      "sms_dispatched_s": 1.3
+    },
+    {
+      "incident": "765a2c25-1aca-49e9-b2d1-05c85843b2b4",
+      "tier": "lga",
+      "mode": "operational",
+      "severity": "critical",
+      "due": "2026-11-07T09:33:00.614675+00:00",
+      "recorded_due": "2026-11-07T09:33:00.614675+00:00",
+      "applied": "2026-11-07T09:33:01.058712+00:00",
+      "delay_s": 0.4,
+      "sms_dispatched_s": 1.1
+    },
+    {
+      "incident": "765a2c25-1aca-49e9-b2d1-05c85843b2b4",
+      "tier": "state",
+      "mode": "operational",
+      "severity": "critical",
+      "due": "2026-11-07T10:18:00.614675+00:00",
+      "recorded_due": "2026-11-07T10:18:00.614675+00:00",
+      "applied": "2026-11-07T10:18:01.231293+00:00",
+      "delay_s": 0.6,
+      "sms_dispatched_s": 1.3
+    },
+    {
+      "incident": "c30738a1-6b54-46f9-89da-7a0e24df1399",
+      "tier": "lga",
+      "mode": "operational",
+      "severity": "critical",
+      "due": "2026-11-07T09:33:00.611453+00:00",
+      "recorded_due": "2026-11-07T09:33:00.611453+00:00",
+      "applied": "2026-11-07T09:33:01.034356+00:00",
+      "delay_s": 0.4,
+      "sms_dispatched_s": 1.1
+    },
+    {
+      "incident": "c30738a1-6b54-46f9-89da-7a0e24df1399",
+      "tier": "state",
+      "mode": "operational",
+      "severity": "critical",
+      "due": "2026-11-07T10:18:00.611453+00:00",
+      "recorded_due": "2026-11-07T10:18:00.611453+00:00",
+      "applied": "2026-11-07T10:18:01.304731+00:00",
+      "delay_s": 0.7,
+      "sms_dispatched_s": 1.3
+    },
+    {
+      "incident": "be18ff84-6907-4f29-8410-8344493f0730",
+      "tier": "lga",
+      "mode": "operational",
+      "severity": "critical",
+      "due": "2026-11-07T09:33:00.605701+00:00",
+      "recorded_due": "2026-11-07T09:33:00.605701+00:00",
+      "applied": "2026-11-07T09:33:01.170075+00:00",
+      "delay_s": 0.6,
+      "sms_dispatched_s": 1.1
+    },
+    {
+      "incident": "be18ff84-6907-4f29-8410-8344493f0730",
+      "tier": "state",
+      "mode": "operational",
+      "severity": "critical",
+      "due": "2026-11-07T10:18:00.605701+00:00",
+      "recorded_due": "2026-11-07T10:18:00.605701+00:00",
+      "applied": "2026-11-07T10:18:01.179839+00:00",
+      "delay_s": 0.6,
+      "sms_dispatched_s": 1.3
+    },
+    {
+      "incident": "adfa169b-c77e-4f05-884b-c79caa31b2ed",
+      "tier": "lga",
+      "mode": "operational",
+      "severity": "critical",
+      "due": "2026-11-07T09:37:01.115835+00:00",
+      "recorded_due": "2026-11-07T09:37:01.115835+00:00",
+      "applied": "2026-11-07T09:37:01.144063+00:00",
+      "delay_s": 0.0,
+      "sms_dispatched_s": 44.2
+    },
+    {
+      "incident": "adfa169b-c77e-4f05-884b-c79caa31b2ed",
+      "tier": "state",
+      "mode": "operational",
+      "severity": "critical",
+      "due": "2026-11-07T10:22:01.115835+00:00",
+      "recorded_due": "2026-11-07T10:22:01.115835+00:00",
+      "applied": "2026-11-07T10:22:01.144581+00:00",
+      "delay_s": 0.0,
+      "sms_dispatched_s": 42.9
+    },
+    {
+      "incident": "8486ef16-2613-42a0-be88-08a498aecb34",
+      "tier": "lga",
+      "mode": "operational",
+      "severity": "critical",
+      "due": "2026-11-07T09:36:00.572273+00:00",
+      "recorded_due": "2026-11-07T09:36:00.572273+00:00",
+      "applied": "2026-11-07T09:36:00.600592+00:00",
+      "delay_s": 0.0,
+      "sms_dispatched_s": 0.4
+    },
+    {
+      "incident": "8486ef16-2613-42a0-be88-08a498aecb34",
+      "tier": "state",
+      "mode": "operational",
+      "severity": "critical",
+      "due": "2026-11-07T10:21:00.572273+00:00",
+      "recorded_due": "2026-11-07T10:21:00.572273+00:00",
+      "applied": "2026-11-07T10:21:00.596687+00:00",
+      "delay_s": 0.0,
+      "sms_dispatched_s": 0.7
+    },
+    {
+      "incident": "d25812e8-8e0c-4610-9d15-be77958e9e77",
+      "tier": "lga",
+      "mode": "operational",
+      "severity": "critical",
+      "due": "2026-11-07T09:33:00.613094+00:00",
+      "recorded_due": "2026-11-07T09:33:00.613094+00:00",
+      "applied": "2026-11-07T09:33:01.165124+00:00",
+      "delay_s": 0.6,
+      "sms_dispatched_s": 1.1
+    },
+    {
+      "incident": "d25812e8-8e0c-4610-9d15-be77958e9e77",
+      "tier": "state",
+      "mode": "operational",
+      "severity": "critical",
+      "due": "2026-11-07T10:18:00.613094+00:00",
+      "recorded_due": "2026-11-07T10:18:00.613094+00:00",
+      "applied": "2026-11-07T10:18:01.213262+00:00",
+      "delay_s": 0.6,
+      "sms_dispatched_s": 1.3
+    },
+    {
+      "incident": "d10cdcf5-36be-40ad-9aac-7b760f925219",
+      "tier": "lga",
+      "mode": "operational",
+      "severity": "critical",
+      "due": "2026-11-07T09:37:01.101086+00:00",
+      "recorded_due": "2026-11-07T09:37:01.101086+00:00",
+      "applied": "2026-11-07T09:37:01.120152+00:00",
+      "delay_s": 0.0,
+      "sms_dispatched_s": 44.2
+    },
+    {
+      "incident": "d10cdcf5-36be-40ad-9aac-7b760f925219",
+      "tier": "state",
+      "mode": "operational",
+      "severity": "critical",
+      "due": "2026-11-07T10:22:01.101086+00:00",
+      "recorded_due": "2026-11-07T10:22:01.101086+00:00",
+      "applied": "2026-11-07T10:22:01.133298+00:00",
+      "delay_s": 0.0,
+      "sms_dispatched_s": 42.9
+    },
+    {
+      "incident": "42339ff9-1da5-48f2-b49a-804f9716fc06",
+      "tier": "lga",
+      "mode": "operational",
+      "severity": "critical",
+      "due": "2026-11-07T09:36:00.573711+00:00",
+      "recorded_due": "2026-11-07T09:36:00.573711+00:00",
+      "applied": "2026-11-07T09:36:00.595064+00:00",
+      "delay_s": 0.0,
+      "sms_dispatched_s": 0.4
+    },
+    {
+      "incident": "42339ff9-1da5-48f2-b49a-804f9716fc06",
+      "tier": "state",
+      "mode": "operational",
+      "severity": "critical",
+      "due": "2026-11-07T10:21:00.573711+00:00",
+      "recorded_due": "2026-11-07T10:21:00.573711+00:00",
+      "applied": "2026-11-07T10:21:00.610078+00:00",
+      "delay_s": 0.0,
+      "sms_dispatched_s": 0.7
+    },
+    {
+      "incident": "2da008f2-005a-4714-87af-db68ef404077",
+      "tier": "lga",
+      "mode": "operational",
+      "severity": "critical",
+      "due": "2026-11-07T09:37:01.113373+00:00",
+      "recorded_due": "2026-11-07T09:37:01.113373+00:00",
+      "applied": "2026-11-07T09:37:01.142642+00:00",
+      "delay_s": 0.0,
+      "sms_dispatched_s": 44.2
+    },
+    {
+      "incident": "2da008f2-005a-4714-87af-db68ef404077",
+      "tier": "state",
+      "mode": "operational",
+      "severity": "critical",
+      "due": "2026-11-07T10:22:01.113373+00:00",
+      "recorded_due": "2026-11-07T10:22:01.113373+00:00",
+      "applied": "2026-11-07T10:22:01.148280+00:00",
+      "delay_s": 0.0,
+      "sms_dispatched_s": 42.9
+    },
+    {
+      "incident": "6c327e46-a4cb-46ed-9f2f-e3b8da451798",
+      "tier": "lga",
+      "mode": "operational",
+      "severity": "critical",
+      "due": "2026-11-07T09:35:00.517359+00:00",
+      "recorded_due": "2026-11-07T09:35:00.517359+00:00",
+      "applied": "2026-11-07T09:35:00.646958+00:00",
+      "delay_s": 0.1,
+      "sms_dispatched_s": 0.7
+    },
+    {
+      "incident": "6c327e46-a4cb-46ed-9f2f-e3b8da451798",
+      "tier": "state",
+      "mode": "operational",
+      "severity": "critical",
+      "due": "2026-11-07T10:20:00.517359+00:00",
+      "recorded_due": "2026-11-07T10:20:00.517359+00:00",
+      "applied": "2026-11-07T10:20:00.542047+00:00",
+      "delay_s": 0.0,
+      "sms_dispatched_s": 0.9
+    },
+    {
+      "incident": "b5579a89-cec9-4e06-9754-9ee760caeb22",
+      "tier": "lga",
+      "mode": "operational",
+      "severity": "critical",
+      "due": "2026-11-07T09:33:00.616312+00:00",
+      "recorded_due": "2026-11-07T09:33:00.616312+00:00",
+      "applied": "2026-11-07T09:33:01.027003+00:00",
+      "delay_s": 0.4,
+      "sms_dispatched_s": 1.1
+    },
+    {
+      "incident": "b5579a89-cec9-4e06-9754-9ee760caeb22",
+      "tier": "state",
+      "mode": "operational",
+      "severity": "critical",
+      "due": "2026-11-07T10:18:00.616312+00:00",
+      "recorded_due": "2026-11-07T10:18:00.616312+00:00",
+      "applied": "2026-11-07T10:18:01.241058+00:00",
+      "delay_s": 0.6,
+      "sms_dispatched_s": 1.3
+    },
+    {
+      "incident": "26b2daae-be01-41c2-a4a8-51f573fad02b",
+      "tier": "lga",
+      "mode": "operational",
+      "severity": "critical",
+      "due": "2026-11-07T09:33:00.603987+00:00",
+      "recorded_due": "2026-11-07T09:33:00.603987+00:00",
+      "applied": "2026-11-07T09:33:01.013574+00:00",
+      "delay_s": 0.4,
+      "sms_dispatched_s": 1.1
+    },
+    {
+      "incident": "26b2daae-be01-41c2-a4a8-51f573fad02b",
+      "tier": "state",
+      "mode": "operational",
+      "severity": "critical",
+      "due": "2026-11-07T10:18:00.603987+00:00",
+      "recorded_due": "2026-11-07T10:18:00.603987+00:00",
+      "applied": "2026-11-07T10:18:01.337403+00:00",
+      "delay_s": 0.7,
+      "sms_dispatched_s": 1.3
+    },
+    {
+      "incident": "ee593ecf-42b2-472d-b6c2-9bd206abdb17",
+      "tier": "lga",
+      "mode": "operational",
+      "severity": "critical",
+      "due": "2026-11-07T09:34:00.837665+00:00",
+      "recorded_due": "2026-11-07T09:34:00.837665+00:00",
+      "applied": "2026-11-07T09:34:00.858742+00:00",
+      "delay_s": 0.0,
+      "sms_dispatched_s": 0.6
+    },
+    {
+      "incident": "ee593ecf-42b2-472d-b6c2-9bd206abdb17",
+      "tier": "state",
+      "mode": "operational",
+      "severity": "critical",
+      "due": "2026-11-07T10:19:00.837665+00:00",
+      "recorded_due": "2026-11-07T10:19:00.837665+00:00",
+      "applied": "2026-11-07T10:19:00.862824+00:00",
+      "delay_s": 0.0,
+      "sms_dispatched_s": 0.3
+    },
+    {
+      "incident": "cffb6948-c4dc-49b7-abc9-cc11d178e8a5",
+      "tier": "lga",
+      "mode": "operational",
+      "severity": "critical",
+      "due": "2026-11-07T09:32:00.511706+00:00",
+      "recorded_due": "2026-11-07T09:32:00.511706+00:00",
+      "applied": "2026-11-07T09:32:00.526549+00:00",
+      "delay_s": 0.0,
+      "sms_dispatched_s": 0.5
+    },
+    {
+      "incident": "cffb6948-c4dc-49b7-abc9-cc11d178e8a5",
+      "tier": "state",
+      "mode": "operational",
+      "severity": "critical",
+      "due": "2026-11-07T10:17:00.511706+00:00",
+      "recorded_due": "2026-11-07T10:17:00.511706+00:00",
+      "applied": "2026-11-07T10:17:00.531898+00:00",
+      "delay_s": 0.0,
+      "sms_dispatched_s": 3.1
+    },
+    {
+      "incident": "d84cfaf9-5d71-4063-a054-c30ad8e70368",
+      "tier": "lga",
+      "mode": "operational",
+      "severity": "critical",
+      "due": "2026-11-07T09:35:00.519361+00:00",
+      "recorded_due": "2026-11-07T09:35:00.519361+00:00",
+      "applied": "2026-11-07T09:35:00.656267+00:00",
+      "delay_s": 0.1,
+      "sms_dispatched_s": 0.7
+    },
+    {
+      "incident": "d84cfaf9-5d71-4063-a054-c30ad8e70368",
+      "tier": "state",
+      "mode": "operational",
+      "severity": "critical",
+      "due": "2026-11-07T10:20:00.519361+00:00",
+      "recorded_due": "2026-11-07T10:20:00.519361+00:00",
+      "applied": "2026-11-07T10:20:00.805823+00:00",
+      "delay_s": 0.3,
+      "sms_dispatched_s": 0.9
+    },
+    {
+      "incident": "62269c69-6d1c-4a89-ae65-9257cc0b7cae",
+      "tier": "lga",
+      "mode": "operational",
+      "severity": "critical",
+      "due": "2026-11-07T09:36:00.566286+00:00",
+      "recorded_due": "2026-11-07T09:36:00.566286+00:00",
+      "applied": "2026-11-07T09:36:00.610108+00:00",
+      "delay_s": 0.0,
+      "sms_dispatched_s": 0.4
+    },
+    {
+      "incident": "62269c69-6d1c-4a89-ae65-9257cc0b7cae",
+      "tier": "state",
+      "mode": "operational",
+      "severity": "critical",
+      "due": "2026-11-07T10:21:00.566286+00:00",
+      "recorded_due": "2026-11-07T10:21:00.566286+00:00",
+      "applied": "2026-11-07T10:21:00.602269+00:00",
+      "delay_s": 0.0,
+      "sms_dispatched_s": 0.7
+    },
+    {
+      "incident": "2df25961-fa61-435d-be47-b795ab34285f",
+      "tier": "lga",
+      "mode": "operational",
+      "severity": "critical",
+      "due": "2026-11-07T09:34:00.832424+00:00",
+      "recorded_due": "2026-11-07T09:34:00.832424+00:00",
+      "applied": "2026-11-07T09:34:00.851604+00:00",
+      "delay_s": 0.0,
+      "sms_dispatched_s": 0.6
+    },
+    {
+      "incident": "2df25961-fa61-435d-be47-b795ab34285f",
+      "tier": "state",
+      "mode": "operational",
+      "severity": "critical",
+      "due": "2026-11-07T10:19:00.832424+00:00",
+      "recorded_due": "2026-11-07T10:19:00.832424+00:00",
+      "applied": "2026-11-07T10:19:00.877989+00:00",
+      "delay_s": 0.0,
+      "sms_dispatched_s": 0.3
+    },
+    {
+      "incident": "b7d2a0e0-6954-4c86-820b-27a5bcec2cbd",
+      "tier": "lga",
+      "mode": "operational",
+      "severity": "critical",
+      "due": "2026-11-07T09:36:00.575104+00:00",
+      "recorded_due": "2026-11-07T09:36:00.575104+00:00",
+      "applied": "2026-11-07T09:36:00.635627+00:00",
+      "delay_s": 0.1,
+      "sms_dispatched_s": 0.4
+    },
+    {
+      "incident": "b7d2a0e0-6954-4c86-820b-27a5bcec2cbd",
+      "tier": "state",
+      "mode": "operational",
+      "severity": "critical",
+      "due": "2026-11-07T10:21:00.575104+00:00",
+      "recorded_due": "2026-11-07T10:21:00.575104+00:00",
+      "applied": "2026-11-07T10:21:00.626791+00:00",
+      "delay_s": 0.1,
+      "sms_dispatched_s": 0.7
+    },
+    {
+      "incident": "59e32584-6342-417f-ac5c-03756bdfcd11",
+      "tier": "lga",
+      "mode": "operational",
+      "severity": "critical",
+      "due": "2026-11-07T09:36:00.578163+00:00",
+      "recorded_due": "2026-11-07T09:36:00.578163+00:00",
+      "applied": "2026-11-07T09:36:00.603859+00:00",
+      "delay_s": 0.0,
+      "sms_dispatched_s": 0.4
+    },
+    {
+      "incident": "59e32584-6342-417f-ac5c-03756bdfcd11",
+      "tier": "state",
+      "mode": "operational",
+      "severity": "critical",
+      "due": "2026-11-07T10:21:00.578163+00:00",
+      "recorded_due": "2026-11-07T10:21:00.578163+00:00",
+      "applied": "2026-11-07T10:21:00.627963+00:00",
+      "delay_s": 0.0,
+      "sms_dispatched_s": 0.7
+    },
+    {
+      "incident": "45ef4260-037a-4ad7-ad97-9886ee2c8cdf",
+      "tier": "lga",
+      "mode": "operational",
+      "severity": "critical",
+      "due": "2026-11-07T09:37:01.109478+00:00",
+      "recorded_due": "2026-11-07T09:37:01.109478+00:00",
+      "applied": "2026-11-07T09:37:01.132634+00:00",
+      "delay_s": 0.0,
+      "sms_dispatched_s": 44.2
+    },
+    {
+      "incident": "45ef4260-037a-4ad7-ad97-9886ee2c8cdf",
+      "tier": "state",
+      "mode": "operational",
+      "severity": "critical",
+      "due": "2026-11-07T10:22:01.109478+00:00",
+      "recorded_due": "2026-11-07T10:22:01.109478+00:00",
+      "applied": "2026-11-07T10:22:01.145812+00:00",
+      "delay_s": 0.0,
+      "sms_dispatched_s": 42.9
+    },
+    {
+      "incident": "30be6fb1-4549-4326-ad80-59e832b8876e",
+      "tier": "lga",
+      "mode": "operational",
+      "severity": "critical",
+      "due": "2026-11-07T09:33:00.607098+00:00",
+      "recorded_due": "2026-11-07T09:33:00.607098+00:00",
+      "applied": "2026-11-07T09:33:01.018730+00:00",
+      "delay_s": 0.4,
+      "sms_dispatched_s": 1.1
+    },
+    {
+      "incident": "30be6fb1-4549-4326-ad80-59e832b8876e",
+      "tier": "state",
+      "mode": "operational",
+      "severity": "critical",
+      "due": "2026-11-07T10:18:00.607098+00:00",
+      "recorded_due": "2026-11-07T10:18:00.607098+00:00",
+      "applied": "2026-11-07T10:18:01.378624+00:00",
+      "delay_s": 0.8,
+      "sms_dispatched_s": 1.3
+    },
+    {
+      "incident": "61dbecf8-8550-4fdd-98d8-8adbc60f0abd",
+      "tier": "lga",
+      "mode": "operational",
+      "severity": "critical",
+      "due": "2026-11-07T09:33:00.608593+00:00",
+      "recorded_due": "2026-11-07T09:33:00.608593+00:00",
+      "applied": "2026-11-07T09:33:01.070089+00:00",
+      "delay_s": 0.5,
+      "sms_dispatched_s": 1.1
+    },
+    {
+      "incident": "61dbecf8-8550-4fdd-98d8-8adbc60f0abd",
+      "tier": "state",
+      "mode": "operational",
+      "severity": "critical",
+      "due": "2026-11-07T10:18:00.608593+00:00",
+      "recorded_due": "2026-11-07T10:18:00.608593+00:00",
+      "applied": "2026-11-07T10:18:01.189207+00:00",
+      "delay_s": 0.6,
+      "sms_dispatched_s": 1.3
+    },
+    {
+      "incident": "69cbbe6f-d230-451a-b99f-7953283b62f6",
+      "tier": "lga",
+      "mode": "operational",
+      "severity": "critical",
+      "due": "2026-11-07T09:34:00.814889+00:00",
+      "recorded_due": "2026-11-07T09:34:00.814889+00:00",
+      "applied": "2026-11-07T09:34:00.839166+00:00",
+      "delay_s": 0.0,
+      "sms_dispatched_s": 0.6
+    },
+    {
+      "incident": "69cbbe6f-d230-451a-b99f-7953283b62f6",
+      "tier": "state",
+      "mode": "operational",
+      "severity": "critical",
+      "due": "2026-11-07T10:19:00.814889+00:00",
+      "recorded_due": "2026-11-07T10:19:00.814889+00:00",
+      "applied": "2026-11-07T10:19:00.875030+00:00",
+      "delay_s": 0.1,
+      "sms_dispatched_s": 0.4
+    },
+    {
+      "incident": "bceda0ef-796d-4979-a4b6-0f4d50b8aa84",
+      "tier": "lga",
+      "mode": "operational",
+      "severity": "critical",
+      "due": "2026-11-07T09:32:01.040015+00:00",
+      "recorded_due": "2026-11-07T09:32:01.040015+00:00",
+      "applied": "2026-11-07T09:32:01.056139+00:00",
+      "delay_s": 0.0,
+      "sms_dispatched_s": 0.4
+    },
+    {
+      "incident": "bceda0ef-796d-4979-a4b6-0f4d50b8aa84",
+      "tier": "state",
+      "mode": "operational",
+      "severity": "critical",
+      "due": "2026-11-07T10:17:01.040015+00:00",
+      "recorded_due": "2026-11-07T10:17:01.040015+00:00",
+      "applied": "2026-11-07T10:17:01.065793+00:00",
+      "delay_s": 0.0,
+      "sms_dispatched_s": 2.6
+    },
+    {
+      "incident": "c83d00e9-187b-4456-9de6-e67b622b36bb",
+      "tier": "lga",
+      "mode": "operational",
+      "severity": "critical",
+      "due": "2026-11-07T09:34:00.821469+00:00",
+      "recorded_due": "2026-11-07T09:34:00.821469+00:00",
+      "applied": "2026-11-07T09:34:00.842944+00:00",
+      "delay_s": 0.0,
+      "sms_dispatched_s": 0.6
+    },
+    {
+      "incident": "c83d00e9-187b-4456-9de6-e67b622b36bb",
+      "tier": "state",
+      "mode": "operational",
+      "severity": "critical",
+      "due": "2026-11-07T10:19:00.821469+00:00",
+      "recorded_due": "2026-11-07T10:19:00.821469+00:00",
+      "applied": "2026-11-07T10:19:00.843231+00:00",
+      "delay_s": 0.0,
+      "sms_dispatched_s": 0.3
+    },
+    {
+      "incident": "dc7ec71d-72b5-45c9-b15d-08608d6629fd",
+      "tier": "lga",
+      "mode": "operational",
+      "severity": "critical",
+      "due": "2026-11-07T09:32:00.506231+00:00",
+      "recorded_due": "2026-11-07T09:32:00.506231+00:00",
+      "applied": "2026-11-07T09:32:00.524050+00:00",
+      "delay_s": 0.0,
+      "sms_dispatched_s": 0.5
+    },
+    {
+      "incident": "dc7ec71d-72b5-45c9-b15d-08608d6629fd",
+      "tier": "state",
+      "mode": "operational",
+      "severity": "critical",
+      "due": "2026-11-07T10:17:00.506231+00:00",
+      "recorded_due": "2026-11-07T10:17:00.506231+00:00",
+      "applied": "2026-11-07T10:17:00.539415+00:00",
+      "delay_s": 0.0,
+      "sms_dispatched_s": 3.1
+    },
+    {
+      "incident": "46c7b8f1-400e-48f5-85df-6e356fa078d0",
+      "tier": "lga",
+      "mode": "operational",
+      "severity": "critical",
+      "due": "2026-11-07T09:36:00.579784+00:00",
+      "recorded_due": "2026-11-07T09:36:00.579784+00:00",
+      "applied": "2026-11-07T09:36:00.640311+00:00",
+      "delay_s": 0.1,
+      "sms_dispatched_s": 0.4
+    },
+    {
+      "incident": "46c7b8f1-400e-48f5-85df-6e356fa078d0",
+      "tier": "state",
+      "mode": "operational",
+      "severity": "critical",
+      "due": "2026-11-07T10:21:00.579784+00:00",
+      "recorded_due": "2026-11-07T10:21:00.579784+00:00",
+      "applied": "2026-11-07T10:21:00.635225+00:00",
+      "delay_s": 0.1,
+      "sms_dispatched_s": 0.6
+    },
+    {
+      "incident": "a3405bf5-3bf0-425d-86f8-ee11291baa26",
+      "tier": "lga",
+      "mode": "operational",
+      "severity": "critical",
+      "due": "2026-11-07T09:36:00.568974+00:00",
+      "recorded_due": "2026-11-07T09:36:00.568974+00:00",
+      "applied": "2026-11-07T09:36:00.611295+00:00",
+      "delay_s": 0.0,
+      "sms_dispatched_s": 0.4
+    },
+    {
+      "incident": "a3405bf5-3bf0-425d-86f8-ee11291baa26",
+      "tier": "state",
+      "mode": "operational",
+      "severity": "critical",
+      "due": "2026-11-07T10:21:00.568974+00:00",
+      "recorded_due": "2026-11-07T10:21:00.568974+00:00",
+      "applied": "2026-11-07T10:21:00.593520+00:00",
+      "delay_s": 0.0,
+      "sms_dispatched_s": 0.7
+    },
+    {
+      "incident": "7e6be581-db03-4074-9a6b-ad15c1b0ce70",
+      "tier": "lga",
+      "mode": "operational",
+      "severity": "critical",
+      "due": "2026-11-07T09:36:00.576495+00:00",
+      "recorded_due": "2026-11-07T09:36:00.576495+00:00",
+      "applied": "2026-11-07T09:36:00.618153+00:00",
+      "delay_s": 0.0,
+      "sms_dispatched_s": 0.4
+    },
+    {
+      "incident": "7e6be581-db03-4074-9a6b-ad15c1b0ce70",
+      "tier": "state",
+      "mode": "operational",
+      "severity": "critical",
+      "due": "2026-11-07T10:21:00.576495+00:00",
+      "recorded_due": "2026-11-07T10:21:00.576495+00:00",
+      "applied": "2026-11-07T10:21:00.616318+00:00",
+      "delay_s": 0.0,
+      "sms_dispatched_s": 0.7
+    },
+    {
+      "incident": "46a55fa1-12ab-404a-8bb7-375cfc68b1c1",
+      "tier": "lga",
+      "mode": "operational",
+      "severity": "critical",
+      "due": "2026-11-07T09:34:00.835081+00:00",
+      "recorded_due": "2026-11-07T09:34:00.835081+00:00",
+      "applied": "2026-11-07T09:34:00.869504+00:00",
+      "delay_s": 0.0,
+      "sms_dispatched_s": 1.1
+    },
+    {
+      "incident": "46a55fa1-12ab-404a-8bb7-375cfc68b1c1",
+      "tier": "state",
+      "mode": "operational",
+      "severity": "critical",
+      "due": "2026-11-07T10:19:00.835081+00:00",
+      "recorded_due": "2026-11-07T10:19:00.835081+00:00",
+      "applied": "2026-11-07T10:19:00.869641+00:00",
+      "delay_s": 0.0,
+      "sms_dispatched_s": 0.3
+    },
+    {
+      "incident": "52f00e2e-d3f7-4cf3-b24f-11ff00bdba5d",
+      "tier": "lga",
+      "mode": "operational",
+      "severity": "critical",
+      "due": "2026-11-07T09:36:00.570658+00:00",
+      "recorded_due": "2026-11-07T09:36:00.570658+00:00",
+      "applied": "2026-11-07T09:36:00.597606+00:00",
+      "delay_s": 0.0,
+      "sms_dispatched_s": 0.4
+    },
+    {
+      "incident": "52f00e2e-d3f7-4cf3-b24f-11ff00bdba5d",
+      "tier": "state",
+      "mode": "operational",
+      "severity": "critical",
+      "due": "2026-11-07T10:21:00.570658+00:00",
+      "recorded_due": "2026-11-07T10:21:00.570658+00:00",
+      "applied": "2026-11-07T10:21:00.600952+00:00",
+      "delay_s": 0.0,
+      "sms_dispatched_s": 0.7
+    },
+    {
+      "incident": "99d7a1fc-8a06-43c5-a950-25cbb2623012",
+      "tier": "lga",
+      "mode": "operational",
+      "severity": "critical",
+      "due": "2026-11-07T09:32:00.514201+00:00",
+      "recorded_due": "2026-11-07T09:32:00.514201+00:00",
+      "applied": "2026-11-07T09:32:00.528684+00:00",
+      "delay_s": 0.0,
+      "sms_dispatched_s": 0.5
+    },
+    {
+      "incident": "99d7a1fc-8a06-43c5-a950-25cbb2623012",
+      "tier": "state",
+      "mode": "operational",
+      "severity": "critical",
+      "due": "2026-11-07T10:17:00.514201+00:00",
+      "recorded_due": "2026-11-07T10:17:00.514201+00:00",
+      "applied": "2026-11-07T10:17:00.529716+00:00",
+      "delay_s": 0.0,
+      "sms_dispatched_s": 3.1
+    },
+    {
+      "incident": "23987de9-ea38-4303-90de-2bb76e7a6899",
+      "tier": "lga",
+      "mode": "operational",
+      "severity": "critical",
+      "due": "2026-11-07T09:37:01.095931+00:00",
+      "recorded_due": "2026-11-07T09:37:01.095931+00:00",
+      "applied": "2026-11-07T09:37:01.127278+00:00",
+      "delay_s": 0.0,
+      "sms_dispatched_s": 44.2
+    },
+    {
+      "incident": "23987de9-ea38-4303-90de-2bb76e7a6899",
+      "tier": "state",
+      "mode": "operational",
+      "severity": "critical",
+      "due": "2026-11-07T10:22:01.095931+00:00",
+      "recorded_due": "2026-11-07T10:22:01.095931+00:00",
+      "applied": "2026-11-07T10:22:01.128256+00:00",
+      "delay_s": 0.0,
+      "sms_dispatched_s": 42.9
+    },
+    {
+      "incident": "bd536b41-0f0f-474c-aef3-6718648deb1d",
+      "tier": "lga",
+      "mode": "operational",
+      "severity": "critical",
+      "due": "2026-11-07T09:35:00.521391+00:00",
+      "recorded_due": "2026-11-07T09:35:00.521391+00:00",
+      "applied": "2026-11-07T09:35:00.641753+00:00",
+      "delay_s": 0.1,
+      "sms_dispatched_s": 0.7
+    },
+    {
+      "incident": "bd536b41-0f0f-474c-aef3-6718648deb1d",
+      "tier": "state",
+      "mode": "operational",
+      "severity": "critical",
+      "due": "2026-11-07T10:20:00.521391+00:00",
+      "recorded_due": "2026-11-07T10:20:00.521391+00:00",
+      "applied": "2026-11-07T10:20:00.543509+00:00",
+      "delay_s": 0.0,
+      "sms_dispatched_s": 0.9
+    },
+    {
+      "incident": "75e22daa-c2f0-4529-8281-a69dec346c87",
+      "tier": "lga",
+      "mode": "operational",
+      "severity": "critical",
+      "due": "2026-11-07T09:33:00.610078+00:00",
+      "recorded_due": "2026-11-07T09:33:00.610078+00:00",
+      "applied": "2026-11-07T09:33:01.158686+00:00",
+      "delay_s": 0.5,
+      "sms_dispatched_s": 1.1
+    },
+    {
+      "incident": "75e22daa-c2f0-4529-8281-a69dec346c87",
+      "tier": "state",
+      "mode": "operational",
+      "severity": "critical",
+      "due": "2026-11-07T10:18:00.610078+00:00",
+      "recorded_due": "2026-11-07T10:18:00.610078+00:00",
+      "applied": "2026-11-07T10:18:01.198164+00:00",
+      "delay_s": 0.6,
+      "sms_dispatched_s": 1.3
+    },
+    {
+      "incident": "95f4307c-e194-4fbb-ab88-2afce8f0c95e",
+      "tier": "lga",
+      "mode": "operational",
+      "severity": "critical",
+      "due": "2026-11-07T09:37:01.106271+00:00",
+      "recorded_due": "2026-11-07T09:37:01.106271+00:00",
+      "applied": "2026-11-07T09:37:01.122070+00:00",
+      "delay_s": 0.0,
+      "sms_dispatched_s": 44.2
+    },
+    {
+      "incident": "95f4307c-e194-4fbb-ab88-2afce8f0c95e",
+      "tier": "state",
+      "mode": "operational",
+      "severity": "critical",
+      "due": "2026-11-07T10:22:01.106271+00:00",
+      "recorded_due": "2026-11-07T10:22:01.106271+00:00",
+      "applied": "2026-11-07T10:22:01.130678+00:00",
+      "delay_s": 0.0,
+      "sms_dispatched_s": 42.9
+    }
+  ],
+  "criteria": {
+    "no readings lost": true,
+    "no incidents lost or duplicated": true,
+    "no escalations lost": true,
+    "all escalations within 1 min": true,
+    "every escalation notice sent": true,
+    "all restarts succeeded": true
+  }
+}

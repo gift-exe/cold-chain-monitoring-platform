@@ -1,0 +1,160 @@
+{
+  "run": "detection-110",
+  "unit_days": 4718.0,
+  "recall": {
+    "heat_excursion": {
+      "injected": 11,
+      "events": 11,
+      "detected_overlap": 11,
+      "early_minutes_sum": 28.0,
+      "detected": 11
+    },
+    "freeze": {
+      "injected": 16,
+      "events": 8,
+      "detected_overlap": 8,
+      "early_minutes_sum": 90.0,
+      "no_qualifying_condition": 8,
+      "detected": 4
+    },
+    "door_open": {
+      "injected": 5,
+      "events": 5,
+      "detected_overlap": 5,
+      "early_minutes_sum": 0.0,
+      "detected": 5
+    },
+    "power_loss": {
+      "injected": 2,
+      "events": 2,
+      "detected_overlap": 2,
+      "early_minutes_sum": 180.0,
+      "detected": 1
+    }
+  },
+  "precision": {
+    "critical": {
+      "incidents": 614,
+      "true": 608,
+      "injected": 22
+    },
+    "critical:freeze": {
+      "incidents": 208,
+      "true": 204,
+      "injected": 10
+    },
+    "critical:heat_excursion": {
+      "incidents": 214,
+      "true": 212,
+      "injected": 11
+    },
+    "critical:power_loss": {
+      "incidents": 192,
+      "true": 192,
+      "injected": 1
+    },
+    "warning": {
+      "incidents": 1110,
+      "true": 1110,
+      "injected": 6
+    },
+    "warning:door_open": {
+      "incidents": 893,
+      "true": 893,
+      "injected": 5
+    },
+    "warning:power_loss": {
+      "incidents": 217,
+      "true": 217,
+      "injected": 1
+    }
+  },
+  "false_critical_per_1000_device_days": 1.272,
+  "misses": [
+    {
+      "injection": "freeze-00002",
+      "serial": "SIM-ROG-0002",
+      "condition_start": "2024-03-04T09:53:00+00:00",
+      "nearest_event_start": "2024-03-04T09:42:00+00:00",
+      "nearest_event_incident": true,
+      "event_found_but_no_incident": false
+    },
+    {
+      "injection": "freeze-00020",
+      "serial": "SIM-ALB-0007",
+      "condition_start": "2024-03-07T09:26:00+00:00",
+      "nearest_event_start": "2024-03-07T09:04:00+00:00",
+      "nearest_event_incident": true,
+      "event_found_but_no_incident": false
+    },
+    {
+      "injection": "freeze-00028",
+      "serial": "SIM-GAB-0004",
+      "condition_start": "2024-03-07T22:32:00+00:00",
+      "nearest_event_start": "2024-03-07T22:20:00+00:00",
+      "nearest_event_incident": true,
+      "event_found_but_no_incident": false
+    },
+    {
+      "injection": "freeze-00044",
+      "serial": "SIM-TUD-0005",
+      "condition_start": "2024-03-10T10:22:00+00:00",
+      "nearest_event_start": "2024-03-10T10:07:00+00:00",
+      "nearest_event_incident": true,
+      "event_found_but_no_incident": false
+    },
+    {
+      "injection": "power_loss-00046",
+      "serial": "SIM-GAY-0009",
+      "condition_start": "2024-03-10T07:02:00+00:00",
+      "nearest_event_start": "2024-03-10T04:02:00+00:00",
+      "nearest_event_incident": true,
+      "event_found_but_no_incident": false
+    }
+  ],
+  "false_alarms": [
+    {
+      "incident": "d4735eca-0a79-4000-b40a-21622908edae",
+      "serial": "SIM-SUM-0004",
+      "type": "freeze",
+      "severity": "critical",
+      "mode": "retrospective"
+    },
+    {
+      "incident": "d608a67a-1e5c-483d-8a09-b081accfdbae",
+      "serial": "SIM-DAL-0024",
+      "type": "heat_excursion",
+      "severity": "critical",
+      "mode": "operational"
+    },
+    {
+      "incident": "7cc1ce42-8e13-4488-a5df-5d5ae2a4f4c8",
+      "serial": "SIM-RAN-M001",
+      "type": "freeze",
+      "severity": "critical",
+      "mode": "retrospective"
+    },
+    {
+      "incident": "26a04922-4d0e-42dc-b4ea-aaabc42bfb09",
+      "serial": "SIM-BEB-0010",
+      "type": "freeze",
+      "severity": "critical",
+      "mode": "operational"
+    },
+    {
+      "incident": "85b548f0-d40c-473f-b656-06f580f3c398",
+      "serial": "SIM-KUM-0008",
+      "type": "freeze",
+      "severity": "critical",
+      "mode": "operational"
+    },
+    {
+      "incident": "4b168227-ded7-46ae-9a93-f900c9663d88",
+      "serial": "SIM-DAL-0024",
+      "type": "heat_excursion",
+      "severity": "critical",
+      "mode": "retrospective"
+    }
+  ],
+  "events_without_incident": 0
+}

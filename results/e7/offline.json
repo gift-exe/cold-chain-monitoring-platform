@@ -1,0 +1,1344 @@
+{
+  "upload_at": "2026-11-05T13:26:00+00:00",
+  "totals": {
+    "readings_lost": 0,
+    "duplicate_readings": 0,
+    "duplicate_incidents": 0,
+    "events": 80,
+    "correctly_classified": 80,
+    "late_flag_errors": 0,
+    "episodes_without_incident": 0,
+    "incidents": 40,
+    "incident_mode_correct": 40,
+    "classification": 1.0,
+    "criteria": {
+      "no loss": true,
+      "no duplicate readings": true,
+      "no duplicate incidents": true,
+      "100% classification": true,
+      "late flags correct": true
+    }
+  },
+  "devices": [
+    {
+      "seed": 101,
+      "gap_h": 1,
+      "sent_unique": 60,
+      "sent_total": 156,
+      "stored": 60,
+      "lost": 0,
+      "duplicates_stored": 0,
+      "late_flagged": 0,
+      "late_expected": 0,
+      "events": [
+        {
+          "name": "ended",
+          "expected": "retrospective",
+          "got": "retrospective",
+          "integrity_events": 1,
+          "incident": "1532476e-a502-434a-9fb9-b8462a1aa900"
+        }
+      ],
+      "incidents": {
+        "1532476e-a502-434a-9fb9-b8462a1aa900": {
+          "mode": "retrospective",
+          "expected": "retrospective"
+        }
+      }
+    },
+    {
+      "seed": 101,
+      "gap_h": 8,
+      "sent_unique": 480,
+      "sent_total": 1248,
+      "stored": 480,
+      "lost": 0,
+      "duplicates_stored": 0,
+      "late_flagged": 0,
+      "late_expected": 0,
+      "events": [
+        {
+          "name": "ended",
+          "expected": "retrospective",
+          "got": "retrospective",
+          "integrity_events": 1,
+          "incident": "259bbed8-d956-4e63-8c69-bbf2d8a89020"
+        },
+        {
+          "name": "ongoing",
+          "expected": "operational",
+          "got": "operational",
+          "integrity_events": 1,
+          "incident": "259bbed8-d956-4e63-8c69-bbf2d8a89020"
+        }
+      ],
+      "incidents": {
+        "259bbed8-d956-4e63-8c69-bbf2d8a89020": {
+          "mode": "operational",
+          "expected": "operational"
+        }
+      }
+    },
+    {
+      "seed": 101,
+      "gap_h": 24,
+      "sent_unique": 1440,
+      "sent_total": 3744,
+      "stored": 1440,
+      "lost": 0,
+      "duplicates_stored": 0,
+      "late_flagged": 0,
+      "late_expected": 0,
+      "events": [
+        {
+          "name": "ended",
+          "expected": "retrospective",
+          "got": "retrospective",
+          "integrity_events": 1,
+          "incident": "defab74e-76bc-4bd6-9399-b849dfadf13f"
+        },
+        {
+          "name": "ongoing",
+          "expected": "operational",
+          "got": "operational",
+          "integrity_events": 1,
+          "incident": "defab74e-76bc-4bd6-9399-b849dfadf13f"
+        }
+      ],
+      "incidents": {
+        "defab74e-76bc-4bd6-9399-b849dfadf13f": {
+          "mode": "operational",
+          "expected": "operational"
+        }
+      }
+    },
+    {
+      "seed": 101,
+      "gap_h": 72,
+      "sent_unique": 4560,
+      "sent_total": 11856,
+      "stored": 4560,
+      "lost": 0,
+      "duplicates_stored": 0,
+      "late_flagged": 241,
+      "late_expected": 241,
+      "events": [
+        {
+          "name": "ended",
+          "expected": "retrospective",
+          "got": "retrospective",
+          "integrity_events": 1,
+          "incident": "90abb0ef-427a-45bc-a2a8-d9e568eac327"
+        },
+        {
+          "name": "ongoing",
+          "expected": "operational",
+          "got": "operational",
+          "integrity_events": 1,
+          "incident": "90abb0ef-427a-45bc-a2a8-d9e568eac327"
+        },
+        {
+          "name": "beyond_72h",
+          "expected": "none",
+          "got": "none",
+          "integrity_events": 0,
+          "incident": null
+        }
+      ],
+      "incidents": {
+        "90abb0ef-427a-45bc-a2a8-d9e568eac327": {
+          "mode": "operational",
+          "expected": "operational"
+        }
+      }
+    },
+    {
+      "seed": 102,
+      "gap_h": 1,
+      "sent_unique": 60,
+      "sent_total": 156,
+      "stored": 60,
+      "lost": 0,
+      "duplicates_stored": 0,
+      "late_flagged": 0,
+      "late_expected": 0,
+      "events": [
+        {
+          "name": "ended",
+          "expected": "retrospective",
+          "got": "retrospective",
+          "integrity_events": 1,
+          "incident": "c8d1eb16-cc64-457e-ab60-d172e6093311"
+        }
+      ],
+      "incidents": {
+        "c8d1eb16-cc64-457e-ab60-d172e6093311": {
+          "mode": "retrospective",
+          "expected": "retrospective"
+        }
+      }
+    },
+    {
+      "seed": 102,
+      "gap_h": 8,
+      "sent_unique": 480,
+      "sent_total": 1248,
+      "stored": 480,
+      "lost": 0,
+      "duplicates_stored": 0,
+      "late_flagged": 0,
+      "late_expected": 0,
+      "events": [
+        {
+          "name": "ended",
+          "expected": "retrospective",
+          "got": "retrospective",
+          "integrity_events": 1,
+          "incident": "edac95b7-da2d-4111-8553-cbc951e06c9a"
+        },
+        {
+          "name": "ongoing",
+          "expected": "operational",
+          "got": "operational",
+          "integrity_events": 1,
+          "incident": "edac95b7-da2d-4111-8553-cbc951e06c9a"
+        }
+      ],
+      "incidents": {
+        "edac95b7-da2d-4111-8553-cbc951e06c9a": {
+          "mode": "operational",
+          "expected": "operational"
+        }
+      }
+    },
+    {
+      "seed": 102,
+      "gap_h": 24,
+      "sent_unique": 1440,
+      "sent_total": 3744,
+      "stored": 1440,
+      "lost": 0,
+      "duplicates_stored": 0,
+      "late_flagged": 0,
+      "late_expected": 0,
+      "events": [
+        {
+          "name": "ended",
+          "expected": "retrospective",
+          "got": "retrospective",
+          "integrity_events": 1,
+          "incident": "b49d6dfd-b06c-4e4c-8261-2f0e9b52dc97"
+        },
+        {
+          "name": "ongoing",
+          "expected": "operational",
+          "got": "operational",
+          "integrity_events": 1,
+          "incident": "b49d6dfd-b06c-4e4c-8261-2f0e9b52dc97"
+        }
+      ],
+      "incidents": {
+        "b49d6dfd-b06c-4e4c-8261-2f0e9b52dc97": {
+          "mode": "operational",
+          "expected": "operational"
+        }
+      }
+    },
+    {
+      "seed": 102,
+      "gap_h": 72,
+      "sent_unique": 4560,
+      "sent_total": 11856,
+      "stored": 4560,
+      "lost": 0,
+      "duplicates_stored": 0,
+      "late_flagged": 241,
+      "late_expected": 241,
+      "events": [
+        {
+          "name": "ended",
+          "expected": "retrospective",
+          "got": "retrospective",
+          "integrity_events": 1,
+          "incident": "a44489ae-7a20-43d9-a8bb-a738127d65d5"
+        },
+        {
+          "name": "ongoing",
+          "expected": "operational",
+          "got": "operational",
+          "integrity_events": 1,
+          "incident": "a44489ae-7a20-43d9-a8bb-a738127d65d5"
+        },
+        {
+          "name": "beyond_72h",
+          "expected": "none",
+          "got": "none",
+          "integrity_events": 0,
+          "incident": null
+        }
+      ],
+      "incidents": {
+        "a44489ae-7a20-43d9-a8bb-a738127d65d5": {
+          "mode": "operational",
+          "expected": "operational"
+        }
+      }
+    },
+    {
+      "seed": 103,
+      "gap_h": 1,
+      "sent_unique": 60,
+      "sent_total": 156,
+      "stored": 60,
+      "lost": 0,
+      "duplicates_stored": 0,
+      "late_flagged": 0,
+      "late_expected": 0,
+      "events": [
+        {
+          "name": "ended",
+          "expected": "retrospective",
+          "got": "retrospective",
+          "integrity_events": 1,
+          "incident": "10dbcb83-6974-4ae6-9951-23ff2f0d32d7"
+        }
+      ],
+      "incidents": {
+        "10dbcb83-6974-4ae6-9951-23ff2f0d32d7": {
+          "mode": "retrospective",
+          "expected": "retrospective"
+        }
+      }
+    },
+    {
+      "seed": 103,
+      "gap_h": 8,
+      "sent_unique": 480,
+      "sent_total": 1248,
+      "stored": 480,
+      "lost": 0,
+      "duplicates_stored": 0,
+      "late_flagged": 0,
+      "late_expected": 0,
+      "events": [
+        {
+          "name": "ended",
+          "expected": "retrospective",
+          "got": "retrospective",
+          "integrity_events": 1,
+          "incident": "aacd36fd-4ce0-4e95-a398-235a12e4b6d3"
+        },
+        {
+          "name": "ongoing",
+          "expected": "operational",
+          "got": "operational",
+          "integrity_events": 1,
+          "incident": "aacd36fd-4ce0-4e95-a398-235a12e4b6d3"
+        }
+      ],
+      "incidents": {
+        "aacd36fd-4ce0-4e95-a398-235a12e4b6d3": {
+          "mode": "operational",
+          "expected": "operational"
+        }
+      }
+    },
+    {
+      "seed": 103,
+      "gap_h": 24,
+      "sent_unique": 1440,
+      "sent_total": 3744,
+      "stored": 1440,
+      "lost": 0,
+      "duplicates_stored": 0,
+      "late_flagged": 0,
+      "late_expected": 0,
+      "events": [
+        {
+          "name": "ended",
+          "expected": "retrospective",
+          "got": "retrospective",
+          "integrity_events": 1,
+          "incident": "45c096e9-7484-42aa-aba3-35ba3ab373b0"
+        },
+        {
+          "name": "ongoing",
+          "expected": "operational",
+          "got": "operational",
+          "integrity_events": 1,
+          "incident": "45c096e9-7484-42aa-aba3-35ba3ab373b0"
+        }
+      ],
+      "incidents": {
+        "45c096e9-7484-42aa-aba3-35ba3ab373b0": {
+          "mode": "operational",
+          "expected": "operational"
+        }
+      }
+    },
+    {
+      "seed": 103,
+      "gap_h": 72,
+      "sent_unique": 4560,
+      "sent_total": 11856,
+      "stored": 4560,
+      "lost": 0,
+      "duplicates_stored": 0,
+      "late_flagged": 241,
+      "late_expected": 241,
+      "events": [
+        {
+          "name": "ended",
+          "expected": "retrospective",
+          "got": "retrospective",
+          "integrity_events": 1,
+          "incident": "5d5d6ca2-8ed9-4030-af2f-dec4aeebe919"
+        },
+        {
+          "name": "ongoing",
+          "expected": "operational",
+          "got": "operational",
+          "integrity_events": 1,
+          "incident": "5d5d6ca2-8ed9-4030-af2f-dec4aeebe919"
+        },
+        {
+          "name": "beyond_72h",
+          "expected": "none",
+          "got": "none",
+          "integrity_events": 0,
+          "incident": null
+        }
+      ],
+      "incidents": {
+        "5d5d6ca2-8ed9-4030-af2f-dec4aeebe919": {
+          "mode": "operational",
+          "expected": "operational"
+        }
+      }
+    },
+    {
+      "seed": 104,
+      "gap_h": 1,
+      "sent_unique": 60,
+      "sent_total": 156,
+      "stored": 60,
+      "lost": 0,
+      "duplicates_stored": 0,
+      "late_flagged": 0,
+      "late_expected": 0,
+      "events": [
+        {
+          "name": "ended",
+          "expected": "retrospective",
+          "got": "retrospective",
+          "integrity_events": 1,
+          "incident": "b784a8fd-4c0f-4df1-8135-018d1c6d51d6"
+        }
+      ],
+      "incidents": {
+        "b784a8fd-4c0f-4df1-8135-018d1c6d51d6": {
+          "mode": "retrospective",
+          "expected": "retrospective"
+        }
+      }
+    },
+    {
+      "seed": 104,
+      "gap_h": 8,
+      "sent_unique": 480,
+      "sent_total": 1248,
+      "stored": 480,
+      "lost": 0,
+      "duplicates_stored": 0,
+      "late_flagged": 0,
+      "late_expected": 0,
+      "events": [
+        {
+          "name": "ended",
+          "expected": "retrospective",
+          "got": "retrospective",
+          "integrity_events": 1,
+          "incident": "9b51d3a3-768f-469d-8bdd-797eef1bf765"
+        },
+        {
+          "name": "ongoing",
+          "expected": "operational",
+          "got": "operational",
+          "integrity_events": 1,
+          "incident": "9b51d3a3-768f-469d-8bdd-797eef1bf765"
+        }
+      ],
+      "incidents": {
+        "9b51d3a3-768f-469d-8bdd-797eef1bf765": {
+          "mode": "operational",
+          "expected": "operational"
+        }
+      }
+    },
+    {
+      "seed": 104,
+      "gap_h": 24,
+      "sent_unique": 1440,
+      "sent_total": 3744,
+      "stored": 1440,
+      "lost": 0,
+      "duplicates_stored": 0,
+      "late_flagged": 0,
+      "late_expected": 0,
+      "events": [
+        {
+          "name": "ended",
+          "expected": "retrospective",
+          "got": "retrospective",
+          "integrity_events": 1,
+          "incident": "dc3c7153-9448-423e-b444-a47089464b29"
+        },
+        {
+          "name": "ongoing",
+          "expected": "operational",
+          "got": "operational",
+          "integrity_events": 1,
+          "incident": "dc3c7153-9448-423e-b444-a47089464b29"
+        }
+      ],
+      "incidents": {
+        "dc3c7153-9448-423e-b444-a47089464b29": {
+          "mode": "operational",
+          "expected": "operational"
+        }
+      }
+    },
+    {
+      "seed": 104,
+      "gap_h": 72,
+      "sent_unique": 4560,
+      "sent_total": 11856,
+      "stored": 4560,
+      "lost": 0,
+      "duplicates_stored": 0,
+      "late_flagged": 241,
+      "late_expected": 241,
+      "events": [
+        {
+          "name": "ended",
+          "expected": "retrospective",
+          "got": "retrospective",
+          "integrity_events": 1,
+          "incident": "ed42fb2d-f05a-4868-ad70-00229b8402ca"
+        },
+        {
+          "name": "ongoing",
+          "expected": "operational",
+          "got": "operational",
+          "integrity_events": 1,
+          "incident": "ed42fb2d-f05a-4868-ad70-00229b8402ca"
+        },
+        {
+          "name": "beyond_72h",
+          "expected": "none",
+          "got": "none",
+          "integrity_events": 0,
+          "incident": null
+        }
+      ],
+      "incidents": {
+        "ed42fb2d-f05a-4868-ad70-00229b8402ca": {
+          "mode": "operational",
+          "expected": "operational"
+        }
+      }
+    },
+    {
+      "seed": 105,
+      "gap_h": 1,
+      "sent_unique": 60,
+      "sent_total": 156,
+      "stored": 60,
+      "lost": 0,
+      "duplicates_stored": 0,
+      "late_flagged": 0,
+      "late_expected": 0,
+      "events": [
+        {
+          "name": "ended",
+          "expected": "retrospective",
+          "got": "retrospective",
+          "integrity_events": 1,
+          "incident": "a6668e84-e66a-4c9f-8a93-7bf298dec127"
+        }
+      ],
+      "incidents": {
+        "a6668e84-e66a-4c9f-8a93-7bf298dec127": {
+          "mode": "retrospective",
+          "expected": "retrospective"
+        }
+      }
+    },
+    {
+      "seed": 105,
+      "gap_h": 8,
+      "sent_unique": 480,
+      "sent_total": 1248,
+      "stored": 480,
+      "lost": 0,
+      "duplicates_stored": 0,
+      "late_flagged": 0,
+      "late_expected": 0,
+      "events": [
+        {
+          "name": "ended",
+          "expected": "retrospective",
+          "got": "retrospective",
+          "integrity_events": 1,
+          "incident": "e090dad4-d9a5-4ce3-9e80-0401220d1633"
+        },
+        {
+          "name": "ongoing",
+          "expected": "operational",
+          "got": "operational",
+          "integrity_events": 1,
+          "incident": "e090dad4-d9a5-4ce3-9e80-0401220d1633"
+        }
+      ],
+      "incidents": {
+        "e090dad4-d9a5-4ce3-9e80-0401220d1633": {
+          "mode": "operational",
+          "expected": "operational"
+        }
+      }
+    },
+    {
+      "seed": 105,
+      "gap_h": 24,
+      "sent_unique": 1440,
+      "sent_total": 3744,
+      "stored": 1440,
+      "lost": 0,
+      "duplicates_stored": 0,
+      "late_flagged": 0,
+      "late_expected": 0,
+      "events": [
+        {
+          "name": "ended",
+          "expected": "retrospective",
+          "got": "retrospective",
+          "integrity_events": 1,
+          "incident": "465ce4a5-127e-490d-806f-46a04a1bc321"
+        },
+        {
+          "name": "ongoing",
+          "expected": "operational",
+          "got": "operational",
+          "integrity_events": 1,
+          "incident": "465ce4a5-127e-490d-806f-46a04a1bc321"
+        }
+      ],
+      "incidents": {
+        "465ce4a5-127e-490d-806f-46a04a1bc321": {
+          "mode": "operational",
+          "expected": "operational"
+        }
+      }
+    },
+    {
+      "seed": 105,
+      "gap_h": 72,
+      "sent_unique": 4560,
+      "sent_total": 11856,
+      "stored": 4560,
+      "lost": 0,
+      "duplicates_stored": 0,
+      "late_flagged": 241,
+      "late_expected": 241,
+      "events": [
+        {
+          "name": "ended",
+          "expected": "retrospective",
+          "got": "retrospective",
+          "integrity_events": 1,
+          "incident": "261f2344-4dfd-4908-b210-2eebf0338ab4"
+        },
+        {
+          "name": "ongoing",
+          "expected": "operational",
+          "got": "operational",
+          "integrity_events": 1,
+          "incident": "261f2344-4dfd-4908-b210-2eebf0338ab4"
+        },
+        {
+          "name": "beyond_72h",
+          "expected": "none",
+          "got": "none",
+          "integrity_events": 0,
+          "incident": null
+        }
+      ],
+      "incidents": {
+        "261f2344-4dfd-4908-b210-2eebf0338ab4": {
+          "mode": "operational",
+          "expected": "operational"
+        }
+      }
+    },
+    {
+      "seed": 106,
+      "gap_h": 1,
+      "sent_unique": 60,
+      "sent_total": 156,
+      "stored": 60,
+      "lost": 0,
+      "duplicates_stored": 0,
+      "late_flagged": 0,
+      "late_expected": 0,
+      "events": [
+        {
+          "name": "ended",
+          "expected": "retrospective",
+          "got": "retrospective",
+          "integrity_events": 1,
+          "incident": "780a0b03-e902-4cb5-8c16-1d8cd760c8a9"
+        }
+      ],
+      "incidents": {
+        "780a0b03-e902-4cb5-8c16-1d8cd760c8a9": {
+          "mode": "retrospective",
+          "expected": "retrospective"
+        }
+      }
+    },
+    {
+      "seed": 106,
+      "gap_h": 8,
+      "sent_unique": 480,
+      "sent_total": 1248,
+      "stored": 480,
+      "lost": 0,
+      "duplicates_stored": 0,
+      "late_flagged": 0,
+      "late_expected": 0,
+      "events": [
+        {
+          "name": "ended",
+          "expected": "retrospective",
+          "got": "retrospective",
+          "integrity_events": 1,
+          "incident": "bf5428e4-976c-496a-ab99-bff8741c1b08"
+        },
+        {
+          "name": "ongoing",
+          "expected": "operational",
+          "got": "operational",
+          "integrity_events": 1,
+          "incident": "bf5428e4-976c-496a-ab99-bff8741c1b08"
+        }
+      ],
+      "incidents": {
+        "bf5428e4-976c-496a-ab99-bff8741c1b08": {
+          "mode": "operational",
+          "expected": "operational"
+        }
+      }
+    },
+    {
+      "seed": 106,
+      "gap_h": 24,
+      "sent_unique": 1440,
+      "sent_total": 3744,
+      "stored": 1440,
+      "lost": 0,
+      "duplicates_stored": 0,
+      "late_flagged": 0,
+      "late_expected": 0,
+      "events": [
+        {
+          "name": "ended",
+          "expected": "retrospective",
+          "got": "retrospective",
+          "integrity_events": 1,
+          "incident": "b748967e-6883-4e67-9ed9-49c24aaa3680"
+        },
+        {
+          "name": "ongoing",
+          "expected": "operational",
+          "got": "operational",
+          "integrity_events": 1,
+          "incident": "b748967e-6883-4e67-9ed9-49c24aaa3680"
+        }
+      ],
+      "incidents": {
+        "b748967e-6883-4e67-9ed9-49c24aaa3680": {
+          "mode": "operational",
+          "expected": "operational"
+        }
+      }
+    },
+    {
+      "seed": 106,
+      "gap_h": 72,
+      "sent_unique": 4560,
+      "sent_total": 11856,
+      "stored": 4560,
+      "lost": 0,
+      "duplicates_stored": 0,
+      "late_flagged": 241,
+      "late_expected": 241,
+      "events": [
+        {
+          "name": "ended",
+          "expected": "retrospective",
+          "got": "retrospective",
+          "integrity_events": 1,
+          "incident": "12bfcccd-18d6-4c8c-8e98-13c46a211614"
+        },
+        {
+          "name": "ongoing",
+          "expected": "operational",
+          "got": "operational",
+          "integrity_events": 1,
+          "incident": "12bfcccd-18d6-4c8c-8e98-13c46a211614"
+        },
+        {
+          "name": "beyond_72h",
+          "expected": "none",
+          "got": "none",
+          "integrity_events": 0,
+          "incident": null
+        }
+      ],
+      "incidents": {
+        "12bfcccd-18d6-4c8c-8e98-13c46a211614": {
+          "mode": "operational",
+          "expected": "operational"
+        }
+      }
+    },
+    {
+      "seed": 107,
+      "gap_h": 1,
+      "sent_unique": 60,
+      "sent_total": 156,
+      "stored": 60,
+      "lost": 0,
+      "duplicates_stored": 0,
+      "late_flagged": 0,
+      "late_expected": 0,
+      "events": [
+        {
+          "name": "ended",
+          "expected": "retrospective",
+          "got": "retrospective",
+          "integrity_events": 1,
+          "incident": "d9dd0d8e-2b69-406c-ac86-d6e71c36bf86"
+        }
+      ],
+      "incidents": {
+        "d9dd0d8e-2b69-406c-ac86-d6e71c36bf86": {
+          "mode": "retrospective",
+          "expected": "retrospective"
+        }
+      }
+    },
+    {
+      "seed": 107,
+      "gap_h": 8,
+      "sent_unique": 480,
+      "sent_total": 1248,
+      "stored": 480,
+      "lost": 0,
+      "duplicates_stored": 0,
+      "late_flagged": 0,
+      "late_expected": 0,
+      "events": [
+        {
+          "name": "ended",
+          "expected": "retrospective",
+          "got": "retrospective",
+          "integrity_events": 1,
+          "incident": "491c416d-6f67-4d85-85d4-c0727eb802d9"
+        },
+        {
+          "name": "ongoing",
+          "expected": "operational",
+          "got": "operational",
+          "integrity_events": 1,
+          "incident": "491c416d-6f67-4d85-85d4-c0727eb802d9"
+        }
+      ],
+      "incidents": {
+        "491c416d-6f67-4d85-85d4-c0727eb802d9": {
+          "mode": "operational",
+          "expected": "operational"
+        }
+      }
+    },
+    {
+      "seed": 107,
+      "gap_h": 24,
+      "sent_unique": 1440,
+      "sent_total": 3744,
+      "stored": 1440,
+      "lost": 0,
+      "duplicates_stored": 0,
+      "late_flagged": 0,
+      "late_expected": 0,
+      "events": [
+        {
+          "name": "ended",
+          "expected": "retrospective",
+          "got": "retrospective",
+          "integrity_events": 1,
+          "incident": "96eff3eb-a852-4bda-8e9a-0d608e32c4c4"
+        },
+        {
+          "name": "ongoing",
+          "expected": "operational",
+          "got": "operational",
+          "integrity_events": 1,
+          "incident": "96eff3eb-a852-4bda-8e9a-0d608e32c4c4"
+        }
+      ],
+      "incidents": {
+        "96eff3eb-a852-4bda-8e9a-0d608e32c4c4": {
+          "mode": "operational",
+          "expected": "operational"
+        }
+      }
+    },
+    {
+      "seed": 107,
+      "gap_h": 72,
+      "sent_unique": 4560,
+      "sent_total": 11856,
+      "stored": 4560,
+      "lost": 0,
+      "duplicates_stored": 0,
+      "late_flagged": 241,
+      "late_expected": 241,
+      "events": [
+        {
+          "name": "ended",
+          "expected": "retrospective",
+          "got": "retrospective",
+          "integrity_events": 1,
+          "incident": "a5e54ba0-95ba-40b9-ba75-f2e4a2468c11"
+        },
+        {
+          "name": "ongoing",
+          "expected": "operational",
+          "got": "operational",
+          "integrity_events": 1,
+          "incident": "a5e54ba0-95ba-40b9-ba75-f2e4a2468c11"
+        },
+        {
+          "name": "beyond_72h",
+          "expected": "none",
+          "got": "none",
+          "integrity_events": 0,
+          "incident": null
+        }
+      ],
+      "incidents": {
+        "a5e54ba0-95ba-40b9-ba75-f2e4a2468c11": {
+          "mode": "operational",
+          "expected": "operational"
+        }
+      }
+    },
+    {
+      "seed": 108,
+      "gap_h": 1,
+      "sent_unique": 60,
+      "sent_total": 156,
+      "stored": 60,
+      "lost": 0,
+      "duplicates_stored": 0,
+      "late_flagged": 0,
+      "late_expected": 0,
+      "events": [
+        {
+          "name": "ended",
+          "expected": "retrospective",
+          "got": "retrospective",
+          "integrity_events": 1,
+          "incident": "44ce3cae-b82a-446b-b5ea-51fda0984faa"
+        }
+      ],
+      "incidents": {
+        "44ce3cae-b82a-446b-b5ea-51fda0984faa": {
+          "mode": "retrospective",
+          "expected": "retrospective"
+        }
+      }
+    },
+    {
+      "seed": 108,
+      "gap_h": 8,
+      "sent_unique": 480,
+      "sent_total": 1248,
+      "stored": 480,
+      "lost": 0,
+      "duplicates_stored": 0,
+      "late_flagged": 0,
+      "late_expected": 0,
+      "events": [
+        {
+          "name": "ended",
+          "expected": "retrospective",
+          "got": "retrospective",
+          "integrity_events": 1,
+          "incident": "07d1eebe-b5e7-416b-b88a-a93f2075d3f9"
+        },
+        {
+          "name": "ongoing",
+          "expected": "operational",
+          "got": "operational",
+          "integrity_events": 1,
+          "incident": "07d1eebe-b5e7-416b-b88a-a93f2075d3f9"
+        }
+      ],
+      "incidents": {
+        "07d1eebe-b5e7-416b-b88a-a93f2075d3f9": {
+          "mode": "operational",
+          "expected": "operational"
+        }
+      }
+    },
+    {
+      "seed": 108,
+      "gap_h": 24,
+      "sent_unique": 1440,
+      "sent_total": 3744,
+      "stored": 1440,
+      "lost": 0,
+      "duplicates_stored": 0,
+      "late_flagged": 0,
+      "late_expected": 0,
+      "events": [
+        {
+          "name": "ended",
+          "expected": "retrospective",
+          "got": "retrospective",
+          "integrity_events": 1,
+          "incident": "41022df3-2990-4102-86dd-fbeb212a79a1"
+        },
+        {
+          "name": "ongoing",
+          "expected": "operational",
+          "got": "operational",
+          "integrity_events": 1,
+          "incident": "41022df3-2990-4102-86dd-fbeb212a79a1"
+        }
+      ],
+      "incidents": {
+        "41022df3-2990-4102-86dd-fbeb212a79a1": {
+          "mode": "operational",
+          "expected": "operational"
+        }
+      }
+    },
+    {
+      "seed": 108,
+      "gap_h": 72,
+      "sent_unique": 4560,
+      "sent_total": 11856,
+      "stored": 4560,
+      "lost": 0,
+      "duplicates_stored": 0,
+      "late_flagged": 241,
+      "late_expected": 241,
+      "events": [
+        {
+          "name": "ended",
+          "expected": "retrospective",
+          "got": "retrospective",
+          "integrity_events": 1,
+          "incident": "7aedc969-fa8a-4412-8b51-910375d180d9"
+        },
+        {
+          "name": "ongoing",
+          "expected": "operational",
+          "got": "operational",
+          "integrity_events": 1,
+          "incident": "7aedc969-fa8a-4412-8b51-910375d180d9"
+        },
+        {
+          "name": "beyond_72h",
+          "expected": "none",
+          "got": "none",
+          "integrity_events": 0,
+          "incident": null
+        }
+      ],
+      "incidents": {
+        "7aedc969-fa8a-4412-8b51-910375d180d9": {
+          "mode": "operational",
+          "expected": "operational"
+        }
+      }
+    },
+    {
+      "seed": 109,
+      "gap_h": 1,
+      "sent_unique": 60,
+      "sent_total": 156,
+      "stored": 60,
+      "lost": 0,
+      "duplicates_stored": 0,
+      "late_flagged": 0,
+      "late_expected": 0,
+      "events": [
+        {
+          "name": "ended",
+          "expected": "retrospective",
+          "got": "retrospective",
+          "integrity_events": 1,
+          "incident": "2e26dc0f-9a4c-4e5b-a432-5b31223f039b"
+        }
+      ],
+      "incidents": {
+        "2e26dc0f-9a4c-4e5b-a432-5b31223f039b": {
+          "mode": "retrospective",
+          "expected": "retrospective"
+        }
+      }
+    },
+    {
+      "seed": 109,
+      "gap_h": 8,
+      "sent_unique": 480,
+      "sent_total": 1248,
+      "stored": 480,
+      "lost": 0,
+      "duplicates_stored": 0,
+      "late_flagged": 0,
+      "late_expected": 0,
+      "events": [
+        {
+          "name": "ended",
+          "expected": "retrospective",
+          "got": "retrospective",
+          "integrity_events": 1,
+          "incident": "00560d96-fa7f-4b73-b299-a9dc0aa9b131"
+        },
+        {
+          "name": "ongoing",
+          "expected": "operational",
+          "got": "operational",
+          "integrity_events": 1,
+          "incident": "00560d96-fa7f-4b73-b299-a9dc0aa9b131"
+        }
+      ],
+      "incidents": {
+        "00560d96-fa7f-4b73-b299-a9dc0aa9b131": {
+          "mode": "operational",
+          "expected": "operational"
+        }
+      }
+    },
+    {
+      "seed": 109,
+      "gap_h": 24,
+      "sent_unique": 1440,
+      "sent_total": 3744,
+      "stored": 1440,
+      "lost": 0,
+      "duplicates_stored": 0,
+      "late_flagged": 0,
+      "late_expected": 0,
+      "events": [
+        {
+          "name": "ended",
+          "expected": "retrospective",
+          "got": "retrospective",
+          "integrity_events": 1,
+          "incident": "daa3bf5a-6c25-449e-984d-99618ddc272b"
+        },
+        {
+          "name": "ongoing",
+          "expected": "operational",
+          "got": "operational",
+          "integrity_events": 1,
+          "incident": "daa3bf5a-6c25-449e-984d-99618ddc272b"
+        }
+      ],
+      "incidents": {
+        "daa3bf5a-6c25-449e-984d-99618ddc272b": {
+          "mode": "operational",
+          "expected": "operational"
+        }
+      }
+    },
+    {
+      "seed": 109,
+      "gap_h": 72,
+      "sent_unique": 4560,
+      "sent_total": 11856,
+      "stored": 4560,
+      "lost": 0,
+      "duplicates_stored": 0,
+      "late_flagged": 241,
+      "late_expected": 241,
+      "events": [
+        {
+          "name": "ended",
+          "expected": "retrospective",
+          "got": "retrospective",
+          "integrity_events": 1,
+          "incident": "ee3ee53e-149b-4d4f-84b9-43c85b5aaca7"
+        },
+        {
+          "name": "ongoing",
+          "expected": "operational",
+          "got": "operational",
+          "integrity_events": 1,
+          "incident": "ee3ee53e-149b-4d4f-84b9-43c85b5aaca7"
+        },
+        {
+          "name": "beyond_72h",
+          "expected": "none",
+          "got": "none",
+          "integrity_events": 0,
+          "incident": null
+        }
+      ],
+      "incidents": {
+        "ee3ee53e-149b-4d4f-84b9-43c85b5aaca7": {
+          "mode": "operational",
+          "expected": "operational"
+        }
+      }
+    },
+    {
+      "seed": 110,
+      "gap_h": 1,
+      "sent_unique": 60,
+      "sent_total": 156,
+      "stored": 60,
+      "lost": 0,
+      "duplicates_stored": 0,
+      "late_flagged": 0,
+      "late_expected": 0,
+      "events": [
+        {
+          "name": "ended",
+          "expected": "retrospective",
+          "got": "retrospective",
+          "integrity_events": 1,
+          "incident": "297c1ee6-f9d3-4c7a-91b3-94674c04e408"
+        }
+      ],
+      "incidents": {
+        "297c1ee6-f9d3-4c7a-91b3-94674c04e408": {
+          "mode": "retrospective",
+          "expected": "retrospective"
+        }
+      }
+    },
+    {
+      "seed": 110,
+      "gap_h": 8,
+      "sent_unique": 480,
+      "sent_total": 1248,
+      "stored": 480,
+      "lost": 0,
+      "duplicates_stored": 0,
+      "late_flagged": 0,
+      "late_expected": 0,
+      "events": [
+        {
+          "name": "ended",
+          "expected": "retrospective",
+          "got": "retrospective",
+          "integrity_events": 1,
+          "incident": "8bd49051-ef35-456e-bd2e-8fd3a3e318e1"
+        },
+        {
+          "name": "ongoing",
+          "expected": "operational",
+          "got": "operational",
+          "integrity_events": 1,
+          "incident": "8bd49051-ef35-456e-bd2e-8fd3a3e318e1"
+        }
+      ],
+      "incidents": {
+        "8bd49051-ef35-456e-bd2e-8fd3a3e318e1": {
+          "mode": "operational",
+          "expected": "operational"
+        }
+      }
+    },
+    {
+      "seed": 110,
+      "gap_h": 24,
+      "sent_unique": 1440,
+      "sent_total": 3744,
+      "stored": 1440,
+      "lost": 0,
+      "duplicates_stored": 0,
+      "late_flagged": 0,
+      "late_expected": 0,
+      "events": [
+        {
+          "name": "ended",
+          "expected": "retrospective",
+          "got": "retrospective",
+          "integrity_events": 1,
+          "incident": "bc4c8334-656b-445a-995c-2c2659ee812d"
+        },
+        {
+          "name": "ongoing",
+          "expected": "operational",
+          "got": "operational",
+          "integrity_events": 1,
+          "incident": "bc4c8334-656b-445a-995c-2c2659ee812d"
+        }
+      ],
+      "incidents": {
+        "bc4c8334-656b-445a-995c-2c2659ee812d": {
+          "mode": "operational",
+          "expected": "operational"
+        }
+      }
+    },
+    {
+      "seed": 110,
+      "gap_h": 72,
+      "sent_unique": 4560,
+      "sent_total": 11856,
+      "stored": 4560,
+      "lost": 0,
+      "duplicates_stored": 0,
+      "late_flagged": 241,
+      "late_expected": 241,
+      "events": [
+        {
+          "name": "ended",
+          "expected": "retrospective",
+          "got": "retrospective",
+          "integrity_events": 1,
+          "incident": "674acf3f-bd67-4a9a-854b-d0895c5a8824"
+        },
+        {
+          "name": "ongoing",
+          "expected": "operational",
+          "got": "operational",
+          "integrity_events": 1,
+          "incident": "674acf3f-bd67-4a9a-854b-d0895c5a8824"
+        },
+        {
+          "name": "beyond_72h",
+          "expected": "none",
+          "got": "none",
+          "integrity_events": 0,
+          "incident": null
+        }
+      ],
+      "incidents": {
+        "674acf3f-bd67-4a9a-854b-d0895c5a8824": {
+          "mode": "operational",
+          "expected": "operational"
+        }
+      }
+    }
+  ]
+}

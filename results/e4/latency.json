@@ -1,0 +1,1113 @@
+{
+  "began": "2026-11-07T06:14:00+00:00",
+  "duration_min": 49,
+  "loggers": 100,
+  "scripted_incidents_expected": 100,
+  "missing_dispatch": [
+    {
+      "incident": "6a1c91ec-80d8-4b34-b290-41c5d037e6a1",
+      "group": "background",
+      "type": "power_loss",
+      "status": null
+    }
+  ],
+  "sms_bodies_checked": 118,
+  "sms_bodies_over_limit": [],
+  "longest_sms": 159,
+  "scripted": {
+    "receipt_to_dispatch": {
+      "n": 100,
+      "median": 1.189,
+      "p95": 1.571,
+      "max": 1.657,
+      "min": 0.538
+    },
+    "receipt_to_detection": {
+      "n": 100,
+      "median": 0.236,
+      "p95": 0.359,
+      "max": 0.471,
+      "min": 0.075
+    },
+    "detection_to_incident": {
+      "n": 100,
+      "median": 0.275,
+      "p95": 0.474,
+      "max": 0.5,
+      "min": 0.013
+    },
+    "incident_to_dispatch": {
+      "n": 100,
+      "median": 0.708,
+      "p95": 1.08,
+      "max": 1.113,
+      "min": 0.143
+    },
+    "dispatch_to_delivery": {
+      "n": 100,
+      "median": 0.242,
+      "p95": 0.257,
+      "max": 0.267,
+      "min": 0.217
+    },
+    "event_to_receipt": {
+      "n": 100,
+      "median": 0.226,
+      "p95": 0.287,
+      "max": 0.29,
+      "min": 0.212
+    },
+    "by_type": {
+      "freeze": {
+        "n": 50,
+        "median": 1.299,
+        "p95": 1.571,
+        "max": 1.657,
+        "min": 0.538
+      },
+      "heat_excursion": {
+        "n": 50,
+        "median": 1.171,
+        "p95": 1.57,
+        "max": 1.574,
+        "min": 0.54
+      }
+    }
+  },
+  "scripted_rows": [
+    {
+      "incident": "8854edc6-f1bf-4799-9a71-e0a1ef7e2bf8",
+      "type": "heat_excursion",
+      "receipt_to_dispatch": 1.558329,
+      "receipt_to_detection": 0.284175,
+      "detection_to_incident": 0.41025,
+      "incident_to_dispatch": 0.863904,
+      "dispatch_to_delivery": 0.251278,
+      "event_to_receipt": 0.282349
+    },
+    {
+      "incident": "c24e1c36-3ee3-4cfe-8a8c-fca30ac44fa2",
+      "type": "heat_excursion",
+      "receipt_to_dispatch": 0.701042,
+      "receipt_to_detection": 0.205439,
+      "detection_to_incident": 0.340809,
+      "incident_to_dispatch": 0.154794,
+      "dispatch_to_delivery": 0.247736,
+      "event_to_receipt": 0.279102
+    },
+    {
+      "incident": "b04eb766-ae1a-4d1d-a1dd-16497d660f61",
+      "type": "freeze",
+      "receipt_to_dispatch": 1.552918,
+      "receipt_to_detection": 0.237991,
+      "detection_to_incident": 0.445598,
+      "incident_to_dispatch": 0.869329,
+      "dispatch_to_delivery": 0.251493,
+      "event_to_receipt": 0.28776
+    },
+    {
+      "incident": "df87eb36-0b3e-4ff4-a622-061a9fb49ab4",
+      "type": "heat_excursion",
+      "receipt_to_dispatch": 0.69323,
+      "receipt_to_detection": 0.211292,
+      "detection_to_incident": 0.338744,
+      "incident_to_dispatch": 0.143194,
+      "dispatch_to_delivery": 0.247986,
+      "event_to_receipt": 0.286914
+    },
+    {
+      "incident": "952c580e-a8d4-4c5e-bee3-c42e453be32f",
+      "type": "heat_excursion",
+      "receipt_to_dispatch": 1.199644,
+      "receipt_to_detection": 0.226849,
+      "detection_to_incident": 0.328713,
+      "incident_to_dispatch": 0.644082,
+      "dispatch_to_delivery": 0.228903,
+      "event_to_receipt": 0.28658
+    },
+    {
+      "incident": "e7452632-6509-43b2-8f4b-b01c24971fd8",
+      "type": "freeze",
+      "receipt_to_dispatch": 1.198307,
+      "receipt_to_detection": 0.254914,
+      "detection_to_incident": 0.301944,
+      "incident_to_dispatch": 0.641449,
+      "dispatch_to_delivery": 0.229047,
+      "event_to_receipt": 0.287917
+    },
+    {
+      "incident": "27a4604b-e1b8-42c0-ba63-3e4229a45b9f",
+      "type": "heat_excursion",
+      "receipt_to_dispatch": 1.19915,
+      "receipt_to_detection": 0.266092,
+      "detection_to_incident": 0.293859,
+      "incident_to_dispatch": 0.639199,
+      "dispatch_to_delivery": 0.228582,
+      "event_to_receipt": 0.287074
+    },
+    {
+      "incident": "f09d6ef7-08c8-4639-925a-27de0fc162cb",
+      "type": "freeze",
+      "receipt_to_dispatch": 1.557259,
+      "receipt_to_detection": 0.234194,
+      "detection_to_incident": 0.449165,
+      "incident_to_dispatch": 0.8739,
+      "dispatch_to_delivery": 0.252736,
+      "event_to_receipt": 0.283419
+    },
+    {
+      "incident": "3b80ce91-8de3-427b-a11e-6a055b2318fb",
+      "type": "heat_excursion",
+      "receipt_to_dispatch": 1.558593,
+      "receipt_to_detection": 0.271707,
+      "detection_to_incident": 0.420205,
+      "incident_to_dispatch": 0.866681,
+      "dispatch_to_delivery": 0.251093,
+      "event_to_receipt": 0.282085
+    },
+    {
+      "incident": "db6bbf94-c722-42aa-bdd0-a5133f733db1",
+      "type": "heat_excursion",
+      "receipt_to_dispatch": 1.557002,
+      "receipt_to_detection": 0.301003,
+      "detection_to_incident": 0.394525,
+      "incident_to_dispatch": 0.861474,
+      "dispatch_to_delivery": 0.252866,
+      "event_to_receipt": 0.283676
+    },
+    {
+      "incident": "e83582fa-27a4-4824-9a9e-de7dedba595c",
+      "type": "heat_excursion",
+      "receipt_to_dispatch": 1.333712,
+      "receipt_to_detection": 0.190075,
+      "detection_to_incident": 0.434354,
+      "incident_to_dispatch": 0.709283,
+      "dispatch_to_delivery": 0.26735,
+      "event_to_receipt": 0.285566
+    },
+    {
+      "incident": "6b7b1784-dbde-42fa-b9c0-1ab080bea28f",
+      "type": "freeze",
+      "receipt_to_dispatch": 1.550334,
+      "receipt_to_detection": 0.300451,
+      "detection_to_incident": 0.392998,
+      "incident_to_dispatch": 0.856885,
+      "dispatch_to_delivery": 0.252417,
+      "event_to_receipt": 0.290344
+    },
+    {
+      "incident": "cc94c6b8-9e3a-44aa-91f6-e7473f601807",
+      "type": "freeze",
+      "receipt_to_dispatch": 1.333321,
+      "receipt_to_detection": 0.131775,
+      "detection_to_incident": 0.473253,
+      "incident_to_dispatch": 0.728293,
+      "dispatch_to_delivery": 0.267436,
+      "event_to_receipt": 0.285957
+    },
+    {
+      "incident": "7906cf6e-98a3-430b-b382-470cce9db09e",
+      "type": "freeze",
+      "receipt_to_dispatch": 1.337353,
+      "receipt_to_detection": 0.170099,
+      "detection_to_incident": 0.450184,
+      "incident_to_dispatch": 0.71707,
+      "dispatch_to_delivery": 0.267266,
+      "event_to_receipt": 0.281925
+    },
+    {
+      "incident": "a508b97c-86bc-46f4-940f-a3e40d06a2bb",
+      "type": "heat_excursion",
+      "receipt_to_dispatch": 0.540767,
+      "receipt_to_detection": 0.230743,
+      "detection_to_incident": 0.070442,
+      "incident_to_dispatch": 0.239582,
+      "dispatch_to_delivery": 0.23776,
+      "event_to_receipt": 0.27974
+    },
+    {
+      "incident": "17ae48d2-1a7c-4e00-bbb1-89a7bf23325a",
+      "type": "freeze",
+      "receipt_to_dispatch": 1.053769,
+      "receipt_to_detection": 0.229295,
+      "detection_to_incident": 0.253527,
+      "incident_to_dispatch": 0.570947,
+      "dispatch_to_delivery": 0.223637,
+      "event_to_receipt": 0.278653
+    },
+    {
+      "incident": "e1cfcbf2-b78d-47e8-8a08-59f737d02d57",
+      "type": "freeze",
+      "receipt_to_dispatch": 1.053685,
+      "receipt_to_detection": 0.232211,
+      "detection_to_incident": 0.25534,
+      "incident_to_dispatch": 0.566134,
+      "dispatch_to_delivery": 0.223214,
+      "event_to_receipt": 0.278737
+    },
+    {
+      "incident": "c0baa533-6573-4983-bcbc-e7054422d101",
+      "type": "freeze",
+      "receipt_to_dispatch": 1.572805,
+      "receipt_to_detection": 0.234319,
+      "detection_to_incident": 0.256276,
+      "incident_to_dispatch": 1.08221,
+      "dispatch_to_delivery": 0.237754,
+      "event_to_receipt": 0.279008
+    },
+    {
+      "incident": "8ebd1881-3b2e-439f-8738-827353dabe18",
+      "type": "freeze",
+      "receipt_to_dispatch": 1.571019,
+      "receipt_to_detection": 0.23583,
+      "detection_to_incident": 0.255641,
+      "incident_to_dispatch": 1.079548,
+      "dispatch_to_delivery": 0.236111,
+      "event_to_receipt": 0.280794
+    },
+    {
+      "incident": "000b8292-6b8c-46e6-82ed-3899f48e03b5",
+      "type": "heat_excursion",
+      "receipt_to_dispatch": 1.573688,
+      "receipt_to_detection": 0.24699,
+      "detection_to_incident": 0.24985,
+      "incident_to_dispatch": 1.076848,
+      "dispatch_to_delivery": 0.237866,
+      "event_to_receipt": 0.278125
+    },
+    {
+      "incident": "655912b9-148b-4752-8611-825836db2a47",
+      "type": "freeze",
+      "receipt_to_dispatch": 1.568552,
+      "receipt_to_detection": 0.249193,
+      "detection_to_incident": 0.244673,
+      "incident_to_dispatch": 1.074686,
+      "dispatch_to_delivery": 0.236444,
+      "event_to_receipt": 0.283261
+    },
+    {
+      "incident": "d9e37a84-21c5-42df-a837-bc68f09c2f3b",
+      "type": "heat_excursion",
+      "receipt_to_dispatch": 0.540459,
+      "receipt_to_detection": 0.235458,
+      "detection_to_incident": 0.067225,
+      "incident_to_dispatch": 0.237776,
+      "dispatch_to_delivery": 0.238016,
+      "event_to_receipt": 0.280048
+    },
+    {
+      "incident": "4bc0b3c2-e771-4371-beec-e630cc35401c",
+      "type": "heat_excursion",
+      "receipt_to_dispatch": 1.569529,
+      "receipt_to_detection": 0.261011,
+      "detection_to_incident": 0.236152,
+      "incident_to_dispatch": 1.072366,
+      "dispatch_to_delivery": 0.237952,
+      "event_to_receipt": 0.282284
+    },
+    {
+      "incident": "b20719cf-8aef-4438-8456-2e0fde54b75d",
+      "type": "freeze",
+      "receipt_to_dispatch": 0.539676,
+      "receipt_to_detection": 0.239308,
+      "detection_to_incident": 0.064154,
+      "incident_to_dispatch": 0.236214,
+      "dispatch_to_delivery": 0.238184,
+      "event_to_receipt": 0.280831
+    },
+    {
+      "incident": "e40d6574-5ca5-4ba3-9911-ca91133a16b6",
+      "type": "freeze",
+      "receipt_to_dispatch": 1.569314,
+      "receipt_to_detection": 0.261851,
+      "detection_to_incident": 0.237641,
+      "incident_to_dispatch": 1.069822,
+      "dispatch_to_delivery": 0.237329,
+      "event_to_receipt": 0.282499
+    },
+    {
+      "incident": "88d40191-d543-41c5-9b51-b60be2cb0f26",
+      "type": "heat_excursion",
+      "receipt_to_dispatch": 1.571818,
+      "receipt_to_detection": 0.27061,
+      "detection_to_incident": 0.233505,
+      "incident_to_dispatch": 1.067703,
+      "dispatch_to_delivery": 0.238283,
+      "event_to_receipt": 0.279995
+    },
+    {
+      "incident": "0126c93b-2ca0-49b6-8bba-85595217ab12",
+      "type": "freeze",
+      "receipt_to_dispatch": 1.571147,
+      "receipt_to_detection": 0.272492,
+      "detection_to_incident": 0.233542,
+      "incident_to_dispatch": 1.065113,
+      "dispatch_to_delivery": 0.237417,
+      "event_to_receipt": 0.280666
+    },
+    {
+      "incident": "ee9b0d89-723e-4bd2-b998-8a260ed46b7d",
+      "type": "freeze",
+      "receipt_to_dispatch": 1.568152,
+      "receipt_to_detection": 0.275324,
+      "detection_to_incident": 0.229783,
+      "incident_to_dispatch": 1.063045,
+      "dispatch_to_delivery": 0.23818,
+      "event_to_receipt": 0.283661
+    },
+    {
+      "incident": "d2a9214e-2991-4af6-be7f-09cede2518e4",
+      "type": "freeze",
+      "receipt_to_dispatch": 0.538337,
+      "receipt_to_detection": 0.24201,
+      "detection_to_incident": 0.061389,
+      "incident_to_dispatch": 0.234938,
+      "dispatch_to_delivery": 0.237629,
+      "event_to_receipt": 0.28217
+    },
+    {
+      "incident": "3664853e-28cf-4271-bf7b-0c202c6b12b5",
+      "type": "freeze",
+      "receipt_to_dispatch": 1.303477,
+      "receipt_to_detection": 0.153392,
+      "detection_to_incident": 0.29914,
+      "incident_to_dispatch": 0.850945,
+      "dispatch_to_delivery": 0.249112,
+      "event_to_receipt": 0.278353
+    },
+    {
+      "incident": "5fff09ba-5d78-460b-95ec-442608d0e295",
+      "type": "heat_excursion",
+      "receipt_to_dispatch": 1.40462,
+      "receipt_to_detection": 0.444214,
+      "detection_to_incident": 0.037234,
+      "incident_to_dispatch": 0.923172,
+      "dispatch_to_delivery": 0.234766,
+      "event_to_receipt": 0.215308
+    },
+    {
+      "incident": "cbcf242a-5835-44c2-aa7d-501c9eb02882",
+      "type": "freeze",
+      "receipt_to_dispatch": 1.333122,
+      "receipt_to_detection": 0.191446,
+      "detection_to_incident": 0.434573,
+      "incident_to_dispatch": 0.707103,
+      "dispatch_to_delivery": 0.267156,
+      "event_to_receipt": 0.286156
+    },
+    {
+      "incident": "cc3efcc4-4ad5-4289-b948-b5ceeeb51a26",
+      "type": "heat_excursion",
+      "receipt_to_dispatch": 1.301159,
+      "receipt_to_detection": 0.193877,
+      "detection_to_incident": 0.276661,
+      "incident_to_dispatch": 0.830621,
+      "dispatch_to_delivery": 0.248659,
+      "event_to_receipt": 0.280671
+    },
+    {
+      "incident": "403d966b-0e75-4646-a2d7-fef59c2aaf16",
+      "type": "heat_excursion",
+      "receipt_to_dispatch": 1.297157,
+      "receipt_to_detection": 0.220667,
+      "detection_to_incident": 0.248848,
+      "incident_to_dispatch": 0.827642,
+      "dispatch_to_delivery": 0.249619,
+      "event_to_receipt": 0.284673
+    },
+    {
+      "incident": "2db861c9-805d-4c31-a383-50815ae2b45b",
+      "type": "freeze",
+      "receipt_to_dispatch": 1.298232,
+      "receipt_to_detection": 0.231737,
+      "detection_to_incident": 0.241411,
+      "incident_to_dispatch": 0.825084,
+      "dispatch_to_delivery": 0.249703,
+      "event_to_receipt": 0.283598
+    },
+    {
+      "incident": "a93d7072-ac48-44c2-bf94-6ed098acdec2",
+      "type": "freeze",
+      "receipt_to_dispatch": 1.555921,
+      "receipt_to_detection": 0.302278,
+      "detection_to_incident": 0.394566,
+      "incident_to_dispatch": 0.859077,
+      "dispatch_to_delivery": 0.251384,
+      "event_to_receipt": 0.284757
+    },
+    {
+      "incident": "c68efad6-11d5-432d-8faf-aa4dafa927b1",
+      "type": "freeze",
+      "receipt_to_dispatch": 1.332552,
+      "receipt_to_detection": 0.177628,
+      "detection_to_incident": 0.441186,
+      "incident_to_dispatch": 0.713738,
+      "dispatch_to_delivery": 0.266737,
+      "event_to_receipt": 0.286726
+    },
+    {
+      "incident": "6f0f805e-77cc-4ce4-8b80-0181c5d018aa",
+      "type": "heat_excursion",
+      "receipt_to_dispatch": 0.541675,
+      "receipt_to_detection": 0.212932,
+      "detection_to_incident": 0.085775,
+      "incident_to_dispatch": 0.242968,
+      "dispatch_to_delivery": 0.23792,
+      "event_to_receipt": 0.278832
+    },
+    {
+      "incident": "b53d74f9-e664-482b-bb7d-34f9cdc46828",
+      "type": "heat_excursion",
+      "receipt_to_dispatch": 1.053772,
+      "receipt_to_detection": 0.25416,
+      "detection_to_incident": 0.050989,
+      "incident_to_dispatch": 0.748623,
+      "dispatch_to_delivery": 0.2313,
+      "event_to_receipt": 0.281666
+    },
+    {
+      "incident": "c4d845fc-de6a-4703-ad1a-ca65dc8ec1f4",
+      "type": "heat_excursion",
+      "receipt_to_dispatch": 1.051756,
+      "receipt_to_detection": 0.268723,
+      "detection_to_incident": 0.035794,
+      "incident_to_dispatch": 0.747239,
+      "dispatch_to_delivery": 0.231087,
+      "event_to_receipt": 0.283682
+    },
+    {
+      "incident": "dcc5eba5-86d8-4395-ae07-013e74461fa4",
+      "type": "heat_excursion",
+      "receipt_to_dispatch": 1.055467,
+      "receipt_to_detection": 0.279555,
+      "detection_to_incident": 0.029866,
+      "incident_to_dispatch": 0.746046,
+      "dispatch_to_delivery": 0.230684,
+      "event_to_receipt": 0.279971
+    },
+    {
+      "incident": "961a6cff-de3c-488b-9402-45c149c2d208",
+      "type": "freeze",
+      "receipt_to_dispatch": 1.053322,
+      "receipt_to_detection": 0.284105,
+      "detection_to_incident": 0.024347,
+      "incident_to_dispatch": 0.74487,
+      "dispatch_to_delivery": 0.231198,
+      "event_to_receipt": 0.282116
+    },
+    {
+      "incident": "743dfa99-f3bd-466d-acc3-e22df995cedd",
+      "type": "freeze",
+      "receipt_to_dispatch": 1.656823,
+      "receipt_to_detection": 0.284583,
+      "detection_to_incident": 0.44967,
+      "incident_to_dispatch": 0.92257,
+      "dispatch_to_delivery": 0.21662,
+      "event_to_receipt": 0.222268
+    },
+    {
+      "incident": "207b85d8-9cdc-4e39-999a-94c3491f8fd2",
+      "type": "freeze",
+      "receipt_to_dispatch": 0.874083,
+      "receipt_to_detection": 0.20591,
+      "detection_to_incident": 0.066008,
+      "incident_to_dispatch": 0.602165,
+      "dispatch_to_delivery": 0.247274,
+      "event_to_receipt": 0.223525
+    },
+    {
+      "incident": "a8ede1f8-7cac-4d63-8751-c2f96979687d",
+      "type": "heat_excursion",
+      "receipt_to_dispatch": 0.874231,
+      "receipt_to_detection": 0.179713,
+      "detection_to_incident": 0.086078,
+      "incident_to_dispatch": 0.60844,
+      "dispatch_to_delivery": 0.247653,
+      "event_to_receipt": 0.223377
+    },
+    {
+      "incident": "995b4732-20c3-4e99-aa0f-552d01c2323f",
+      "type": "heat_excursion",
+      "receipt_to_dispatch": 0.874177,
+      "receipt_to_detection": 0.181011,
+      "detection_to_incident": 0.086503,
+      "incident_to_dispatch": 0.606663,
+      "dispatch_to_delivery": 0.247805,
+      "event_to_receipt": 0.223431
+    },
+    {
+      "incident": "02c24571-d71d-45fa-a6fe-691111a28601",
+      "type": "heat_excursion",
+      "receipt_to_dispatch": 0.875583,
+      "receipt_to_detection": 0.191451,
+      "detection_to_incident": 0.079118,
+      "incident_to_dispatch": 0.605014,
+      "dispatch_to_delivery": 0.247731,
+      "event_to_receipt": 0.222025
+    },
+    {
+      "incident": "1238ebbf-7735-4d21-97c1-c18122cb9ac8",
+      "type": "freeze",
+      "receipt_to_dispatch": 0.875185,
+      "receipt_to_detection": 0.20462,
+      "detection_to_incident": 0.067144,
+      "incident_to_dispatch": 0.603421,
+      "dispatch_to_delivery": 0.247959,
+      "event_to_receipt": 0.222423
+    },
+    {
+      "incident": "86af3473-8119-4481-a844-7675d51ced98",
+      "type": "freeze",
+      "receipt_to_dispatch": 1.304314,
+      "receipt_to_detection": 0.194531,
+      "detection_to_incident": 0.27419,
+      "incident_to_dispatch": 0.835593,
+      "dispatch_to_delivery": 0.249425,
+      "event_to_receipt": 0.277516
+    },
+    {
+      "incident": "82c42c21-5f55-4b00-9f01-64664665afe9",
+      "type": "heat_excursion",
+      "receipt_to_dispatch": 0.874594,
+      "receipt_to_detection": 0.225883,
+      "detection_to_incident": 0.047698,
+      "incident_to_dispatch": 0.601013,
+      "dispatch_to_delivery": 0.247557,
+      "event_to_receipt": 0.223014
+    },
+    {
+      "incident": "d9772d0e-25ee-4157-8048-1cbb44bf4433",
+      "type": "heat_excursion",
+      "receipt_to_dispatch": 1.386993,
+      "receipt_to_detection": 0.227454,
+      "detection_to_incident": 0.046168,
+      "incident_to_dispatch": 1.113371,
+      "dispatch_to_delivery": 0.229294,
+      "event_to_receipt": 0.224203
+    },
+    {
+      "incident": "64d9ca0b-d949-44ec-93a2-935231b13d5e",
+      "type": "heat_excursion",
+      "receipt_to_dispatch": 1.386895,
+      "receipt_to_detection": 0.228854,
+      "detection_to_incident": 0.045947,
+      "incident_to_dispatch": 1.112094,
+      "dispatch_to_delivery": 0.229392,
+      "event_to_receipt": 0.224301
+    },
+    {
+      "incident": "65f96f5a-2a81-48ed-aef0-77cb401b8854",
+      "type": "heat_excursion",
+      "receipt_to_dispatch": 1.388598,
+      "receipt_to_detection": 0.235792,
+      "detection_to_incident": 0.041885,
+      "incident_to_dispatch": 1.110921,
+      "dispatch_to_delivery": 0.229574,
+      "event_to_receipt": 0.222598
+    },
+    {
+      "incident": "1c673690-4fdd-448a-8b86-326decbc8b8f",
+      "type": "heat_excursion",
+      "receipt_to_dispatch": 1.38773,
+      "receipt_to_detection": 0.237122,
+      "detection_to_incident": 0.040845,
+      "incident_to_dispatch": 1.109763,
+      "dispatch_to_delivery": 0.228977,
+      "event_to_receipt": 0.223466
+    },
+    {
+      "incident": "da51d029-4914-4637-bf01-0124b531b9af",
+      "type": "freeze",
+      "receipt_to_dispatch": 1.152325,
+      "receipt_to_detection": 0.209736,
+      "detection_to_incident": 0.500415,
+      "incident_to_dispatch": 0.442174,
+      "dispatch_to_delivery": 0.236531,
+      "event_to_receipt": 0.221589
+    },
+    {
+      "incident": "8f24b7ff-65dc-4a79-82c7-be4b6a24e5f8",
+      "type": "heat_excursion",
+      "receipt_to_dispatch": 1.150611,
+      "receipt_to_detection": 0.218584,
+      "detection_to_incident": 0.495932,
+      "incident_to_dispatch": 0.436095,
+      "dispatch_to_delivery": 0.236311,
+      "event_to_receipt": 0.223303
+    },
+    {
+      "incident": "9378966f-4333-4f10-a213-bd37398879c5",
+      "type": "freeze",
+      "receipt_to_dispatch": 1.179689,
+      "receipt_to_detection": 0.087712,
+      "detection_to_incident": 0.123031,
+      "incident_to_dispatch": 0.968946,
+      "dispatch_to_delivery": 0.230316,
+      "event_to_receipt": 0.219654
+    },
+    {
+      "incident": "2630f8fe-d3fc-4daa-bf03-9a54e6dd57b6",
+      "type": "heat_excursion",
+      "receipt_to_dispatch": 1.152081,
+      "receipt_to_detection": 0.247836,
+      "detection_to_incident": 0.477216,
+      "incident_to_dispatch": 0.427029,
+      "dispatch_to_delivery": 0.236394,
+      "event_to_receipt": 0.221833
+    },
+    {
+      "incident": "76f800e5-6329-43d9-a02c-9a280d667940",
+      "type": "heat_excursion",
+      "receipt_to_dispatch": 1.147204,
+      "receipt_to_detection": 0.249483,
+      "detection_to_incident": 0.4737,
+      "incident_to_dispatch": 0.424021,
+      "dispatch_to_delivery": 0.235986,
+      "event_to_receipt": 0.22671
+    },
+    {
+      "incident": "0e56b93d-f3fa-4cda-8d1a-2d91f1326f7c",
+      "type": "heat_excursion",
+      "receipt_to_dispatch": 1.152764,
+      "receipt_to_detection": 0.257894,
+      "detection_to_incident": 0.473536,
+      "incident_to_dispatch": 0.421334,
+      "dispatch_to_delivery": 0.23663,
+      "event_to_receipt": 0.22115
+    },
+    {
+      "incident": "d47a0cc3-a110-4540-b74f-788499693695",
+      "type": "freeze",
+      "receipt_to_dispatch": 1.15308,
+      "receipt_to_detection": 0.271622,
+      "detection_to_incident": 0.462105,
+      "incident_to_dispatch": 0.419353,
+      "dispatch_to_delivery": 0.236095,
+      "event_to_receipt": 0.220834
+    },
+    {
+      "incident": "181e11ee-4c5d-4ddf-914d-a11f62cf89a0",
+      "type": "freeze",
+      "receipt_to_dispatch": 0.887977,
+      "receipt_to_detection": 0.377787,
+      "detection_to_incident": 0.101499,
+      "incident_to_dispatch": 0.408691,
+      "dispatch_to_delivery": 0.220004,
+      "event_to_receipt": 0.214499
+    },
+    {
+      "incident": "ec07695e-11b0-4bc6-9063-153dfab96a2c",
+      "type": "heat_excursion",
+      "receipt_to_dispatch": 1.416535,
+      "receipt_to_detection": 0.1723,
+      "detection_to_incident": 0.446008,
+      "incident_to_dispatch": 0.798227,
+      "dispatch_to_delivery": 0.23964,
+      "event_to_receipt": 0.218248
+    },
+    {
+      "incident": "d86e28d7-8cb6-4857-b1ca-905957349830",
+      "type": "heat_excursion",
+      "receipt_to_dispatch": 1.416309,
+      "receipt_to_detection": 0.207078,
+      "detection_to_incident": 0.416859,
+      "incident_to_dispatch": 0.792372,
+      "dispatch_to_delivery": 0.23896,
+      "event_to_receipt": 0.218474
+    },
+    {
+      "incident": "ca354860-71f7-4c5f-bbd6-18b172a0ab80",
+      "type": "freeze",
+      "receipt_to_dispatch": 1.414801,
+      "receipt_to_detection": 0.217929,
+      "detection_to_incident": 0.407507,
+      "incident_to_dispatch": 0.789365,
+      "dispatch_to_delivery": 0.239734,
+      "event_to_receipt": 0.219982
+    },
+    {
+      "incident": "3cda1b59-7c18-4ed9-8334-591d18b0574d",
+      "type": "heat_excursion",
+      "receipt_to_dispatch": 1.411636,
+      "receipt_to_detection": 0.237575,
+      "detection_to_incident": 0.388815,
+      "incident_to_dispatch": 0.785246,
+      "dispatch_to_delivery": 0.239368,
+      "event_to_receipt": 0.223147
+    },
+    {
+      "incident": "aa8fd879-52d8-4f83-8bcd-37d7ddba6c5d",
+      "type": "heat_excursion",
+      "receipt_to_dispatch": 1.169075,
+      "receipt_to_detection": 0.093598,
+      "detection_to_incident": 0.386609,
+      "incident_to_dispatch": 0.688868,
+      "dispatch_to_delivery": 0.255703,
+      "event_to_receipt": 0.219577
+    },
+    {
+      "incident": "39975f9c-9e09-44af-8c38-5a0341f7d57f",
+      "type": "freeze",
+      "receipt_to_dispatch": 1.159748,
+      "receipt_to_detection": 0.094354,
+      "detection_to_incident": 0.384134,
+      "incident_to_dispatch": 0.68126,
+      "dispatch_to_delivery": 0.256464,
+      "event_to_receipt": 0.228904
+    },
+    {
+      "incident": "4d7c9579-1749-4e3f-8811-9041a3f16dd3",
+      "type": "freeze",
+      "receipt_to_dispatch": 1.163235,
+      "receipt_to_detection": 0.104632,
+      "detection_to_incident": 0.380401,
+      "incident_to_dispatch": 0.678202,
+      "dispatch_to_delivery": 0.256078,
+      "event_to_receipt": 0.225417
+    },
+    {
+      "incident": "17f5ea66-c7c2-4803-9fca-07376adad85b",
+      "type": "heat_excursion",
+      "receipt_to_dispatch": 1.161741,
+      "receipt_to_detection": 0.107024,
+      "detection_to_incident": 0.379478,
+      "incident_to_dispatch": 0.675239,
+      "dispatch_to_delivery": 0.256374,
+      "event_to_receipt": 0.226911
+    },
+    {
+      "incident": "aa52bb85-65a9-42bd-8c7e-5be24e1112d0",
+      "type": "heat_excursion",
+      "receipt_to_dispatch": 1.165372,
+      "receipt_to_detection": 0.128475,
+      "detection_to_incident": 0.364607,
+      "incident_to_dispatch": 0.67229,
+      "dispatch_to_delivery": 0.256583,
+      "event_to_receipt": 0.22328
+    },
+    {
+      "incident": "6c9b0361-e420-4c7c-8917-53aeed0cffab",
+      "type": "freeze",
+      "receipt_to_dispatch": 1.173641,
+      "receipt_to_detection": 0.100811,
+      "detection_to_incident": 0.106713,
+      "incident_to_dispatch": 0.966117,
+      "dispatch_to_delivery": 0.230635,
+      "event_to_receipt": 0.225702
+    },
+    {
+      "incident": "0e50f740-ccb9-4bfa-9e68-35c93a0ba738",
+      "type": "heat_excursion",
+      "receipt_to_dispatch": 1.172152,
+      "receipt_to_detection": 0.123766,
+      "detection_to_incident": 0.085601,
+      "incident_to_dispatch": 0.962785,
+      "dispatch_to_delivery": 0.230811,
+      "event_to_receipt": 0.227191
+    },
+    {
+      "incident": "231e491a-3d09-4513-adac-6361b07c51d0",
+      "type": "heat_excursion",
+      "receipt_to_dispatch": 0.950428,
+      "receipt_to_detection": 0.294888,
+      "detection_to_incident": 0.088252,
+      "incident_to_dispatch": 0.567288,
+      "dispatch_to_delivery": 0.247249,
+      "event_to_receipt": 0.219807
+    },
+    {
+      "incident": "1fca23d7-0248-432a-a265-bf8aa9fbd6ba",
+      "type": "heat_excursion",
+      "receipt_to_dispatch": 0.947406,
+      "receipt_to_detection": 0.312457,
+      "detection_to_incident": 0.069848,
+      "incident_to_dispatch": 0.565101,
+      "dispatch_to_delivery": 0.24716,
+      "event_to_receipt": 0.222829
+    },
+    {
+      "incident": "8e2bcf86-970d-4c10-8d97-6812806d4527",
+      "type": "freeze",
+      "receipt_to_dispatch": 0.951044,
+      "receipt_to_detection": 0.329581,
+      "detection_to_incident": 0.059595,
+      "incident_to_dispatch": 0.561868,
+      "dispatch_to_delivery": 0.24643,
+      "event_to_receipt": 0.219191
+    },
+    {
+      "incident": "4370a8e3-7fc3-48d3-ad62-d7062675ee18",
+      "type": "heat_excursion",
+      "receipt_to_dispatch": 0.950996,
+      "receipt_to_detection": 0.331371,
+      "detection_to_incident": 0.05906,
+      "incident_to_dispatch": 0.560565,
+      "dispatch_to_delivery": 0.246086,
+      "event_to_receipt": 0.219239
+    },
+    {
+      "incident": "22a7aa9b-7808-4c94-85aa-e95c0f7bb1a6",
+      "type": "heat_excursion",
+      "receipt_to_dispatch": 0.951918,
+      "receipt_to_detection": 0.344121,
+      "detection_to_incident": 0.048868,
+      "incident_to_dispatch": 0.558929,
+      "dispatch_to_delivery": 0.246675,
+      "event_to_receipt": 0.218317
+    },
+    {
+      "incident": "461fafef-1a8d-4678-b47b-c2f0ebae2157",
+      "type": "freeze",
+      "receipt_to_dispatch": 0.949673,
+      "receipt_to_detection": 0.350259,
+      "detection_to_incident": 0.041682,
+      "incident_to_dispatch": 0.557732,
+      "dispatch_to_delivery": 0.247354,
+      "event_to_receipt": 0.220562
+    },
+    {
+      "incident": "5053960f-58dd-4498-a67f-26238cb96cb9",
+      "type": "heat_excursion",
+      "receipt_to_dispatch": 0.950943,
+      "receipt_to_detection": 0.358542,
+      "detection_to_incident": 0.035866,
+      "incident_to_dispatch": 0.556535,
+      "dispatch_to_delivery": 0.247028,
+      "event_to_receipt": 0.219292
+    },
+    {
+      "incident": "90c38924-2886-4e24-90a9-75caae2267da",
+      "type": "freeze",
+      "receipt_to_dispatch": 1.152172,
+      "receipt_to_detection": 0.246737,
+      "detection_to_incident": 0.475346,
+      "incident_to_dispatch": 0.430089,
+      "dispatch_to_delivery": 0.235725,
+      "event_to_receipt": 0.221742
+    },
+    {
+      "incident": "cbb81066-5083-4dbf-adf1-a67f9f0704ad",
+      "type": "heat_excursion",
+      "receipt_to_dispatch": 1.17245,
+      "receipt_to_detection": 0.074717,
+      "detection_to_incident": 0.12484,
+      "incident_to_dispatch": 0.972893,
+      "dispatch_to_delivery": 0.229764,
+      "event_to_receipt": 0.226893
+    },
+    {
+      "incident": "bba5144b-880a-4b2c-9238-c48df83fb66c",
+      "type": "freeze",
+      "receipt_to_dispatch": 1.395474,
+      "receipt_to_detection": 0.29393,
+      "detection_to_incident": 0.380884,
+      "incident_to_dispatch": 0.72066,
+      "dispatch_to_delivery": 0.249074,
+      "event_to_receipt": 0.224672
+    },
+    {
+      "incident": "601299f0-f93c-4670-8818-780a7c6467b9",
+      "type": "freeze",
+      "receipt_to_dispatch": 0.953047,
+      "receipt_to_detection": 0.320857,
+      "detection_to_incident": 0.06901,
+      "incident_to_dispatch": 0.56318,
+      "dispatch_to_delivery": 0.246764,
+      "event_to_receipt": 0.217188
+    },
+    {
+      "incident": "3f7957e2-9990-44db-971a-c6eb55938b79",
+      "type": "freeze",
+      "receipt_to_dispatch": 1.398802,
+      "receipt_to_detection": 0.328218,
+      "detection_to_incident": 0.358966,
+      "incident_to_dispatch": 0.711618,
+      "dispatch_to_delivery": 0.249677,
+      "event_to_receipt": 0.221344
+    },
+    {
+      "incident": "eefd6ab3-769b-4b15-9f6e-625a6fa08702",
+      "type": "freeze",
+      "receipt_to_dispatch": 1.396618,
+      "receipt_to_detection": 0.329186,
+      "detection_to_incident": 0.359294,
+      "incident_to_dispatch": 0.708138,
+      "dispatch_to_delivery": 0.249224,
+      "event_to_receipt": 0.223528
+    },
+    {
+      "incident": "2a2c2e84-8952-4332-bf94-dfc4b6b3aede",
+      "type": "heat_excursion",
+      "receipt_to_dispatch": 1.393069,
+      "receipt_to_detection": 0.331342,
+      "detection_to_incident": 0.356711,
+      "incident_to_dispatch": 0.705016,
+      "dispatch_to_delivery": 0.249864,
+      "event_to_receipt": 0.227077
+    },
+    {
+      "incident": "ad7261c7-2921-42e2-9672-bbada5ec856b",
+      "type": "heat_excursion",
+      "receipt_to_dispatch": 1.400065,
+      "receipt_to_detection": 0.343925,
+      "detection_to_incident": 0.35396,
+      "incident_to_dispatch": 0.70218,
+      "dispatch_to_delivery": 0.249494,
+      "event_to_receipt": 0.220081
+    },
+    {
+      "incident": "2cf2db50-33b3-4010-ac75-ddbd9c5b57bb",
+      "type": "heat_excursion",
+      "receipt_to_dispatch": 1.399622,
+      "receipt_to_detection": 0.345487,
+      "detection_to_incident": 0.354514,
+      "incident_to_dispatch": 0.699621,
+      "dispatch_to_delivery": 0.249313,
+      "event_to_receipt": 0.220524
+    },
+    {
+      "incident": "d41c0901-73a0-49e6-8de3-57f81601968e",
+      "type": "freeze",
+      "receipt_to_dispatch": 1.133503,
+      "receipt_to_detection": 0.206834,
+      "detection_to_incident": 0.395411,
+      "incident_to_dispatch": 0.531258,
+      "dispatch_to_delivery": 0.242616,
+      "event_to_receipt": 0.218701
+    },
+    {
+      "incident": "0a0af1e4-5f1e-4a0a-a31b-091089349820",
+      "type": "freeze",
+      "receipt_to_dispatch": 1.399413,
+      "receipt_to_detection": 0.34653,
+      "detection_to_incident": 0.355476,
+      "incident_to_dispatch": 0.697407,
+      "dispatch_to_delivery": 0.249407,
+      "event_to_receipt": 0.220733
+    },
+    {
+      "incident": "152f6e38-283f-423d-a753-2fceb342ec6f",
+      "type": "freeze",
+      "receipt_to_dispatch": 1.137763,
+      "receipt_to_detection": 0.144326,
+      "detection_to_incident": 0.447136,
+      "incident_to_dispatch": 0.546301,
+      "dispatch_to_delivery": 0.242083,
+      "event_to_receipt": 0.214441
+    },
+    {
+      "incident": "051fdec3-1d81-4df1-a350-3c69ff914dbf",
+      "type": "freeze",
+      "receipt_to_dispatch": 1.138311,
+      "receipt_to_detection": 0.159441,
+      "detection_to_incident": 0.437389,
+      "incident_to_dispatch": 0.541481,
+      "dispatch_to_delivery": 0.242731,
+      "event_to_receipt": 0.213893
+    },
+    {
+      "incident": "6bbb1194-b771-42ad-be00-e81367e28758",
+      "type": "freeze",
+      "receipt_to_dispatch": 1.137163,
+      "receipt_to_detection": 0.187459,
+      "detection_to_incident": 0.41268,
+      "incident_to_dispatch": 0.537024,
+      "dispatch_to_delivery": 0.243055,
+      "event_to_receipt": 0.215041
+    },
+    {
+      "incident": "c9132b56-d3af-4a94-a77e-9a6d6c27e3b1",
+      "type": "heat_excursion",
+      "receipt_to_dispatch": 1.156591,
+      "receipt_to_detection": 0.204991,
+      "detection_to_incident": 0.399394,
+      "incident_to_dispatch": 0.552206,
+      "dispatch_to_delivery": 0.224943,
+      "event_to_receipt": 0.213799
+    },
+    {
+      "incident": "6c3ba5a4-adcd-43ea-8fb6-f9d8e5b3ddef",
+      "type": "freeze",
+      "receipt_to_dispatch": 1.139883,
+      "receipt_to_detection": 0.135806,
+      "detection_to_incident": 0.451642,
+      "incident_to_dispatch": 0.552435,
+      "dispatch_to_delivery": 0.242975,
+      "event_to_receipt": 0.212321
+    },
+    {
+      "incident": "68c7772f-bb82-4084-88c0-6810afde5731",
+      "type": "freeze",
+      "receipt_to_dispatch": 1.300446,
+      "receipt_to_detection": 0.157455,
+      "detection_to_incident": 0.30251,
+      "incident_to_dispatch": 0.840481,
+      "dispatch_to_delivery": 0.249521,
+      "event_to_receipt": 0.281384
+    },
+    {
+      "incident": "986e9497-e5a7-4987-87eb-7f6cd812ba6a",
+      "type": "freeze",
+      "receipt_to_dispatch": 1.405559,
+      "receipt_to_detection": 0.454245,
+      "detection_to_incident": 0.029466,
+      "incident_to_dispatch": 0.921848,
+      "dispatch_to_delivery": 0.234009,
+      "event_to_receipt": 0.214369
+    },
+    {
+      "incident": "cf4901c5-1a66-4fd6-8512-c8fd93b34d2c",
+      "type": "freeze",
+      "receipt_to_dispatch": 1.399394,
+      "receipt_to_detection": 0.462382,
+      "detection_to_incident": 0.016895,
+      "incident_to_dispatch": 0.920117,
+      "dispatch_to_delivery": 0.234982,
+      "event_to_receipt": 0.220534
+    },
+    {
+      "incident": "9eea8492-1153-450e-ab77-59e196315a5c",
+      "type": "heat_excursion",
+      "receipt_to_dispatch": 1.402624,
+      "receipt_to_detection": 0.471039,
+      "detection_to_incident": 0.012693,
+      "incident_to_dispatch": 0.918892,
+      "dispatch_to_delivery": 0.234876,
+      "event_to_receipt": 0.217304
+    }
+  ],
+  "background": {
+    "receipt_to_dispatch": {
+      "n": 0
+    },
+    "receipt_to_detection": {
+      "n": 0
+    },
+    "detection_to_incident": {
+      "n": 0
+    },
+    "incident_to_dispatch": {
+      "n": 0
+    },
+    "dispatch_to_delivery": {
+      "n": 0
+    },
+    "event_to_receipt": {
+      "n": 0
+    },
+    "by_type": {}
+  },
+  "background_rows": [],
+  "all": {
+    "n": 100,
+    "median": 1.189,
+    "p95": 1.571,
+    "max": 1.657,
+    "min": 0.538
+  },
+  "criteria": {
+    "p95 <= 30 s": true,
+    "every scripted incident alerted": true,
+    "all SMS <= 160": true
+  }
+}

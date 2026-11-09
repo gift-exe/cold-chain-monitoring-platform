@@ -67,8 +67,13 @@ tests = ["test_custody.py::test_event_with_no_custodian_goes_to_lga_officer_and_
 tests = ["test_incidents.py::test_event_ended_15_minutes_before_detection_is_retrospective_and_copied_to_lga",
          "test_incidents.py::test_event_ended_just_before_detection_is_operational", "test_policy.py::test_retrospective_critical_uses_slow_timers_and_no_reminders"]
 [FR5_5]
-tests = []
-status = "dropped (Gift, 2026-11-05): a condition after resolution is always a new incident (test_incidents.py::test_condition_soon_after_resolution_is_a_new_incident)"
+# Revised during development (report Table 3.4, Table 4.5): episodes within 24 h of the last join an
+# unresolved incident; a recurrence after resolution, or after 24 h, is a new incident. The original rule
+# (reopen within 60 minutes of resolution) was superseded on 2026-11-05 and is not implemented.
+tests = ["test_incidents.py::test_new_episode_while_open_updates_the_incident",
+         "test_incidents.py::test_new_episode_a_day_after_the_last_is_a_new_incident_even_if_open",
+         "test_incidents.py::test_new_episode_after_resolution_is_a_new_incident",
+         "test_incidents.py::test_condition_soon_after_resolution_is_a_new_incident"]
 
 [FR6_1]
 tests = ["test_policy.py::test_critical_never_acknowledged_reaches_national_at_4_hours_then_overdue_with_daily_reminders",

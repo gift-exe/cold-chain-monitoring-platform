@@ -1,0 +1,2920 @@
+{
+ "attempts": 364,
+ "permitted_but_not_entitled": 0,
+ "refused_but_entitled": 0,
+ "differences": [],
+ "rows": [
+  {
+   "role": "national",
+   "incident": "own_facility",
+   "tier": "owner",
+   "action": "view",
+   "expected": true,
+   "allowed": true
+  },
+  {
+   "role": "national",
+   "incident": "own_facility",
+   "tier": "owner",
+   "action": "acknowledge",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "national",
+   "incident": "own_facility",
+   "tier": "owner",
+   "action": "resolve",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "national",
+   "incident": "own_facility",
+   "tier": "owner",
+   "action": "close",
+   "expected": true,
+   "allowed": true
+  },
+  {
+   "role": "state",
+   "incident": "own_facility",
+   "tier": "owner",
+   "action": "view",
+   "expected": true,
+   "allowed": true
+  },
+  {
+   "role": "state",
+   "incident": "own_facility",
+   "tier": "owner",
+   "action": "acknowledge",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "state",
+   "incident": "own_facility",
+   "tier": "owner",
+   "action": "resolve",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "state",
+   "incident": "own_facility",
+   "tier": "owner",
+   "action": "close",
+   "expected": true,
+   "allowed": true
+  },
+  {
+   "role": "lga",
+   "incident": "own_facility",
+   "tier": "owner",
+   "action": "view",
+   "expected": true,
+   "allowed": true
+  },
+  {
+   "role": "lga",
+   "incident": "own_facility",
+   "tier": "owner",
+   "action": "acknowledge",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "lga",
+   "incident": "own_facility",
+   "tier": "owner",
+   "action": "resolve",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "lga",
+   "incident": "own_facility",
+   "tier": "owner",
+   "action": "close",
+   "expected": true,
+   "allowed": true
+  },
+  {
+   "role": "oic",
+   "incident": "own_facility",
+   "tier": "owner",
+   "action": "view",
+   "expected": true,
+   "allowed": true
+  },
+  {
+   "role": "oic",
+   "incident": "own_facility",
+   "tier": "owner",
+   "action": "acknowledge",
+   "expected": true,
+   "allowed": true
+  },
+  {
+   "role": "oic",
+   "incident": "own_facility",
+   "tier": "owner",
+   "action": "resolve",
+   "expected": true,
+   "allowed": true
+  },
+  {
+   "role": "oic",
+   "incident": "own_facility",
+   "tier": "owner",
+   "action": "close",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "outreach",
+   "incident": "own_facility",
+   "tier": "owner",
+   "action": "view",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "outreach",
+   "incident": "own_facility",
+   "tier": "owner",
+   "action": "acknowledge",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "outreach",
+   "incident": "own_facility",
+   "tier": "owner",
+   "action": "resolve",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "outreach",
+   "incident": "own_facility",
+   "tier": "owner",
+   "action": "close",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "driver",
+   "incident": "own_facility",
+   "tier": "owner",
+   "action": "view",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "driver",
+   "incident": "own_facility",
+   "tier": "owner",
+   "action": "acknowledge",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "driver",
+   "incident": "own_facility",
+   "tier": "owner",
+   "action": "resolve",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "driver",
+   "incident": "own_facility",
+   "tier": "owner",
+   "action": "close",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "admin",
+   "incident": "own_facility",
+   "tier": "owner",
+   "action": "view",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "admin",
+   "incident": "own_facility",
+   "tier": "owner",
+   "action": "acknowledge",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "admin",
+   "incident": "own_facility",
+   "tier": "owner",
+   "action": "resolve",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "admin",
+   "incident": "own_facility",
+   "tier": "owner",
+   "action": "close",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "national",
+   "incident": "own_facility",
+   "tier": "lga",
+   "action": "view",
+   "expected": true,
+   "allowed": true
+  },
+  {
+   "role": "national",
+   "incident": "own_facility",
+   "tier": "lga",
+   "action": "acknowledge",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "national",
+   "incident": "own_facility",
+   "tier": "lga",
+   "action": "resolve",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "national",
+   "incident": "own_facility",
+   "tier": "lga",
+   "action": "close",
+   "expected": true,
+   "allowed": true
+  },
+  {
+   "role": "state",
+   "incident": "own_facility",
+   "tier": "lga",
+   "action": "view",
+   "expected": true,
+   "allowed": true
+  },
+  {
+   "role": "state",
+   "incident": "own_facility",
+   "tier": "lga",
+   "action": "acknowledge",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "state",
+   "incident": "own_facility",
+   "tier": "lga",
+   "action": "resolve",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "state",
+   "incident": "own_facility",
+   "tier": "lga",
+   "action": "close",
+   "expected": true,
+   "allowed": true
+  },
+  {
+   "role": "lga",
+   "incident": "own_facility",
+   "tier": "lga",
+   "action": "view",
+   "expected": true,
+   "allowed": true
+  },
+  {
+   "role": "lga",
+   "incident": "own_facility",
+   "tier": "lga",
+   "action": "acknowledge",
+   "expected": true,
+   "allowed": true
+  },
+  {
+   "role": "lga",
+   "incident": "own_facility",
+   "tier": "lga",
+   "action": "resolve",
+   "expected": true,
+   "allowed": true
+  },
+  {
+   "role": "lga",
+   "incident": "own_facility",
+   "tier": "lga",
+   "action": "close",
+   "expected": true,
+   "allowed": true
+  },
+  {
+   "role": "oic",
+   "incident": "own_facility",
+   "tier": "lga",
+   "action": "view",
+   "expected": true,
+   "allowed": true
+  },
+  {
+   "role": "oic",
+   "incident": "own_facility",
+   "tier": "lga",
+   "action": "acknowledge",
+   "expected": true,
+   "allowed": true
+  },
+  {
+   "role": "oic",
+   "incident": "own_facility",
+   "tier": "lga",
+   "action": "resolve",
+   "expected": true,
+   "allowed": true
+  },
+  {
+   "role": "oic",
+   "incident": "own_facility",
+   "tier": "lga",
+   "action": "close",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "outreach",
+   "incident": "own_facility",
+   "tier": "lga",
+   "action": "view",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "outreach",
+   "incident": "own_facility",
+   "tier": "lga",
+   "action": "acknowledge",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "outreach",
+   "incident": "own_facility",
+   "tier": "lga",
+   "action": "resolve",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "outreach",
+   "incident": "own_facility",
+   "tier": "lga",
+   "action": "close",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "driver",
+   "incident": "own_facility",
+   "tier": "lga",
+   "action": "view",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "driver",
+   "incident": "own_facility",
+   "tier": "lga",
+   "action": "acknowledge",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "driver",
+   "incident": "own_facility",
+   "tier": "lga",
+   "action": "resolve",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "driver",
+   "incident": "own_facility",
+   "tier": "lga",
+   "action": "close",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "admin",
+   "incident": "own_facility",
+   "tier": "lga",
+   "action": "view",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "admin",
+   "incident": "own_facility",
+   "tier": "lga",
+   "action": "acknowledge",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "admin",
+   "incident": "own_facility",
+   "tier": "lga",
+   "action": "resolve",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "admin",
+   "incident": "own_facility",
+   "tier": "lga",
+   "action": "close",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "national",
+   "incident": "own_facility",
+   "tier": "state",
+   "action": "view",
+   "expected": true,
+   "allowed": true
+  },
+  {
+   "role": "national",
+   "incident": "own_facility",
+   "tier": "state",
+   "action": "acknowledge",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "national",
+   "incident": "own_facility",
+   "tier": "state",
+   "action": "resolve",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "national",
+   "incident": "own_facility",
+   "tier": "state",
+   "action": "close",
+   "expected": true,
+   "allowed": true
+  },
+  {
+   "role": "state",
+   "incident": "own_facility",
+   "tier": "state",
+   "action": "view",
+   "expected": true,
+   "allowed": true
+  },
+  {
+   "role": "state",
+   "incident": "own_facility",
+   "tier": "state",
+   "action": "acknowledge",
+   "expected": true,
+   "allowed": true
+  },
+  {
+   "role": "state",
+   "incident": "own_facility",
+   "tier": "state",
+   "action": "resolve",
+   "expected": true,
+   "allowed": true
+  },
+  {
+   "role": "state",
+   "incident": "own_facility",
+   "tier": "state",
+   "action": "close",
+   "expected": true,
+   "allowed": true
+  },
+  {
+   "role": "lga",
+   "incident": "own_facility",
+   "tier": "state",
+   "action": "view",
+   "expected": true,
+   "allowed": true
+  },
+  {
+   "role": "lga",
+   "incident": "own_facility",
+   "tier": "state",
+   "action": "acknowledge",
+   "expected": true,
+   "allowed": true
+  },
+  {
+   "role": "lga",
+   "incident": "own_facility",
+   "tier": "state",
+   "action": "resolve",
+   "expected": true,
+   "allowed": true
+  },
+  {
+   "role": "lga",
+   "incident": "own_facility",
+   "tier": "state",
+   "action": "close",
+   "expected": true,
+   "allowed": true
+  },
+  {
+   "role": "oic",
+   "incident": "own_facility",
+   "tier": "state",
+   "action": "view",
+   "expected": true,
+   "allowed": true
+  },
+  {
+   "role": "oic",
+   "incident": "own_facility",
+   "tier": "state",
+   "action": "acknowledge",
+   "expected": true,
+   "allowed": true
+  },
+  {
+   "role": "oic",
+   "incident": "own_facility",
+   "tier": "state",
+   "action": "resolve",
+   "expected": true,
+   "allowed": true
+  },
+  {
+   "role": "oic",
+   "incident": "own_facility",
+   "tier": "state",
+   "action": "close",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "outreach",
+   "incident": "own_facility",
+   "tier": "state",
+   "action": "view",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "outreach",
+   "incident": "own_facility",
+   "tier": "state",
+   "action": "acknowledge",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "outreach",
+   "incident": "own_facility",
+   "tier": "state",
+   "action": "resolve",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "outreach",
+   "incident": "own_facility",
+   "tier": "state",
+   "action": "close",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "driver",
+   "incident": "own_facility",
+   "tier": "state",
+   "action": "view",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "driver",
+   "incident": "own_facility",
+   "tier": "state",
+   "action": "acknowledge",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "driver",
+   "incident": "own_facility",
+   "tier": "state",
+   "action": "resolve",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "driver",
+   "incident": "own_facility",
+   "tier": "state",
+   "action": "close",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "admin",
+   "incident": "own_facility",
+   "tier": "state",
+   "action": "view",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "admin",
+   "incident": "own_facility",
+   "tier": "state",
+   "action": "acknowledge",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "admin",
+   "incident": "own_facility",
+   "tier": "state",
+   "action": "resolve",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "admin",
+   "incident": "own_facility",
+   "tier": "state",
+   "action": "close",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "national",
+   "incident": "own_facility",
+   "tier": "national",
+   "action": "view",
+   "expected": true,
+   "allowed": true
+  },
+  {
+   "role": "national",
+   "incident": "own_facility",
+   "tier": "national",
+   "action": "acknowledge",
+   "expected": true,
+   "allowed": true
+  },
+  {
+   "role": "national",
+   "incident": "own_facility",
+   "tier": "national",
+   "action": "resolve",
+   "expected": true,
+   "allowed": true
+  },
+  {
+   "role": "national",
+   "incident": "own_facility",
+   "tier": "national",
+   "action": "close",
+   "expected": true,
+   "allowed": true
+  },
+  {
+   "role": "state",
+   "incident": "own_facility",
+   "tier": "national",
+   "action": "view",
+   "expected": true,
+   "allowed": true
+  },
+  {
+   "role": "state",
+   "incident": "own_facility",
+   "tier": "national",
+   "action": "acknowledge",
+   "expected": true,
+   "allowed": true
+  },
+  {
+   "role": "state",
+   "incident": "own_facility",
+   "tier": "national",
+   "action": "resolve",
+   "expected": true,
+   "allowed": true
+  },
+  {
+   "role": "state",
+   "incident": "own_facility",
+   "tier": "national",
+   "action": "close",
+   "expected": true,
+   "allowed": true
+  },
+  {
+   "role": "lga",
+   "incident": "own_facility",
+   "tier": "national",
+   "action": "view",
+   "expected": true,
+   "allowed": true
+  },
+  {
+   "role": "lga",
+   "incident": "own_facility",
+   "tier": "national",
+   "action": "acknowledge",
+   "expected": true,
+   "allowed": true
+  },
+  {
+   "role": "lga",
+   "incident": "own_facility",
+   "tier": "national",
+   "action": "resolve",
+   "expected": true,
+   "allowed": true
+  },
+  {
+   "role": "lga",
+   "incident": "own_facility",
+   "tier": "national",
+   "action": "close",
+   "expected": true,
+   "allowed": true
+  },
+  {
+   "role": "oic",
+   "incident": "own_facility",
+   "tier": "national",
+   "action": "view",
+   "expected": true,
+   "allowed": true
+  },
+  {
+   "role": "oic",
+   "incident": "own_facility",
+   "tier": "national",
+   "action": "acknowledge",
+   "expected": true,
+   "allowed": true
+  },
+  {
+   "role": "oic",
+   "incident": "own_facility",
+   "tier": "national",
+   "action": "resolve",
+   "expected": true,
+   "allowed": true
+  },
+  {
+   "role": "oic",
+   "incident": "own_facility",
+   "tier": "national",
+   "action": "close",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "outreach",
+   "incident": "own_facility",
+   "tier": "national",
+   "action": "view",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "outreach",
+   "incident": "own_facility",
+   "tier": "national",
+   "action": "acknowledge",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "outreach",
+   "incident": "own_facility",
+   "tier": "national",
+   "action": "resolve",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "outreach",
+   "incident": "own_facility",
+   "tier": "national",
+   "action": "close",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "driver",
+   "incident": "own_facility",
+   "tier": "national",
+   "action": "view",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "driver",
+   "incident": "own_facility",
+   "tier": "national",
+   "action": "acknowledge",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "driver",
+   "incident": "own_facility",
+   "tier": "national",
+   "action": "resolve",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "driver",
+   "incident": "own_facility",
+   "tier": "national",
+   "action": "close",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "admin",
+   "incident": "own_facility",
+   "tier": "national",
+   "action": "view",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "admin",
+   "incident": "own_facility",
+   "tier": "national",
+   "action": "acknowledge",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "admin",
+   "incident": "own_facility",
+   "tier": "national",
+   "action": "resolve",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "admin",
+   "incident": "own_facility",
+   "tier": "national",
+   "action": "close",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "national",
+   "incident": "other_gwale_facility",
+   "tier": "owner",
+   "action": "view",
+   "expected": true,
+   "allowed": true
+  },
+  {
+   "role": "national",
+   "incident": "other_gwale_facility",
+   "tier": "owner",
+   "action": "acknowledge",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "national",
+   "incident": "other_gwale_facility",
+   "tier": "owner",
+   "action": "resolve",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "national",
+   "incident": "other_gwale_facility",
+   "tier": "owner",
+   "action": "close",
+   "expected": true,
+   "allowed": true
+  },
+  {
+   "role": "state",
+   "incident": "other_gwale_facility",
+   "tier": "owner",
+   "action": "view",
+   "expected": true,
+   "allowed": true
+  },
+  {
+   "role": "state",
+   "incident": "other_gwale_facility",
+   "tier": "owner",
+   "action": "acknowledge",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "state",
+   "incident": "other_gwale_facility",
+   "tier": "owner",
+   "action": "resolve",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "state",
+   "incident": "other_gwale_facility",
+   "tier": "owner",
+   "action": "close",
+   "expected": true,
+   "allowed": true
+  },
+  {
+   "role": "lga",
+   "incident": "other_gwale_facility",
+   "tier": "owner",
+   "action": "view",
+   "expected": true,
+   "allowed": true
+  },
+  {
+   "role": "lga",
+   "incident": "other_gwale_facility",
+   "tier": "owner",
+   "action": "acknowledge",
+   "expected": true,
+   "allowed": true
+  },
+  {
+   "role": "lga",
+   "incident": "other_gwale_facility",
+   "tier": "owner",
+   "action": "resolve",
+   "expected": true,
+   "allowed": true
+  },
+  {
+   "role": "lga",
+   "incident": "other_gwale_facility",
+   "tier": "owner",
+   "action": "close",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "oic",
+   "incident": "other_gwale_facility",
+   "tier": "owner",
+   "action": "view",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "oic",
+   "incident": "other_gwale_facility",
+   "tier": "owner",
+   "action": "acknowledge",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "oic",
+   "incident": "other_gwale_facility",
+   "tier": "owner",
+   "action": "resolve",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "oic",
+   "incident": "other_gwale_facility",
+   "tier": "owner",
+   "action": "close",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "outreach",
+   "incident": "other_gwale_facility",
+   "tier": "owner",
+   "action": "view",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "outreach",
+   "incident": "other_gwale_facility",
+   "tier": "owner",
+   "action": "acknowledge",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "outreach",
+   "incident": "other_gwale_facility",
+   "tier": "owner",
+   "action": "resolve",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "outreach",
+   "incident": "other_gwale_facility",
+   "tier": "owner",
+   "action": "close",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "driver",
+   "incident": "other_gwale_facility",
+   "tier": "owner",
+   "action": "view",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "driver",
+   "incident": "other_gwale_facility",
+   "tier": "owner",
+   "action": "acknowledge",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "driver",
+   "incident": "other_gwale_facility",
+   "tier": "owner",
+   "action": "resolve",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "driver",
+   "incident": "other_gwale_facility",
+   "tier": "owner",
+   "action": "close",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "admin",
+   "incident": "other_gwale_facility",
+   "tier": "owner",
+   "action": "view",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "admin",
+   "incident": "other_gwale_facility",
+   "tier": "owner",
+   "action": "acknowledge",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "admin",
+   "incident": "other_gwale_facility",
+   "tier": "owner",
+   "action": "resolve",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "admin",
+   "incident": "other_gwale_facility",
+   "tier": "owner",
+   "action": "close",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "national",
+   "incident": "other_gwale_facility",
+   "tier": "lga",
+   "action": "view",
+   "expected": true,
+   "allowed": true
+  },
+  {
+   "role": "national",
+   "incident": "other_gwale_facility",
+   "tier": "lga",
+   "action": "acknowledge",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "national",
+   "incident": "other_gwale_facility",
+   "tier": "lga",
+   "action": "resolve",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "national",
+   "incident": "other_gwale_facility",
+   "tier": "lga",
+   "action": "close",
+   "expected": true,
+   "allowed": true
+  },
+  {
+   "role": "state",
+   "incident": "other_gwale_facility",
+   "tier": "lga",
+   "action": "view",
+   "expected": true,
+   "allowed": true
+  },
+  {
+   "role": "state",
+   "incident": "other_gwale_facility",
+   "tier": "lga",
+   "action": "acknowledge",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "state",
+   "incident": "other_gwale_facility",
+   "tier": "lga",
+   "action": "resolve",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "state",
+   "incident": "other_gwale_facility",
+   "tier": "lga",
+   "action": "close",
+   "expected": true,
+   "allowed": true
+  },
+  {
+   "role": "lga",
+   "incident": "other_gwale_facility",
+   "tier": "lga",
+   "action": "view",
+   "expected": true,
+   "allowed": true
+  },
+  {
+   "role": "lga",
+   "incident": "other_gwale_facility",
+   "tier": "lga",
+   "action": "acknowledge",
+   "expected": true,
+   "allowed": true
+  },
+  {
+   "role": "lga",
+   "incident": "other_gwale_facility",
+   "tier": "lga",
+   "action": "resolve",
+   "expected": true,
+   "allowed": true
+  },
+  {
+   "role": "lga",
+   "incident": "other_gwale_facility",
+   "tier": "lga",
+   "action": "close",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "oic",
+   "incident": "other_gwale_facility",
+   "tier": "lga",
+   "action": "view",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "oic",
+   "incident": "other_gwale_facility",
+   "tier": "lga",
+   "action": "acknowledge",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "oic",
+   "incident": "other_gwale_facility",
+   "tier": "lga",
+   "action": "resolve",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "oic",
+   "incident": "other_gwale_facility",
+   "tier": "lga",
+   "action": "close",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "outreach",
+   "incident": "other_gwale_facility",
+   "tier": "lga",
+   "action": "view",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "outreach",
+   "incident": "other_gwale_facility",
+   "tier": "lga",
+   "action": "acknowledge",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "outreach",
+   "incident": "other_gwale_facility",
+   "tier": "lga",
+   "action": "resolve",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "outreach",
+   "incident": "other_gwale_facility",
+   "tier": "lga",
+   "action": "close",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "driver",
+   "incident": "other_gwale_facility",
+   "tier": "lga",
+   "action": "view",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "driver",
+   "incident": "other_gwale_facility",
+   "tier": "lga",
+   "action": "acknowledge",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "driver",
+   "incident": "other_gwale_facility",
+   "tier": "lga",
+   "action": "resolve",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "driver",
+   "incident": "other_gwale_facility",
+   "tier": "lga",
+   "action": "close",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "admin",
+   "incident": "other_gwale_facility",
+   "tier": "lga",
+   "action": "view",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "admin",
+   "incident": "other_gwale_facility",
+   "tier": "lga",
+   "action": "acknowledge",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "admin",
+   "incident": "other_gwale_facility",
+   "tier": "lga",
+   "action": "resolve",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "admin",
+   "incident": "other_gwale_facility",
+   "tier": "lga",
+   "action": "close",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "national",
+   "incident": "other_gwale_facility",
+   "tier": "state",
+   "action": "view",
+   "expected": true,
+   "allowed": true
+  },
+  {
+   "role": "national",
+   "incident": "other_gwale_facility",
+   "tier": "state",
+   "action": "acknowledge",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "national",
+   "incident": "other_gwale_facility",
+   "tier": "state",
+   "action": "resolve",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "national",
+   "incident": "other_gwale_facility",
+   "tier": "state",
+   "action": "close",
+   "expected": true,
+   "allowed": true
+  },
+  {
+   "role": "state",
+   "incident": "other_gwale_facility",
+   "tier": "state",
+   "action": "view",
+   "expected": true,
+   "allowed": true
+  },
+  {
+   "role": "state",
+   "incident": "other_gwale_facility",
+   "tier": "state",
+   "action": "acknowledge",
+   "expected": true,
+   "allowed": true
+  },
+  {
+   "role": "state",
+   "incident": "other_gwale_facility",
+   "tier": "state",
+   "action": "resolve",
+   "expected": true,
+   "allowed": true
+  },
+  {
+   "role": "state",
+   "incident": "other_gwale_facility",
+   "tier": "state",
+   "action": "close",
+   "expected": true,
+   "allowed": true
+  },
+  {
+   "role": "lga",
+   "incident": "other_gwale_facility",
+   "tier": "state",
+   "action": "view",
+   "expected": true,
+   "allowed": true
+  },
+  {
+   "role": "lga",
+   "incident": "other_gwale_facility",
+   "tier": "state",
+   "action": "acknowledge",
+   "expected": true,
+   "allowed": true
+  },
+  {
+   "role": "lga",
+   "incident": "other_gwale_facility",
+   "tier": "state",
+   "action": "resolve",
+   "expected": true,
+   "allowed": true
+  },
+  {
+   "role": "lga",
+   "incident": "other_gwale_facility",
+   "tier": "state",
+   "action": "close",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "oic",
+   "incident": "other_gwale_facility",
+   "tier": "state",
+   "action": "view",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "oic",
+   "incident": "other_gwale_facility",
+   "tier": "state",
+   "action": "acknowledge",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "oic",
+   "incident": "other_gwale_facility",
+   "tier": "state",
+   "action": "resolve",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "oic",
+   "incident": "other_gwale_facility",
+   "tier": "state",
+   "action": "close",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "outreach",
+   "incident": "other_gwale_facility",
+   "tier": "state",
+   "action": "view",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "outreach",
+   "incident": "other_gwale_facility",
+   "tier": "state",
+   "action": "acknowledge",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "outreach",
+   "incident": "other_gwale_facility",
+   "tier": "state",
+   "action": "resolve",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "outreach",
+   "incident": "other_gwale_facility",
+   "tier": "state",
+   "action": "close",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "driver",
+   "incident": "other_gwale_facility",
+   "tier": "state",
+   "action": "view",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "driver",
+   "incident": "other_gwale_facility",
+   "tier": "state",
+   "action": "acknowledge",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "driver",
+   "incident": "other_gwale_facility",
+   "tier": "state",
+   "action": "resolve",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "driver",
+   "incident": "other_gwale_facility",
+   "tier": "state",
+   "action": "close",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "admin",
+   "incident": "other_gwale_facility",
+   "tier": "state",
+   "action": "view",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "admin",
+   "incident": "other_gwale_facility",
+   "tier": "state",
+   "action": "acknowledge",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "admin",
+   "incident": "other_gwale_facility",
+   "tier": "state",
+   "action": "resolve",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "admin",
+   "incident": "other_gwale_facility",
+   "tier": "state",
+   "action": "close",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "national",
+   "incident": "other_gwale_facility",
+   "tier": "national",
+   "action": "view",
+   "expected": true,
+   "allowed": true
+  },
+  {
+   "role": "national",
+   "incident": "other_gwale_facility",
+   "tier": "national",
+   "action": "acknowledge",
+   "expected": true,
+   "allowed": true
+  },
+  {
+   "role": "national",
+   "incident": "other_gwale_facility",
+   "tier": "national",
+   "action": "resolve",
+   "expected": true,
+   "allowed": true
+  },
+  {
+   "role": "national",
+   "incident": "other_gwale_facility",
+   "tier": "national",
+   "action": "close",
+   "expected": true,
+   "allowed": true
+  },
+  {
+   "role": "state",
+   "incident": "other_gwale_facility",
+   "tier": "national",
+   "action": "view",
+   "expected": true,
+   "allowed": true
+  },
+  {
+   "role": "state",
+   "incident": "other_gwale_facility",
+   "tier": "national",
+   "action": "acknowledge",
+   "expected": true,
+   "allowed": true
+  },
+  {
+   "role": "state",
+   "incident": "other_gwale_facility",
+   "tier": "national",
+   "action": "resolve",
+   "expected": true,
+   "allowed": true
+  },
+  {
+   "role": "state",
+   "incident": "other_gwale_facility",
+   "tier": "national",
+   "action": "close",
+   "expected": true,
+   "allowed": true
+  },
+  {
+   "role": "lga",
+   "incident": "other_gwale_facility",
+   "tier": "national",
+   "action": "view",
+   "expected": true,
+   "allowed": true
+  },
+  {
+   "role": "lga",
+   "incident": "other_gwale_facility",
+   "tier": "national",
+   "action": "acknowledge",
+   "expected": true,
+   "allowed": true
+  },
+  {
+   "role": "lga",
+   "incident": "other_gwale_facility",
+   "tier": "national",
+   "action": "resolve",
+   "expected": true,
+   "allowed": true
+  },
+  {
+   "role": "lga",
+   "incident": "other_gwale_facility",
+   "tier": "national",
+   "action": "close",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "oic",
+   "incident": "other_gwale_facility",
+   "tier": "national",
+   "action": "view",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "oic",
+   "incident": "other_gwale_facility",
+   "tier": "national",
+   "action": "acknowledge",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "oic",
+   "incident": "other_gwale_facility",
+   "tier": "national",
+   "action": "resolve",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "oic",
+   "incident": "other_gwale_facility",
+   "tier": "national",
+   "action": "close",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "outreach",
+   "incident": "other_gwale_facility",
+   "tier": "national",
+   "action": "view",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "outreach",
+   "incident": "other_gwale_facility",
+   "tier": "national",
+   "action": "acknowledge",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "outreach",
+   "incident": "other_gwale_facility",
+   "tier": "national",
+   "action": "resolve",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "outreach",
+   "incident": "other_gwale_facility",
+   "tier": "national",
+   "action": "close",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "driver",
+   "incident": "other_gwale_facility",
+   "tier": "national",
+   "action": "view",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "driver",
+   "incident": "other_gwale_facility",
+   "tier": "national",
+   "action": "acknowledge",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "driver",
+   "incident": "other_gwale_facility",
+   "tier": "national",
+   "action": "resolve",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "driver",
+   "incident": "other_gwale_facility",
+   "tier": "national",
+   "action": "close",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "admin",
+   "incident": "other_gwale_facility",
+   "tier": "national",
+   "action": "view",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "admin",
+   "incident": "other_gwale_facility",
+   "tier": "national",
+   "action": "acknowledge",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "admin",
+   "incident": "other_gwale_facility",
+   "tier": "national",
+   "action": "resolve",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "admin",
+   "incident": "other_gwale_facility",
+   "tier": "national",
+   "action": "close",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "national",
+   "incident": "dala",
+   "tier": "owner",
+   "action": "view",
+   "expected": true,
+   "allowed": true
+  },
+  {
+   "role": "national",
+   "incident": "dala",
+   "tier": "owner",
+   "action": "acknowledge",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "national",
+   "incident": "dala",
+   "tier": "owner",
+   "action": "resolve",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "national",
+   "incident": "dala",
+   "tier": "owner",
+   "action": "close",
+   "expected": true,
+   "allowed": true
+  },
+  {
+   "role": "state",
+   "incident": "dala",
+   "tier": "owner",
+   "action": "view",
+   "expected": true,
+   "allowed": true
+  },
+  {
+   "role": "state",
+   "incident": "dala",
+   "tier": "owner",
+   "action": "acknowledge",
+   "expected": true,
+   "allowed": true
+  },
+  {
+   "role": "state",
+   "incident": "dala",
+   "tier": "owner",
+   "action": "resolve",
+   "expected": true,
+   "allowed": true
+  },
+  {
+   "role": "state",
+   "incident": "dala",
+   "tier": "owner",
+   "action": "close",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "lga",
+   "incident": "dala",
+   "tier": "owner",
+   "action": "view",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "lga",
+   "incident": "dala",
+   "tier": "owner",
+   "action": "acknowledge",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "lga",
+   "incident": "dala",
+   "tier": "owner",
+   "action": "resolve",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "lga",
+   "incident": "dala",
+   "tier": "owner",
+   "action": "close",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "oic",
+   "incident": "dala",
+   "tier": "owner",
+   "action": "view",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "oic",
+   "incident": "dala",
+   "tier": "owner",
+   "action": "acknowledge",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "oic",
+   "incident": "dala",
+   "tier": "owner",
+   "action": "resolve",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "oic",
+   "incident": "dala",
+   "tier": "owner",
+   "action": "close",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "outreach",
+   "incident": "dala",
+   "tier": "owner",
+   "action": "view",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "outreach",
+   "incident": "dala",
+   "tier": "owner",
+   "action": "acknowledge",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "outreach",
+   "incident": "dala",
+   "tier": "owner",
+   "action": "resolve",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "outreach",
+   "incident": "dala",
+   "tier": "owner",
+   "action": "close",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "driver",
+   "incident": "dala",
+   "tier": "owner",
+   "action": "view",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "driver",
+   "incident": "dala",
+   "tier": "owner",
+   "action": "acknowledge",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "driver",
+   "incident": "dala",
+   "tier": "owner",
+   "action": "resolve",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "driver",
+   "incident": "dala",
+   "tier": "owner",
+   "action": "close",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "admin",
+   "incident": "dala",
+   "tier": "owner",
+   "action": "view",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "admin",
+   "incident": "dala",
+   "tier": "owner",
+   "action": "acknowledge",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "admin",
+   "incident": "dala",
+   "tier": "owner",
+   "action": "resolve",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "admin",
+   "incident": "dala",
+   "tier": "owner",
+   "action": "close",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "national",
+   "incident": "dala",
+   "tier": "lga",
+   "action": "view",
+   "expected": true,
+   "allowed": true
+  },
+  {
+   "role": "national",
+   "incident": "dala",
+   "tier": "lga",
+   "action": "acknowledge",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "national",
+   "incident": "dala",
+   "tier": "lga",
+   "action": "resolve",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "national",
+   "incident": "dala",
+   "tier": "lga",
+   "action": "close",
+   "expected": true,
+   "allowed": true
+  },
+  {
+   "role": "state",
+   "incident": "dala",
+   "tier": "lga",
+   "action": "view",
+   "expected": true,
+   "allowed": true
+  },
+  {
+   "role": "state",
+   "incident": "dala",
+   "tier": "lga",
+   "action": "acknowledge",
+   "expected": true,
+   "allowed": true
+  },
+  {
+   "role": "state",
+   "incident": "dala",
+   "tier": "lga",
+   "action": "resolve",
+   "expected": true,
+   "allowed": true
+  },
+  {
+   "role": "state",
+   "incident": "dala",
+   "tier": "lga",
+   "action": "close",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "lga",
+   "incident": "dala",
+   "tier": "lga",
+   "action": "view",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "lga",
+   "incident": "dala",
+   "tier": "lga",
+   "action": "acknowledge",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "lga",
+   "incident": "dala",
+   "tier": "lga",
+   "action": "resolve",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "lga",
+   "incident": "dala",
+   "tier": "lga",
+   "action": "close",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "oic",
+   "incident": "dala",
+   "tier": "lga",
+   "action": "view",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "oic",
+   "incident": "dala",
+   "tier": "lga",
+   "action": "acknowledge",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "oic",
+   "incident": "dala",
+   "tier": "lga",
+   "action": "resolve",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "oic",
+   "incident": "dala",
+   "tier": "lga",
+   "action": "close",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "outreach",
+   "incident": "dala",
+   "tier": "lga",
+   "action": "view",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "outreach",
+   "incident": "dala",
+   "tier": "lga",
+   "action": "acknowledge",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "outreach",
+   "incident": "dala",
+   "tier": "lga",
+   "action": "resolve",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "outreach",
+   "incident": "dala",
+   "tier": "lga",
+   "action": "close",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "driver",
+   "incident": "dala",
+   "tier": "lga",
+   "action": "view",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "driver",
+   "incident": "dala",
+   "tier": "lga",
+   "action": "acknowledge",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "driver",
+   "incident": "dala",
+   "tier": "lga",
+   "action": "resolve",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "driver",
+   "incident": "dala",
+   "tier": "lga",
+   "action": "close",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "admin",
+   "incident": "dala",
+   "tier": "lga",
+   "action": "view",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "admin",
+   "incident": "dala",
+   "tier": "lga",
+   "action": "acknowledge",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "admin",
+   "incident": "dala",
+   "tier": "lga",
+   "action": "resolve",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "admin",
+   "incident": "dala",
+   "tier": "lga",
+   "action": "close",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "national",
+   "incident": "dala",
+   "tier": "state",
+   "action": "view",
+   "expected": true,
+   "allowed": true
+  },
+  {
+   "role": "national",
+   "incident": "dala",
+   "tier": "state",
+   "action": "acknowledge",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "national",
+   "incident": "dala",
+   "tier": "state",
+   "action": "resolve",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "national",
+   "incident": "dala",
+   "tier": "state",
+   "action": "close",
+   "expected": true,
+   "allowed": true
+  },
+  {
+   "role": "state",
+   "incident": "dala",
+   "tier": "state",
+   "action": "view",
+   "expected": true,
+   "allowed": true
+  },
+  {
+   "role": "state",
+   "incident": "dala",
+   "tier": "state",
+   "action": "acknowledge",
+   "expected": true,
+   "allowed": true
+  },
+  {
+   "role": "state",
+   "incident": "dala",
+   "tier": "state",
+   "action": "resolve",
+   "expected": true,
+   "allowed": true
+  },
+  {
+   "role": "state",
+   "incident": "dala",
+   "tier": "state",
+   "action": "close",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "lga",
+   "incident": "dala",
+   "tier": "state",
+   "action": "view",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "lga",
+   "incident": "dala",
+   "tier": "state",
+   "action": "acknowledge",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "lga",
+   "incident": "dala",
+   "tier": "state",
+   "action": "resolve",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "lga",
+   "incident": "dala",
+   "tier": "state",
+   "action": "close",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "oic",
+   "incident": "dala",
+   "tier": "state",
+   "action": "view",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "oic",
+   "incident": "dala",
+   "tier": "state",
+   "action": "acknowledge",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "oic",
+   "incident": "dala",
+   "tier": "state",
+   "action": "resolve",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "oic",
+   "incident": "dala",
+   "tier": "state",
+   "action": "close",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "outreach",
+   "incident": "dala",
+   "tier": "state",
+   "action": "view",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "outreach",
+   "incident": "dala",
+   "tier": "state",
+   "action": "acknowledge",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "outreach",
+   "incident": "dala",
+   "tier": "state",
+   "action": "resolve",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "outreach",
+   "incident": "dala",
+   "tier": "state",
+   "action": "close",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "driver",
+   "incident": "dala",
+   "tier": "state",
+   "action": "view",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "driver",
+   "incident": "dala",
+   "tier": "state",
+   "action": "acknowledge",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "driver",
+   "incident": "dala",
+   "tier": "state",
+   "action": "resolve",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "driver",
+   "incident": "dala",
+   "tier": "state",
+   "action": "close",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "admin",
+   "incident": "dala",
+   "tier": "state",
+   "action": "view",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "admin",
+   "incident": "dala",
+   "tier": "state",
+   "action": "acknowledge",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "admin",
+   "incident": "dala",
+   "tier": "state",
+   "action": "resolve",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "admin",
+   "incident": "dala",
+   "tier": "state",
+   "action": "close",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "national",
+   "incident": "dala",
+   "tier": "national",
+   "action": "view",
+   "expected": true,
+   "allowed": true
+  },
+  {
+   "role": "national",
+   "incident": "dala",
+   "tier": "national",
+   "action": "acknowledge",
+   "expected": true,
+   "allowed": true
+  },
+  {
+   "role": "national",
+   "incident": "dala",
+   "tier": "national",
+   "action": "resolve",
+   "expected": true,
+   "allowed": true
+  },
+  {
+   "role": "national",
+   "incident": "dala",
+   "tier": "national",
+   "action": "close",
+   "expected": true,
+   "allowed": true
+  },
+  {
+   "role": "state",
+   "incident": "dala",
+   "tier": "national",
+   "action": "view",
+   "expected": true,
+   "allowed": true
+  },
+  {
+   "role": "state",
+   "incident": "dala",
+   "tier": "national",
+   "action": "acknowledge",
+   "expected": true,
+   "allowed": true
+  },
+  {
+   "role": "state",
+   "incident": "dala",
+   "tier": "national",
+   "action": "resolve",
+   "expected": true,
+   "allowed": true
+  },
+  {
+   "role": "state",
+   "incident": "dala",
+   "tier": "national",
+   "action": "close",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "lga",
+   "incident": "dala",
+   "tier": "national",
+   "action": "view",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "lga",
+   "incident": "dala",
+   "tier": "national",
+   "action": "acknowledge",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "lga",
+   "incident": "dala",
+   "tier": "national",
+   "action": "resolve",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "lga",
+   "incident": "dala",
+   "tier": "national",
+   "action": "close",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "oic",
+   "incident": "dala",
+   "tier": "national",
+   "action": "view",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "oic",
+   "incident": "dala",
+   "tier": "national",
+   "action": "acknowledge",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "oic",
+   "incident": "dala",
+   "tier": "national",
+   "action": "resolve",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "oic",
+   "incident": "dala",
+   "tier": "national",
+   "action": "close",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "outreach",
+   "incident": "dala",
+   "tier": "national",
+   "action": "view",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "outreach",
+   "incident": "dala",
+   "tier": "national",
+   "action": "acknowledge",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "outreach",
+   "incident": "dala",
+   "tier": "national",
+   "action": "resolve",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "outreach",
+   "incident": "dala",
+   "tier": "national",
+   "action": "close",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "driver",
+   "incident": "dala",
+   "tier": "national",
+   "action": "view",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "driver",
+   "incident": "dala",
+   "tier": "national",
+   "action": "acknowledge",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "driver",
+   "incident": "dala",
+   "tier": "national",
+   "action": "resolve",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "driver",
+   "incident": "dala",
+   "tier": "national",
+   "action": "close",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "admin",
+   "incident": "dala",
+   "tier": "national",
+   "action": "view",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "admin",
+   "incident": "dala",
+   "tier": "national",
+   "action": "acknowledge",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "admin",
+   "incident": "dala",
+   "tier": "national",
+   "action": "resolve",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "admin",
+   "incident": "dala",
+   "tier": "national",
+   "action": "close",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "national",
+   "incident": "-",
+   "tier": "-",
+   "action": "change product limits",
+   "expected": true,
+   "allowed": true
+  },
+  {
+   "role": "national",
+   "incident": "-",
+   "tier": "-",
+   "action": "change phone number",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "national",
+   "incident": "-",
+   "tier": "-",
+   "action": "list users",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "national",
+   "incident": "-",
+   "tier": "-",
+   "action": "system status",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "state",
+   "incident": "-",
+   "tier": "-",
+   "action": "change product limits",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "state",
+   "incident": "-",
+   "tier": "-",
+   "action": "change phone number",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "state",
+   "incident": "-",
+   "tier": "-",
+   "action": "list users",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "state",
+   "incident": "-",
+   "tier": "-",
+   "action": "system status",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "lga",
+   "incident": "-",
+   "tier": "-",
+   "action": "change product limits",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "lga",
+   "incident": "-",
+   "tier": "-",
+   "action": "change phone number",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "lga",
+   "incident": "-",
+   "tier": "-",
+   "action": "list users",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "lga",
+   "incident": "-",
+   "tier": "-",
+   "action": "system status",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "oic",
+   "incident": "-",
+   "tier": "-",
+   "action": "change product limits",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "oic",
+   "incident": "-",
+   "tier": "-",
+   "action": "change phone number",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "oic",
+   "incident": "-",
+   "tier": "-",
+   "action": "list users",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "oic",
+   "incident": "-",
+   "tier": "-",
+   "action": "system status",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "outreach",
+   "incident": "-",
+   "tier": "-",
+   "action": "change product limits",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "outreach",
+   "incident": "-",
+   "tier": "-",
+   "action": "change phone number",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "outreach",
+   "incident": "-",
+   "tier": "-",
+   "action": "list users",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "outreach",
+   "incident": "-",
+   "tier": "-",
+   "action": "system status",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "driver",
+   "incident": "-",
+   "tier": "-",
+   "action": "change product limits",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "driver",
+   "incident": "-",
+   "tier": "-",
+   "action": "change phone number",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "driver",
+   "incident": "-",
+   "tier": "-",
+   "action": "list users",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "driver",
+   "incident": "-",
+   "tier": "-",
+   "action": "system status",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "admin",
+   "incident": "-",
+   "tier": "-",
+   "action": "change product limits",
+   "expected": false,
+   "allowed": false
+  },
+  {
+   "role": "admin",
+   "incident": "-",
+   "tier": "-",
+   "action": "change phone number",
+   "expected": true,
+   "allowed": true
+  },
+  {
+   "role": "admin",
+   "incident": "-",
+   "tier": "-",
+   "action": "list users",
+   "expected": true,
+   "allowed": true
+  },
+  {
+   "role": "admin",
+   "incident": "-",
+   "tier": "-",
+   "action": "system status",
+   "expected": true,
+   "allowed": true
+  }
+ ]
+}

@@ -1,0 +1,172 @@
+$ make eval-reset
+$ make eval-up EVAL_NET=/Users/giftabumere/Documents/Miva/coldchain/configs/sim/load-101.toml
+$ make eval-live
+E10 target: 19500 devices every 19.5 s = 1000 readings/s for 30 min
+  target: 5 min, 300000 sent
+  target: 10 min, 600000 sent
+  target: 15 min, 900000 sent
+  target: 20 min, 1200000 sent
+  target: 25 min, 1500000 sent
+  target: 30 min, 1800000 sent
+E10 endurance: 19500 devices every 60.0 s = 325 readings/s for 120 min
+E4: 100 loggers, 114 minutes from 2026-11-07T11:05:00+00:00
+  minute 0/114
+  endurance: 5 min, 97500 sent
+  minute 5/114
+  endurance: 10 min, 195000 sent
+  minute 10/114
+  endurance: 15 min, 292500 sent
+  minute 15/114
+  endurance: 20 min, 390000 sent
+  minute 20/114
+  endurance: 25 min, 487500 sent
+  minute 25/114
+  endurance: 30 min, 585000 sent
+  minute 30/114
+  endurance: 35 min, 682500 sent
+  minute 35/114
+  endurance: 40 min, 780000 sent
+  minute 40/114
+  endurance: 45 min, 877500 sent
+  minute 45/114
+  endurance: 50 min, 975000 sent
+  minute 50/114
+  endurance: 55 min, 1072500 sent
+  minute 55/114
+  endurance: 60 min, 1170000 sent
+  minute 60/114
+  endurance: 65 min, 1267500 sent
+  minute 65/114
+  endurance: 70 min, 1365000 sent
+  minute 70/114
+  endurance: 75 min, 1462500 sent
+  minute 75/114
+  endurance: 80 min, 1560000 sent
+  minute 80/114
+  endurance: 85 min, 1657500 sent
+  minute 85/114
+  endurance: 90 min, 1755000 sent
+  minute 90/114
+  endurance: 95 min, 1852500 sent
+  minute 95/114
+  endurance: 100 min, 1950000 sent
+  minute 100/114
+  endurance: 105 min, 2047500 sent
+  minute 105/114
+  endurance: 110 min, 2145000 sent
+  minute 110/114
+  endurance: 115 min, 2242500 sent
+  endurance: 120 min, 2340000 sent
+{
+  "devices": 19500,
+  "phases": [
+    {
+      "name": "target",
+      "began": "2026-11-07T10:33:34.853275+00:00",
+      "minutes": 30,
+      "interval_s": 19.5,
+      "offered_rate": 1000.0,
+      "ended": "2026-11-07T11:03:34.855081+00:00",
+      "sent": 1800000,
+      "received": 1799603,
+      "stored_in_phase": 1799529,
+      "stored_rate_mean": 999.7,
+      "stored_rate_p5_per_s": 906,
+      "receipt_to_storage_s": {
+        "median": 0.134,
+        "p95": 0.227,
+        "max": "0.620"
+      }
+    },
+    {
+      "name": "endurance",
+      "began": "2026-11-07T11:03:34.855112+00:00",
+      "minutes": 120,
+      "interval_s": 60.0,
+      "offered_rate": 325.0,
+      "ended": "2026-11-07T13:03:35.147647+00:00",
+      "sent": 2340000,
+      "received": 2340352,
+      "stored_in_phase": 2340414,
+      "stored_rate_mean": 325.0,
+      "stored_rate_p5_per_s": 277,
+      "receipt_to_storage_s": {
+        "median": 0.118,
+        "p95": 0.21,
+        "max": "0.468"
+      }
+    }
+  ],
+  "unacked": 0,
+  "readings": {
+    "sent": 4140000,
+    "stored": 4140000,
+    "lost": 0,
+    "duplicates": 0
+  },
+  "notification": {
+    "began": "2026-11-07T11:05:00+00:00",
+    "duration_min": 114,
+    "loggers": 100,
+    "scripted_incidents_expected": 100,
+    "missing_dispatch": [],
+    "sms_bodies_checked": 0,
+    "sms_bodies_over_limit": [],
+    "longest_sms": 0,
+    "scripted": {
+      "receipt_to_dispatch": {
+        "n": 0
+      },
+      "receipt_to_detection": {
+        "n": 0
+      },
+      "detection_to_incident": {
+        "n": 0
+      },
+      "incident_to_dispatch": {
+        "n": 0
+      },
+      "dispatch_to_delivery": {
+        "n": 0
+      },
+      "event_to_receipt": {
+        "n": 0
+      },
+      "by_type": {}
+    },
+    "background": {
+      "receipt_to_dispatch": {
+        "n": 0
+      },
+      "receipt_to_detection": {
+        "n": 0
+      },
+      "detection_to_incident": {
+        "n": 0
+      },
+      "incident_to_dispatch": {
+        "n": 0
+      },
+      "dispatch_to_delivery": {
+        "n": 0
+      },
+      "event_to_receipt": {
+        "n": 0
+      },
+      "by_type": {}
+    },
+    "all": {
+      "n": 0
+    },
+    "criteria": {
+      "p95 <= 30 s": false,
+      "every scripted incident alerted": false,
+      "all SMS <= 160": true
+    }
+  },
+  "criteria": {
+    "1,000 readings/s stored for 30 min": true,
+    "no readings lost": true,
+    "NFR2 met during endurance (p95 <= 30 s)": false
+  }
+}

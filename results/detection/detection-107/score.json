@@ -1,0 +1,128 @@
+{
+  "run": "detection-107",
+  "unit_days": 4718.0,
+  "recall": {
+    "heat_excursion": {
+      "injected": 11,
+      "events": 11,
+      "detected_overlap": 11,
+      "early_minutes_sum": 17.0,
+      "detected": 11
+    },
+    "power_loss": {
+      "injected": 6,
+      "events": 6,
+      "detected_overlap": 6,
+      "early_minutes_sum": 0.0,
+      "detected": 6
+    },
+    "door_open": {
+      "injected": 9,
+      "events": 9,
+      "detected_overlap": 9,
+      "early_minutes_sum": 0.0,
+      "detected": 9
+    },
+    "freeze": {
+      "injected": 7,
+      "no_qualifying_condition": 2,
+      "events": 5,
+      "detected_overlap": 5,
+      "early_minutes_sum": 49.0,
+      "detected": 4
+    }
+  },
+  "precision": {
+    "critical": {
+      "incidents": 588,
+      "true": 582,
+      "injected": 25
+    },
+    "critical:freeze": {
+      "incidents": 198,
+      "true": 194,
+      "injected": 5
+    },
+    "critical:heat_excursion": {
+      "incidents": 205,
+      "true": 203,
+      "injected": 16
+    },
+    "critical:power_loss": {
+      "incidents": 185,
+      "true": 185,
+      "injected": 4
+    },
+    "warning": {
+      "incidents": 1147,
+      "true": 1147,
+      "injected": 11
+    },
+    "warning:door_open": {
+      "incidents": 930,
+      "true": 930,
+      "injected": 9
+    },
+    "warning:power_loss": {
+      "incidents": 217,
+      "true": 217,
+      "injected": 2
+    }
+  },
+  "false_critical_per_1000_device_days": 1.272,
+  "misses": [
+    {
+      "injection": "freeze-00022",
+      "serial": "SIM-DAA-0021",
+      "condition_start": "2024-03-07T14:51:00+00:00",
+      "nearest_event_start": "2024-03-07T14:34:00+00:00",
+      "nearest_event_incident": true,
+      "event_found_but_no_incident": false
+    }
+  ],
+  "false_alarms": [
+    {
+      "incident": "c6596e00-66d4-409b-bc93-43464bdbc846",
+      "serial": "SIM-KUM-0005",
+      "type": "freeze",
+      "severity": "critical",
+      "mode": "retrospective"
+    },
+    {
+      "incident": "7292483c-3b6e-41cd-bb30-da34d9fc5ec1",
+      "serial": "SIM-GWL-0017",
+      "type": "freeze",
+      "severity": "critical",
+      "mode": "operational"
+    },
+    {
+      "incident": "9e7c533a-88d0-47b8-a697-d768686ae979",
+      "serial": "SIM-TOF-0001",
+      "type": "freeze",
+      "severity": "critical",
+      "mode": "operational"
+    },
+    {
+      "incident": "f17522b5-bf1c-40f9-b717-9620b697ec41",
+      "serial": "SIM-GAY-0012",
+      "type": "heat_excursion",
+      "severity": "critical",
+      "mode": "retrospective"
+    },
+    {
+      "incident": "da7890b4-83b7-4d2f-945f-d697137aa420",
+      "serial": "SIM-GAY-0001",
+      "type": "freeze",
+      "severity": "critical",
+      "mode": "retrospective"
+    },
+    {
+      "incident": "4b1d2420-bba9-4595-a16b-9b2bf71b9fa9",
+      "serial": "SIM-NAS-0017",
+      "type": "heat_excursion",
+      "severity": "critical",
+      "mode": "retrospective"
+    }
+  ],
+  "events_without_incident": 0
+}

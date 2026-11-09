@@ -16,7 +16,7 @@ and requirement numbers in the code (e.g. FR1.4, Table 3.18) refer to it.
 | I6 Dashboard | Role-based map, incident, performance, consignment and administration views; live updates; demo network | Done |
 | I7a Simulator core | Kano network (GRID3), equipment (WHO PQS), power (NERC bands, solar, generator), climate (NASA POWER) and sensor models; failure injector with ground truth; run configurations and seed sets; calibration checks | Done |
 | I7b Simulator completion | Movement on the Kano road network with speeds and stops resampled from GTS tracks; connectivity model; outreach carriers; MQTT device emulator and database registration; load network (Table 3.7); time-in-range (Lutukai et al., 2019) and source-mix (Ilegogie, 2025) checks; calibration report (32/32) | Done |
-| I8 | Evaluation | Planned |
+| I8 Evaluation | Evaluation environment and harness; the twelve tests of report Table 3.10; fixes found by evaluation | Done (results in `results/`; how to reproduce each test: report Appendix A) |
 
 ## Requirements
 

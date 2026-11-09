@@ -1,0 +1,72 @@
+{
+  "units": 674,
+  "fixed_units": 586,
+  "mobile_units": 88,
+  "unit_days": 4718.0,
+  "time_in_range": 0.8988510008667858,
+  "time_above_upper": 0.036481357332466546,
+  "time_below_lower": 0.0646676418007476,
+  "trips": 264,
+  "offline_share": {
+    "mobile": 0.1952,
+    "rural": 0.0499,
+    "urban": 0.0115
+  },
+  "injections": {
+    "heat_excursion": 11,
+    "freeze": 16,
+    "door_open": 5,
+    "sensor_drift": 3,
+    "power_loss": 2,
+    "device_silence": 10,
+    "connectivity_gap": 4
+  },
+  "injections_expected": {
+    "heat_excursion": 12.306000000000001,
+    "freeze": 12.306000000000001,
+    "power_loss": 5.166,
+    "door_open": 8.203999999999999,
+    "device_silence": 9.436,
+    "connectivity_gap": 4.718,
+    "sensor_drift": 2.359
+  },
+  "eligible_units": {
+    "heat_excursion": 586,
+    "freeze": 586,
+    "power_loss": 369,
+    "door_open": 586,
+    "device_silence": 674,
+    "connectivity_gap": 674,
+    "sensor_drift": 674
+  },
+  "conditions": {
+    "no_power": {
+      "natural": 9153,
+      "injected": 2
+    },
+    "at_or_below_zero": {
+      "natural": 257,
+      "injected": 11
+    },
+    "above_upper": {
+      "natural": 1185,
+      "injected": 11
+    },
+    "door_open": {
+      "natural": 13585,
+      "injected": 5
+    },
+    "at_or_below_freeze": {
+      "natural": 0,
+      "injected": 10
+    }
+  },
+  "wall_seconds": 2129.7,
+  "mqtt": {
+    "readings": 6786138,
+    "messages": 6384743,
+    "acked": 6384743,
+    "batches": 2841,
+    "unacked": 0
+  }
+}

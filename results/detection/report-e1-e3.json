@@ -1,0 +1,340 @@
+{
+  "runs": [
+    "detection-101",
+    "detection-102",
+    "detection-103",
+    "detection-104",
+    "detection-105",
+    "detection-106",
+    "detection-107",
+    "detection-108",
+    "detection-109",
+    "detection-110"
+  ],
+  "e1_e2": {
+    "replications": 10,
+    "unit_days": 47180.0,
+    "recall": {
+      "door_open": {
+        "injected": 69,
+        "events": 69,
+        "detected_overlap": 69,
+        "early_minutes_sum": 14.0,
+        "detected": 69,
+        "recall": 1.0,
+        "ci95": [
+          0.9473,
+          1.0
+        ],
+        "recall_overlap": 1.0,
+        "ci95_overlap": [
+          0.9473,
+          1.0
+        ],
+        "mean_early_minutes": 0.2
+      },
+      "freeze": {
+        "injected": 114,
+        "no_qualifying_condition": 57,
+        "events": 57,
+        "detected_overlap": 57,
+        "early_minutes_sum": 733.0,
+        "detected": 34,
+        "recall": 0.5965,
+        "ci95": [
+          0.467,
+          0.7138
+        ],
+        "recall_overlap": 1.0,
+        "ci95_overlap": [
+          0.9369,
+          1.0
+        ],
+        "mean_early_minutes": 12.9
+      },
+      "heat_excursion": {
+        "injected": 123,
+        "events": 123,
+        "detected_overlap": 123,
+        "early_minutes_sum": 270.0,
+        "detected": 119,
+        "recall": 0.9675,
+        "ci95": [
+          0.9194,
+          0.9873
+        ],
+        "recall_overlap": 1.0,
+        "ci95_overlap": [
+          0.9697,
+          1.0
+        ],
+        "mean_early_minutes": 2.2
+      },
+      "power_loss": {
+        "injected": 47,
+        "events": 47,
+        "detected_overlap": 47,
+        "early_minutes_sum": 656.0,
+        "detected": 44,
+        "recall": 0.9362,
+        "ci95": [
+          0.8284,
+          0.9781
+        ],
+        "recall_overlap": 1.0,
+        "ci95_overlap": [
+          0.9244,
+          1.0
+        ],
+        "mean_early_minutes": 14.0
+      },
+      "critical (heat + freeze)": {
+        "injected": 237,
+        "events": 180,
+        "detected_overlap": 180,
+        "early_minutes_sum": 1003.0,
+        "detected": 153,
+        "no_qualifying_condition": 57,
+        "recall": 0.85,
+        "ci95": [
+          0.7906,
+          0.8948
+        ],
+        "recall_overlap": 1.0,
+        "ci95_overlap": [
+          0.9791,
+          1.0
+        ],
+        "mean_early_minutes": 5.6
+      }
+    },
+    "precision": {
+      "critical": {
+        "incidents": 6012,
+        "true": 5951,
+        "injected": 260,
+        "precision": 0.9899,
+        "ci95": [
+          0.987,
+          0.9921
+        ],
+        "precision_injected_only": 0.0432
+      },
+      "critical:freeze": {
+        "incidents": 2042,
+        "true": 2012,
+        "injected": 63,
+        "precision": 0.9853,
+        "ci95": [
+          0.9791,
+          0.9897
+        ],
+        "precision_injected_only": 0.0309
+      },
+      "critical:heat_excursion": {
+        "incidents": 2111,
+        "true": 2080,
+        "injected": 163,
+        "precision": 0.9853,
+        "ci95": [
+          0.9792,
+          0.9896
+        ],
+        "precision_injected_only": 0.0772
+      },
+      "critical:power_loss": {
+        "incidents": 1859,
+        "true": 1859,
+        "injected": 34,
+        "precision": 1.0,
+        "ci95": [
+          0.9979,
+          1.0
+        ],
+        "precision_injected_only": 0.0183
+      },
+      "warning": {
+        "incidents": 11434,
+        "true": 11434,
+        "injected": 82,
+        "precision": 1.0,
+        "ci95": [
+          0.9997,
+          1.0
+        ],
+        "precision_injected_only": 0.0072
+      },
+      "warning:door_open": {
+        "incidents": 9225,
+        "true": 9225,
+        "injected": 69,
+        "precision": 1.0,
+        "ci95": [
+          0.9996,
+          1.0
+        ],
+        "precision_injected_only": 0.0075
+      },
+      "warning:power_loss": {
+        "incidents": 2209,
+        "true": 2209,
+        "injected": 13,
+        "precision": 1.0,
+        "ci95": [
+          0.9983,
+          1.0
+        ],
+        "precision_injected_only": 0.0059
+      }
+    },
+    "false_critical_per_1000_device_days": 1.293,
+    "criteria": {
+      "E1 recall >= 0.95 (critical, strict)": false,
+      "E1 recall >= 0.95 (critical, overlap)": true,
+      "E2 precision >= 0.90 (critical)": true
+    }
+  },
+  "e3": {
+    "replications": 10,
+    "device_days": 38023.1,
+    "hours": {
+      "fault": 1600,
+      "other_injected": 4743,
+      "natural_condition": 431187,
+      "none": 475025
+    },
+    "faults": {
+      "sensor_drift": 21
+    },
+    "detectors": {
+      "forest": {
+        "fault_recall": {
+          "sensor_drift": 0.0476
+        },
+        "faults_detected": {
+          "sensor_drift": 1
+        },
+        "hour_recall": 0.0013,
+        "precision": 0.0024,
+        "flagged_hours": {
+          "fault": 2,
+          "other_injected": 101,
+          "natural_condition": 743,
+          "none": 0
+        },
+        "unexplained_per_100_device_days": 0.0,
+        "outside_faults_per_100_device_days": 2.22
+      },
+      "zscore": {
+        "fault_recall": {
+          "sensor_drift": 0.8095
+        },
+        "faults_detected": {
+          "sensor_drift": 17
+        },
+        "hour_recall": 0.0481,
+        "precision": 0.0015,
+        "flagged_hours": {
+          "fault": 77,
+          "other_injected": 1105,
+          "natural_condition": 25482,
+          "none": 25306
+        },
+        "unexplained_per_100_device_days": 66.554,
+        "outside_faults_per_100_device_days": 136.478
+      }
+    }
+  },
+  "pipeline": [
+    {
+      "send_seconds": 2131.0,
+      "stored": 6788884,
+      "shortfall": 0,
+      "integrity_events": 10803,
+      "incidents": 1849,
+      "drain_seconds": 1562.3,
+      "broker_drop_warnings": "0"
+    },
+    {
+      "send_seconds": 2130.9,
+      "stored": 6786042,
+      "shortfall": 0,
+      "integrity_events": 10886,
+      "incidents": 1803,
+      "drain_seconds": 2295.2,
+      "broker_drop_warnings": "0"
+    },
+    {
+      "send_seconds": 2128.8,
+      "stored": 6784443,
+      "shortfall": 0,
+      "integrity_events": 10769,
+      "incidents": 1788,
+      "drain_seconds": 1372.8,
+      "broker_drop_warnings": "0"
+    },
+    {
+      "send_seconds": 2129.9,
+      "stored": 6786870,
+      "shortfall": 0,
+      "integrity_events": 10828,
+      "incidents": 1798,
+      "drain_seconds": 1766.8,
+      "broker_drop_warnings": "0"
+    },
+    {
+      "send_seconds": 2137.1,
+      "stored": 6789502,
+      "shortfall": 0,
+      "integrity_events": 10850,
+      "incidents": 1765,
+      "drain_seconds": 1989.3,
+      "broker_drop_warnings": "0"
+    },
+    {
+      "send_seconds": 2125.2,
+      "stored": 6789529,
+      "shortfall": 0,
+      "integrity_events": 11011,
+      "incidents": 1822,
+      "drain_seconds": 1950.3,
+      "broker_drop_warnings": "0"
+    },
+    {
+      "send_seconds": 2130.3,
+      "stored": 6789012,
+      "shortfall": 0,
+      "integrity_events": 11154,
+      "incidents": 1799,
+      "drain_seconds": 1997.8,
+      "broker_drop_warnings": "0"
+    },
+    {
+      "send_seconds": 2127.7,
+      "stored": 6782940,
+      "shortfall": 0,
+      "integrity_events": 10875,
+      "incidents": 1828,
+      "drain_seconds": 2122.3,
+      "broker_drop_warnings": "0"
+    },
+    {
+      "send_seconds": 2129.3,
+      "stored": 6785547,
+      "shortfall": 0,
+      "integrity_events": 10907,
+      "incidents": 1813,
+      "drain_seconds": 1795.6,
+      "broker_drop_warnings": "0"
+    },
+    {
+      "send_seconds": 2129.7,
+      "stored": 6786138,
+      "shortfall": 0,
+      "integrity_events": 10919,
+      "incidents": 1785,
+      "drain_seconds": 1736.5,
+      "broker_drop_warnings": "0"
+    }
+  ]
+}

@@ -1,0 +1,124 @@
+$ make eval-reset
+$ make eval-up EVAL_NET=/Users/giftabumere/Documents/Miva/coldchain/configs/sim/detection-101.toml
+$ make eval-live
+E4: 100 loggers, 49 minutes from 2026-11-07T06:14:00+00:00
+  minute 0/49
+  minute 5/49
+  minute 10/49
+  minute 15/49
+  minute 20/49
+  minute 25/49
+  minute 30/49
+  minute 35/49
+  minute 40/49
+  minute 45/49
+{
+  "began": "2026-11-07T06:14:00+00:00",
+  "duration_min": 49,
+  "loggers": 100,
+  "scripted_incidents_expected": 100,
+  "missing_dispatch": [
+    {
+      "incident": "6a1c91ec-80d8-4b34-b290-41c5d037e6a1",
+      "group": "background",
+      "type": "power_loss",
+      "status": null
+    }
+  ],
+  "sms_bodies_checked": 118,
+  "sms_bodies_over_limit": [],
+  "longest_sms": 159,
+  "scripted": {
+    "receipt_to_dispatch": {
+      "n": 100,
+      "median": 1.189,
+      "p95": 1.571,
+      "max": 1.657,
+      "min": 0.538
+    },
+    "receipt_to_detection": {
+      "n": 100,
+      "median": 0.236,
+      "p95": 0.359,
+      "max": 0.471,
+      "min": 0.075
+    },
+    "detection_to_incident": {
+      "n": 100,
+      "median": 0.275,
+      "p95": 0.474,
+      "max": 0.5,
+      "min": 0.013
+    },
+    "incident_to_dispatch": {
+      "n": 100,
+      "median": 0.708,
+      "p95": 1.08,
+      "max": 1.113,
+      "min": 0.143
+    },
+    "dispatch_to_delivery": {
+      "n": 100,
+      "median": 0.242,
+      "p95": 0.257,
+      "max": 0.267,
+      "min": 0.217
+    },
+    "event_to_receipt": {
+      "n": 100,
+      "median": 0.226,
+      "p95": 0.287,
+      "max": 0.29,
+      "min": 0.212
+    },
+    "by_type": {
+      "freeze": {
+        "n": 50,
+        "median": 1.299,
+        "p95": 1.571,
+        "max": 1.657,
+        "min": 0.538
+      },
+      "heat_excursion": {
+        "n": 50,
+        "median": 1.171,
+        "p95": 1.57,
+        "max": 1.574,
+        "min": 0.54
+      }
+    }
+  },
+  "background": {
+    "receipt_to_dispatch": {
+      "n": 0
+    },
+    "receipt_to_detection": {
+      "n": 0
+    },
+    "detection_to_incident": {
+      "n": 0
+    },
+    "incident_to_dispatch": {
+      "n": 0
+    },
+    "dispatch_to_delivery": {
+      "n": 0
+    },
+    "event_to_receipt": {
+      "n": 0
+    },
+    "by_type": {}
+  },
+  "all": {
+    "n": 100,
+    "median": 1.189,
+    "p95": 1.571,
+    "max": 1.657,
+    "min": 0.538
+  },
+  "criteria": {
+    "p95 <= 30 s": true,
+    "every scripted incident alerted": true,
+    "all SMS <= 160": true
+  }
+}

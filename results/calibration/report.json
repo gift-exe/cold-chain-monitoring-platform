@@ -1,0 +1,304 @@
+{
+  "info": {
+    "generated": "2026-11-05T09:18:47+00:00",
+    "seeds": [
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30
+    ],
+    "days": 30,
+    "network": {
+      "sites": {
+        "state_store": 1,
+        "lga_store": 44,
+        "health_facility": 541
+      },
+      "fixed_units": 586,
+      "mobile_units": 88,
+      "lgas": 44
+    },
+    "time_in_range_by_seed": [
+      0.9087801399949438,
+      0.9062636676779168,
+      0.907939301289344,
+      0.9090118979901403,
+      0.9079088847806851,
+      0.9073989934900771,
+      0.9057555144735179,
+      0.9090641590822904,
+      0.9089289043736569,
+      0.9100964242826444
+    ],
+    "offline_share_by_class": {
+      "mobile": 0.18777999999999997,
+      "rural": 0.05003,
+      "urban": 0.01005
+    },
+    "note": "Each seed is run twice: without injected failures (Table 3.14) for every check except the injector's, and with injection at the check rates for the injector checks; connectivity and sensor parameters are assumptions, not calibrated."
+  },
+  "checks": [
+    {
+      "model": "Equipment",
+      "check": "Hold-over, Solar direct-drive ice-lined refrigerator",
+      "source": "WHO PQS E003-164, B Medical Systems TCW 50R SDD (hold-over 94:15 at +43 \u00b0C)",
+      "criterion": "within \u00b120% of 94.2 h",
+      "result": "94.2 h (+0.0%)",
+      "passed": true
+    },
+    {
+      "model": "Equipment",
+      "check": "Pull-down to 3.0 \u00b0C, Solar direct-drive ice-lined refrigerator",
+      "source": "ASSUMPTION (pull-down time not in the PQS record)",
+      "criterion": "within \u00b120% of 8.0 h",
+      "result": "8.0 h",
+      "passed": true
+    },
+    {
+      "model": "Equipment",
+      "check": "Hold-over, Mains ice-lined refrigerator",
+      "source": "WHO PQS E003-151, B Medical Systems TCW 240R AC (hold-over 115:19 at +43 \u00b0C)",
+      "criterion": "within \u00b120% of 115.3 h",
+      "result": "115.3 h (+0.0%)",
+      "passed": true
+    },
+    {
+      "model": "Equipment",
+      "check": "Pull-down to 3.0 \u00b0C, Mains ice-lined refrigerator",
+      "source": "ASSUMPTION (pull-down time not in the PQS record)",
+      "criterion": "within \u00b120% of 8.0 h",
+      "result": "8.0 h",
+      "passed": true
+    },
+    {
+      "model": "Equipment",
+      "check": "Hold-over, Walk-in cold room (state and LGA stores)",
+      "source": "ASSUMPTION: PQS E001 cold rooms state no hold-over; 24 h assumed",
+      "criterion": "within \u00b120% of 24.0 h",
+      "result": "24.0 h (+0.0%)",
+      "passed": true
+    },
+    {
+      "model": "Equipment",
+      "check": "Pull-down to 3.5 \u00b0C, Walk-in cold room (state and LGA stores)",
+      "source": "ASSUMPTION (pull-down time not in the PQS record)",
+      "criterion": "within \u00b120% of 6.0 h",
+      "result": "6.0 h",
+      "passed": true
+    },
+    {
+      "model": "Equipment",
+      "check": "Hold-over, Long-range cold box",
+      "source": "WHO PQS E004-084, Mark Enterprises MCBX-01 (cold life 129:56 at +43 \u00b0C)",
+      "criterion": "within \u00b120% of 129.9 h",
+      "result": "129.9 h (+0.0%)",
+      "passed": true
+    },
+    {
+      "model": "Equipment",
+      "check": "Hold-over, Long-range vaccine carrier",
+      "source": "WHO PQS E004-078, Trimurti Plast TPVC 46 (cold life 47:02 at +43 \u00b0C)",
+      "criterion": "within \u00b120% of 47.0 h",
+      "result": "47.0 h (+0.0%)",
+      "passed": true
+    },
+    {
+      "model": "Network",
+      "check": "Vaccine-holding health facilities",
+      "source": "GRID3 v2.0 (Kano)",
+      "criterion": "equal to the source count (541)",
+      "result": "541",
+      "passed": true
+    },
+    {
+      "model": "Network",
+      "check": "LGA stores",
+      "source": "one per LGA",
+      "criterion": "equal to the number of LGAs (44)",
+      "result": "44",
+      "passed": true
+    },
+    {
+      "model": "Power (source mix)",
+      "check": "Facilities by power source",
+      "source": "Ilegogie (2025) grid share; rest ASSUMPTION",
+      "criterion": "each share within \u00b10.5 percentage points of the configuration",
+      "result": "solar 40.1%, grid 25.0%, grid_generator 17.9%, generator 17.0%",
+      "passed": true
+    },
+    {
+      "model": "Power (source mix)",
+      "check": "Facilities connected to the grid",
+      "source": "Ilegogie (2025)",
+      "criterion": "43% \u00b10.5 percentage points",
+      "result": "42.9%",
+      "passed": true
+    },
+    {
+      "model": "Power (grid)",
+      "check": "Grid-connected facilities with about 5 hours a day (Band E)",
+      "source": "Ilegogie (2025)",
+      "criterion": "57% \u00b10.5 percentage points",
+      "result": "56.9%",
+      "passed": true
+    },
+    {
+      "model": "Power (grid)",
+      "check": "Mean daily supply, Band A (130 unit-runs)",
+      "source": "NERC (n.d.); outage durations ASSUMPTION",
+      "criterion": "20\u201324 h per day",
+      "result": "22.0 h (units: 18.5\u201324.0)",
+      "passed": true
+    },
+    {
+      "model": "Power (grid)",
+      "check": "Mean daily supply, Band B (180 unit-runs)",
+      "source": "NERC (n.d.); outage durations ASSUMPTION",
+      "criterion": "16\u201320 h per day",
+      "result": "17.9 h (units: 13.9\u201321.2)",
+      "passed": true
+    },
+    {
+      "model": "Power (grid)",
+      "check": "Mean daily supply, Band C (440 unit-runs)",
+      "source": "NERC (n.d.); outage durations ASSUMPTION",
+      "criterion": "12\u201316 h per day",
+      "result": "13.9 h (units: 10.1\u201317.4)",
+      "passed": true
+    },
+    {
+      "model": "Power (grid)",
+      "check": "Mean daily supply, Band D (830 unit-runs)",
+      "source": "NERC (n.d.); outage durations ASSUMPTION",
+      "criterion": "8\u201312 h per day",
+      "result": "10.1 h (units: 6.7\u201313.6)",
+      "passed": true
+    },
+    {
+      "model": "Power (grid)",
+      "check": "Mean daily supply, Band E (2070 unit-runs)",
+      "source": "NERC (n.d.); outage durations ASSUMPTION",
+      "criterion": "4\u20138 h per day",
+      "result": "6.0 h (units: 3.4\u20139.5)",
+      "passed": true
+    },
+    {
+      "model": "Climate",
+      "check": "Simulated daily mean air temperature (360 cell-days)",
+      "source": "NASA POWER daily T2M, 2024",
+      "criterion": "within \u00b11 \u00b0C of the source on every cell-day",
+      "result": "largest difference 0.000 \u00b0C",
+      "passed": true
+    },
+    {
+      "model": "Power (solar)",
+      "check": "Daily irradiance used (360 cell-days)",
+      "source": "NASA POWER daily ALLSKY_SFC_SW_DWN, 2024",
+      "criterion": "identical to the source series",
+      "result": "0 differences",
+      "passed": true
+    },
+    {
+      "model": "Movement",
+      "check": "Moving speed on outreach trips (461660 simulated, 5000 GTS)",
+      "source": "GTS tracks, Kano, held-out devices",
+      "criterion": "two-sample Kolmogorov\u2013Smirnov p > 0.05",
+      "result": "D = 0.020, p = 0.60; medians 5.8 vs 5.8 m/s",
+      "passed": true
+    },
+    {
+      "model": "Movement",
+      "check": "En-route stop duration on outreach trips (49753 simulated, 5000 GTS)",
+      "source": "GTS tracks, Kano, held-out devices",
+      "criterion": "two-sample Kolmogorov\u2013Smirnov p > 0.05",
+      "result": "D = 0.013, p = 0.96; medians 6.7 vs 6.8 min",
+      "passed": true
+    },
+    {
+      "model": "Movement",
+      "check": "Outreach trips planned and completed",
+      "source": "Section 3.3.5",
+      "criterion": "every mobile unit makes trips",
+      "result": "11076 trips",
+      "passed": true
+    },
+    {
+      "model": "Overall",
+      "check": "Proportion of time in range (2\u20138 \u00b0C), fixed units",
+      "source": "Lutukai et al. (2019), baseline",
+      "criterion": "within \u00b110 percentage points of 83.9%",
+      "result": "90.8% (above 8 \u00b0C 3.2%, below 2 \u00b0C 6.0%; published 2.9% and 6.5%)",
+      "passed": true
+    },
+    {
+      "model": "Failure injector",
+      "check": "Injected heat excursion events",
+      "source": "run configuration",
+      "criterion": "within the Poisson range of 3516 (3358\u20133677; 95% family-wise)",
+      "result": "3489",
+      "passed": true
+    },
+    {
+      "model": "Failure injector",
+      "check": "Injected freeze events",
+      "source": "run configuration",
+      "criterion": "within the Poisson range of 3516 (3358\u20133677; 95% family-wise)",
+      "result": "3472",
+      "passed": true
+    },
+    {
+      "model": "Failure injector",
+      "check": "Injected power loss events",
+      "source": "run configuration",
+      "criterion": "within the Poisson range of 2214 (2088\u20132342; 95% family-wise)",
+      "result": "2204",
+      "passed": true
+    },
+    {
+      "model": "Failure injector",
+      "check": "Injected door open events",
+      "source": "run configuration",
+      "criterion": "within the Poisson range of 3516 (3358\u20133677; 95% family-wise)",
+      "result": "3469",
+      "passed": true
+    },
+    {
+      "model": "Failure injector",
+      "check": "Injected device silence events",
+      "source": "run configuration",
+      "criterion": "within the Poisson range of 4044 (3874\u20134216; 95% family-wise)",
+      "result": "4061",
+      "passed": true
+    },
+    {
+      "model": "Failure injector",
+      "check": "Injected connectivity gap events",
+      "source": "run configuration",
+      "criterion": "within the Poisson range of 4044 (3874\u20134216; 95% family-wise)",
+      "result": "4046",
+      "passed": true
+    },
+    {
+      "model": "Failure injector",
+      "check": "Injected sensor drift events",
+      "source": "run configuration",
+      "criterion": "within the Poisson range of 1011 (927\u20131098; 95% family-wise)",
+      "result": "1055",
+      "passed": true
+    },
+    {
+      "model": "Failure injector",
+      "check": "Ground-truth labels complete",
+      "source": "Section 3.3.5",
+      "criterion": "every injection has type, unit, start, end and expected owner",
+      "result": "21796 labels",
+      "passed": true
+    }
+  ]
+}

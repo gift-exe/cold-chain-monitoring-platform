@@ -1,0 +1,22 @@
+# Detection scenario set (Table 3.14): 7 days of the Kano scenario network with injected failures,
+# test seed 101. Rates per 1,000 device-days are set to give at least 20 critical events per run.
+name = "e11-network"
+purpose = "test"
+seed = 101
+days = 1
+start = "2024-03-04T00:00:00+00:00"
+
+[failures.heat_excursion]
+rate = 3.0
+[failures.freeze]
+rate = 3.0
+[failures.power_loss]
+rate = 2.0
+[failures.door_open]
+rate = 2.0
+[failures.device_silence]
+rate = 2.0
+[failures.connectivity_gap]
+rate = 1.0
+[failures.sensor_drift]
+rate = 0.5

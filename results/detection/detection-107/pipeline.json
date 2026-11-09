@@ -1,0 +1,9 @@
+{
+  "send_seconds": 2130.3,
+  "stored": 6789012,
+  "shortfall": 0,
+  "integrity_events": 11154,
+  "incidents": 1799,
+  "drain_seconds": 1997.8,
+  "broker_drop_warnings": "0"
+}

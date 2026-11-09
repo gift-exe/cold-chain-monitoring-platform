@@ -1,0 +1,164 @@
+{
+  "run": "detection-104",
+  "unit_days": 4718.0,
+  "recall": {
+    "freeze": {
+      "injected": 10,
+      "no_qualifying_condition": 7,
+      "events": 3,
+      "detected_overlap": 3,
+      "early_minutes_sum": 48.0,
+      "detected": 1
+    },
+    "door_open": {
+      "injected": 5,
+      "events": 5,
+      "detected_overlap": 5,
+      "early_minutes_sum": 5.0,
+      "detected": 5
+    },
+    "heat_excursion": {
+      "injected": 11,
+      "events": 11,
+      "detected_overlap": 11,
+      "early_minutes_sum": 8.0,
+      "detected": 11
+    },
+    "power_loss": {
+      "injected": 2,
+      "events": 2,
+      "detected_overlap": 2,
+      "early_minutes_sum": 0.0,
+      "detected": 2
+    }
+  },
+  "precision": {
+    "critical": {
+      "incidents": 612,
+      "true": 602,
+      "injected": 23
+    },
+    "critical:freeze": {
+      "incidents": 201,
+      "true": 198,
+      "injected": 3
+    },
+    "critical:heat_excursion": {
+      "incidents": 225,
+      "true": 218,
+      "injected": 18
+    },
+    "critical:power_loss": {
+      "incidents": 186,
+      "true": 186,
+      "injected": 2
+    },
+    "warning": {
+      "incidents": 1131,
+      "true": 1131,
+      "injected": 5
+    },
+    "warning:door_open": {
+      "incidents": 915,
+      "true": 915,
+      "injected": 5
+    },
+    "warning:power_loss": {
+      "incidents": 216,
+      "true": 216,
+      "injected": 0
+    }
+  },
+  "false_critical_per_1000_device_days": 2.12,
+  "misses": [
+    {
+      "injection": "freeze-00010",
+      "serial": "SIM-GAY-0012",
+      "condition_start": "2024-03-06T13:50:00+00:00",
+      "nearest_event_start": "2024-03-06T13:31:00+00:00",
+      "nearest_event_incident": true,
+      "event_found_but_no_incident": false
+    },
+    {
+      "injection": "freeze-00021",
+      "serial": "SIM-FAG-0015",
+      "condition_start": "2024-03-08T09:46:00+00:00",
+      "nearest_event_start": "2024-03-08T09:26:00+00:00",
+      "nearest_event_incident": true,
+      "event_found_but_no_incident": false
+    }
+  ],
+  "false_alarms": [
+    {
+      "incident": "81c6fa74-a94d-4731-b175-de23ba888e2b",
+      "serial": "SIM-RAN-0005",
+      "type": "heat_excursion",
+      "severity": "critical",
+      "mode": "retrospective"
+    },
+    {
+      "incident": "2c27c4af-6383-4b6d-adc1-a03f0484c2dd",
+      "serial": "SIM-KAR-0005",
+      "type": "freeze",
+      "severity": "critical",
+      "mode": "operational"
+    },
+    {
+      "incident": "b9390ef1-60da-4d27-91d3-2277dba6765b",
+      "serial": "SIM-GAY-M002",
+      "type": "freeze",
+      "severity": "critical",
+      "mode": "operational"
+    },
+    {
+      "incident": "644c2fd0-9ef7-460f-846c-757ddb0198f6",
+      "serial": "SIM-DAA-0006",
+      "type": "heat_excursion",
+      "severity": "critical",
+      "mode": "operational"
+    },
+    {
+      "incident": "c2a15c1d-5b02-4150-b344-df5926c0709c",
+      "serial": "SIM-BUN-0015",
+      "type": "heat_excursion",
+      "severity": "critical",
+      "mode": "operational"
+    },
+    {
+      "incident": "951d4fb5-63c2-4957-ab4a-c0cdcbc992fb",
+      "serial": "SIM-MAK-0006",
+      "type": "heat_excursion",
+      "severity": "critical",
+      "mode": "retrospective"
+    },
+    {
+      "incident": "cee2fa29-8582-4d36-8abc-a114331ad004",
+      "serial": "SIM-RAN-0005",
+      "type": "heat_excursion",
+      "severity": "critical",
+      "mode": "retrospective"
+    },
+    {
+      "incident": "56fb42a2-34f3-442a-b32d-92dbd0c2b10b",
+      "serial": "SIM-TOF-0005",
+      "type": "heat_excursion",
+      "severity": "critical",
+      "mode": "retrospective"
+    },
+    {
+      "incident": "00200eef-81f5-47bd-8fb9-dc666e81c1fa",
+      "serial": "SIM-TOF-M001",
+      "type": "freeze",
+      "severity": "critical",
+      "mode": "retrospective"
+    },
+    {
+      "incident": "61736928-feda-458f-aed2-2c9cd453843f",
+      "serial": "SIM-BUN-0015",
+      "type": "heat_excursion",
+      "severity": "critical",
+      "mode": "operational"
+    }
+  ],
+  "events_without_incident": 0
+}

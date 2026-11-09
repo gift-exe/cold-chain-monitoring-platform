@@ -1,0 +1,38 @@
+{
+  "run": "detection-105",
+  "units": 586,
+  "device_days": 3805.8,
+  "hours": {
+    "fault": 324,
+    "other_injected": 333,
+    "natural_condition": 42785,
+    "none": 47896
+  },
+  "faults": {
+    "sensor_drift": 4
+  },
+  "detectors": {
+    "forest": {
+      "flagged_hours": {
+        "fault": 0,
+        "other_injected": 9,
+        "natural_condition": 64,
+        "none": 0
+      },
+      "faults_detected": {
+        "sensor_drift": 0
+      }
+    },
+    "zscore": {
+      "flagged_hours": {
+        "fault": 8,
+        "other_injected": 81,
+        "natural_condition": 2484,
+        "none": 2591
+      },
+      "faults_detected": {
+        "sensor_drift": 4
+      }
+    }
+  }
+}

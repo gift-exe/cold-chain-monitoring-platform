@@ -1,0 +1,179 @@
+$ make eval-reset
+$ make eval-up EVAL_NET=/Users/giftabumere/Documents/Miva/coldchain/configs/sim/detection-101.toml
+$ make eval-live
+E11: 40 escalating incidents, 100 load loggers, 80 minutes from 2026-11-07T09:10:00+00:00
+  minute 0/80
+  restarted detection at minute 5 (0.3 s)
+  restarted ingestion-bridge at minute 8 (0.3 s)
+  minute 10/80
+  restarted storage-writer at minute 11 (0.3 s)
+  restarted mosquitto at minute 14 (0.3 s)
+  minute 20/80
+  restarted incident-service at minute 23 (0.3 s)
+  restarted temporal at minute 25 (0.3 s)
+  restarted notification-service at minute 27 (0.3 s)
+  minute 30/80
+  restarted kafka at minute 36 (0.4 s)
+  minute 40/80
+  restarted postgres at minute 46 (0.3 s)
+  minute 50/80
+  restarted api at minute 56 (0.3 s)
+  minute 60/80
+  restarted incident-service at minute 68 (0.3 s)
+  minute 70/80
+  restarted temporal at minute 70 (0.3 s)
+  restarted notification-service at minute 72 (0.3 s)
+{
+  "began": "2026-11-07T09:10:00+00:00",
+  "ended": "2026-11-07T10:29:25.174167+00:00",
+  "restarts": [
+    {
+      "minute": 5,
+      "service": "detection",
+      "restarted_at": "2026-11-07T09:15:00.004929+00:00",
+      "seconds": 0.3,
+      "ok": true,
+      "error": null
+    },
+    {
+      "minute": 8,
+      "service": "ingestion-bridge",
+      "restarted_at": "2026-11-07T09:18:00.008775+00:00",
+      "seconds": 0.3,
+      "ok": true,
+      "error": null
+    },
+    {
+      "minute": 11,
+      "service": "storage-writer",
+      "restarted_at": "2026-11-07T09:21:00.001941+00:00",
+      "seconds": 0.3,
+      "ok": true,
+      "error": null
+    },
+    {
+      "minute": 14,
+      "service": "mosquitto",
+      "restarted_at": "2026-11-07T09:24:00.000703+00:00",
+      "seconds": 0.3,
+      "ok": true,
+      "error": null
+    },
+    {
+      "minute": 23,
+      "service": "incident-service",
+      "restarted_at": "2026-11-07T09:33:00.000719+00:00",
+      "seconds": 0.3,
+      "ok": true,
+      "error": null
+    },
+    {
+      "minute": 25,
+      "service": "temporal",
+      "restarted_at": "2026-11-07T09:35:00.000102+00:00",
+      "seconds": 0.3,
+      "ok": true,
+      "error": null
+    },
+    {
+      "minute": 27,
+      "service": "notification-service",
+      "restarted_at": "2026-11-07T09:37:00.002863+00:00",
+      "seconds": 0.3,
+      "ok": true,
+      "error": null
+    },
+    {
+      "minute": 36,
+      "service": "kafka",
+      "restarted_at": "2026-11-07T09:46:00.001482+00:00",
+      "seconds": 0.4,
+      "ok": true,
+      "error": null
+    },
+    {
+      "minute": 46,
+      "service": "postgres",
+      "restarted_at": "2026-11-07T09:56:00.003650+00:00",
+      "seconds": 0.3,
+      "ok": true,
+      "error": null
+    },
+    {
+      "minute": 56,
+      "service": "api",
+      "restarted_at": "2026-11-07T10:06:00.005324+00:00",
+      "seconds": 0.3,
+      "ok": true,
+      "error": null
+    },
+    {
+      "minute": 68,
+      "service": "incident-service",
+      "restarted_at": "2026-11-07T10:18:00.003888+00:00",
+      "seconds": 0.3,
+      "ok": true,
+      "error": null
+    },
+    {
+      "minute": 70,
+      "service": "temporal",
+      "restarted_at": "2026-11-07T10:20:00.001569+00:00",
+      "seconds": 0.3,
+      "ok": true,
+      "error": null
+    },
+    {
+      "minute": 72,
+      "service": "notification-service",
+      "restarted_at": "2026-11-07T10:22:00.005533+00:00",
+      "seconds": 0.3,
+      "ok": true,
+      "error": null
+    }
+  ],
+  "publish_retries": {
+    "loggers": 0,
+    "load": 0
+  },
+  "readings": {
+    "sent": 358200,
+    "stored": 358200,
+    "lost": 0,
+    "duplicates": 0
+  },
+  "incidents": {
+    "expected": 40,
+    "found": 40,
+    "lost": 0,
+    "duplicated": 0,
+    "silence_warnings_after_end": 40
+  },
+  "escalations": {
+    "due": 80,
+    "applied": 80,
+    "lost": 0,
+    "late_over_60s": 0,
+    "delay_s": {
+      "median": 0.0,
+      "max": 0.8
+    },
+    "sms_after_due_s": {
+      "median": 0.9,
+      "max": 44.2,
+      "n": 80
+    },
+    "by_tier": {
+      "lga": 40,
+      "state": 40
+    }
+  },
+  "criteria": {
+    "no readings lost": true,
+    "no incidents lost or duplicated": true,
+    "no escalations lost": true,
+    "all escalations within 1 min": true,
+    "every escalation notice sent": true,
+    "all restarts succeeded": true
+  }
+}

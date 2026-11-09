@@ -1,0 +1,27 @@
+[2m2026-11-05T14:09:41.225445Z[0m [33m WARN[0m [2mtemporalio_sdk_core::worker[0m[2m:[0m Temporal Server 1.16.0 or newer is required to guarantee that the latest heartbeat details are preserved when an activity fails; the server did not advertise the activity_failure_include_heartbeat capability, so heartbeat details may be lost on failure
+seed 101: 20/20 correct so far
+[2m2026-11-05T14:10:51.922497Z[0m [33m WARN[0m [2mtemporalio_sdk_core::worker[0m[2m:[0m Temporal Server 1.16.0 or newer is required to guarantee that the latest heartbeat details are preserved when an activity fails; the server did not advertise the activity_failure_include_heartbeat capability, so heartbeat details may be lost on failure
+seed 102: 40/40 correct so far
+[2m2026-11-05T14:11:57.519710Z[0m [33m WARN[0m [2mtemporalio_sdk_core::worker[0m[2m:[0m Temporal Server 1.16.0 or newer is required to guarantee that the latest heartbeat details are preserved when an activity fails; the server did not advertise the activity_failure_include_heartbeat capability, so heartbeat details may be lost on failure
+seed 103: 60/60 correct so far
+[2m2026-11-05T14:13:03.427391Z[0m [33m WARN[0m [2mtemporalio_sdk_core::worker[0m[2m:[0m Temporal Server 1.16.0 or newer is required to guarantee that the latest heartbeat details are preserved when an activity fails; the server did not advertise the activity_failure_include_heartbeat capability, so heartbeat details may be lost on failure
+seed 104: 80/80 correct so far
+[2m2026-11-05T14:14:25.684500Z[0m [33m WARN[0m [2mtemporalio_sdk_core::worker[0m[2m:[0m Temporal Server 1.16.0 or newer is required to guarantee that the latest heartbeat details are preserved when an activity fails; the server did not advertise the activity_failure_include_heartbeat capability, so heartbeat details may be lost on failure
+seed 105: 100/100 correct so far
+[2m2026-11-05T14:15:30.380730Z[0m [33m WARN[0m [2mtemporalio_sdk_core::worker[0m[2m:[0m Temporal Server 1.16.0 or newer is required to guarantee that the latest heartbeat details are preserved when an activity fails; the server did not advertise the activity_failure_include_heartbeat capability, so heartbeat details may be lost on failure
+seed 106: 120/120 correct so far
+[2m2026-11-05T14:16:34.642909Z[0m [33m WARN[0m [2mtemporalio_sdk_core::worker[0m[2m:[0m Temporal Server 1.16.0 or newer is required to guarantee that the latest heartbeat details are preserved when an activity fails; the server did not advertise the activity_failure_include_heartbeat capability, so heartbeat details may be lost on failure
+seed 107: 140/140 correct so far
+[2m2026-11-05T14:17:48.036889Z[0m [33m WARN[0m [2mtemporalio_sdk_core::worker[0m[2m:[0m Temporal Server 1.16.0 or newer is required to guarantee that the latest heartbeat details are preserved when an activity fails; the server did not advertise the activity_failure_include_heartbeat capability, so heartbeat details may be lost on failure
+seed 108: 160/160 correct so far
+[2m2026-11-05T14:18:52.513261Z[0m [33m WARN[0m [2mtemporalio_sdk_core::worker[0m[2m:[0m Temporal Server 1.16.0 or newer is required to guarantee that the latest heartbeat details are preserved when an activity fails; the server did not advertise the activity_failure_include_heartbeat capability, so heartbeat details may be lost on failure
+seed 109: 180/180 correct so far
+[2m2026-11-05T14:19:55.898412Z[0m [33m WARN[0m [2mtemporalio_sdk_core::worker[0m[2m:[0m Temporal Server 1.16.0 or newer is required to guarantee that the latest heartbeat details are preserved when an activity fails; the server did not advertise the activity_failure_include_heartbeat capability, so heartbeat details may be lost on failure
+seed 110: 200/200 correct so far
+{
+  "incidents": 200,
+  "correct": 200,
+  "proportion": 1.0,
+  "criterion_100pct": true,
+  "max_lateness_min": 0.006
+}
